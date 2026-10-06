@@ -7,16 +7,33 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField, Min(0.1f)] private float selectionDistance = 3f;
     [SerializeField] private LayerMask selectionLayers = ~0;
 
+    [Header("NPC Settings")]
+    [SerializeField, Min(0.1f)] private float npcInteractionDistance = 3f;
+    [SerializeField] private LayerMask npcLayers = ~0;
+
     private HighlightableObject currentTarget;
+    private NPCDialogue currentNpcTarget;
 
     public HighlightableObject CurrentTarget => currentTarget;
 
     private void Update()
     {
         ChangeTarget(FindTarget());
+        currentNpcTarget = FindNpcTarget();
 
-        if (currentTarget != null && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
+            if (currentNpcTarget != null)
+            {
+                currentNpcTarget.StartDialogue();
+                return;
+            }
+
+            if (currentTarget == null)
+            {
+                return;
+            }
+
             InteractableObject interactable = currentTarget.GetComponent<InteractableObject>();
 
             if (interactable != null)
@@ -24,6 +41,38 @@ public class PlayerInteraction : MonoBehaviour
                 interactable.Interact();
             }
         }
+    }
+
+    private NPCDialogue FindNpcTarget()
+    {
+        Collider[] nearbyColliders = Physics.OverlapSphere(
+            transform.position,
+            npcInteractionDistance,
+            npcLayers,
+            QueryTriggerInteraction.Collide);
+
+        NPCDialogue nearestNpc = null;
+        float nearestDistanceSquared = float.MaxValue;
+
+        foreach (Collider nearbyCollider in nearbyColliders)
+        {
+            NPCDialogue candidate = nearbyCollider.GetComponentInParent<NPCDialogue>();
+
+            if (candidate == null)
+            {
+                continue;
+            }
+
+            float distanceSquared = (candidate.transform.position - transform.position).sqrMagnitude;
+
+            if (distanceSquared < nearestDistanceSquared)
+            {
+                nearestDistanceSquared = distanceSquared;
+                nearestNpc = candidate;
+            }
+        }
+
+        return nearestNpc;
     }
 
     private HighlightableObject FindTarget()
@@ -97,5 +146,8 @@ public class PlayerInteraction : MonoBehaviour
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, selectionDistance);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, npcInteractionDistance);
     }
 }

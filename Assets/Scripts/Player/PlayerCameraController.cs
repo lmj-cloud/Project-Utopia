@@ -1,9 +1,13 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
 
 public class PlayerCameraController : MonoBehaviour
 {
-    [SerializeField] private Transform playerBody;
+    [SerializeField] private Transform playerTr;
+    [SerializeField] private Transform cameraTarget;
+    [SerializeField] private CinemachineCamera firstPersonCamera;
+    [SerializeField] private CinemachineCamera thirdPersonCamera;
 
     [SerializeField] private float mouseSensitivity = 0.1f;
     [SerializeField] private float minPitch = -80f;
@@ -13,19 +17,31 @@ public class PlayerCameraController : MonoBehaviour
 
     private float pitch;
     private bool canLook = true;
+    private bool isThirdPerson;
 
     private void Awake()
     {
-        pitch = transform.localEulerAngles.x;
-        if (pitch > 180f)
+        if(playerTr == null)
+        {
+            playerTr = transform;
+        }
+
+        if(cameraTarget == null || firstPersonCamera == null || thirdPersonCamera == null)
+        {
+            enabled = false;
+            return;
+        }
+
+        pitch = cameraTarget.localEulerAngles.x;
+        if(pitch > 180f)
         {
             pitch -= 360f;
         }
 
-        if (playerBody == null && transform.parent != null)
-        {
-            playerBody = transform.parent;
-        }
+        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+        cameraTarget.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+
+        SetView(false);
     }
 
     private void Start()
@@ -38,13 +54,17 @@ public class PlayerCameraController : MonoBehaviour
 
     private void Update()
     {
-        if (!canLook || playerBody == null || Mouse.current == null)
-        {
+        if (!canLook)
             return;
+
+        if(Keyboard.current != null && Keyboard.current.vKey.wasPressedThisFrame){
+            SetView(!isThirdPerson);
         }
 
-        Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+        if (Mouse.current == null)
+            return;
 
+        Vector2 mouseDelta = Mouse.current.delta.ReadValue();
         float yaw = mouseDelta.x * mouseSensitivity;
         float pitchDelta = mouseDelta.y * mouseSensitivity;
 
@@ -53,10 +73,26 @@ public class PlayerCameraController : MonoBehaviour
             pitchDelta = -pitchDelta;
         }
 
-        playerBody.Rotate(Vector3.up * yaw);
+        playerTr.Rotate(Vector3.up * yaw);
 
         pitch = Mathf.Clamp(pitch + pitchDelta, minPitch, maxPitch);
-        transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+        cameraTarget.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+    }
+
+    private void SetView(bool useThirdPerson)
+    {
+        isThirdPerson = useThirdPerson;
+
+        if (isThirdPerson)
+        {
+            firstPersonCamera.Priority = 10;
+            thirdPersonCamera.Priority = 20;
+        }
+        else
+        {
+            firstPersonCamera.Priority = 20;
+            thirdPersonCamera.Priority = 10;
+        }
     }
 
     // Timeline Signal 또는 대화 시스템에서 호출한다.
