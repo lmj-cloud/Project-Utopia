@@ -1,11 +1,18 @@
 using System.Collections.Generic;
 using TMPro;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class HighlightableObject : MonoBehaviour
 {
+
     [Header("Name Label")]
     [SerializeField] private GameObject itemNameText;
+
+    [Header("Camera")]
+    [SerializeField] private PlayerCameraController playerCameraController;
+    [SerializeField] private Transform firstPersonCamera;
+    [SerializeField] private Transform thirdPersonCamera;
 
     [Header("Highlight")]
     [SerializeField, ColorUsage(true, true)] private Color highlightColor = Color.yellow;
@@ -24,6 +31,32 @@ public class HighlightableObject : MonoBehaviour
         {
             itemNameText.SetActive(false);
         }
+    }
+
+    private void LateUpdate()
+    {
+        if(itemNameText == null || !itemNameText.activeInHierarchy || playerCameraController == null)
+        {
+            return;
+        }
+
+        Transform targetCamera = playerCameraController.IsThirdPerson ? thirdPersonCamera : firstPersonCamera;
+
+        if(targetCamera == null)
+        {
+            return;
+        }
+
+        Transform labelTransform = itemNameText.transform;
+
+        if((targetCamera.position - labelTransform.position).sqrMagnitude < 0.0001f)
+        {
+            return;
+        }
+
+        labelTransform.LookAt(targetCamera.position, Vector3.up);
+
+        labelTransform.Rotate(0f, 180f, 0f, Space.Self);
     }
 
     private void CacheMaterials()

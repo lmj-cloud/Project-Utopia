@@ -21,7 +21,7 @@ public class PlayerInteraction : MonoBehaviour
         ChangeTarget(FindTarget());
         currentNpcTarget = FindNpcTarget();
 
-        if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
         {
             if (currentNpcTarget != null)
             {
@@ -46,7 +46,7 @@ public class PlayerInteraction : MonoBehaviour
     private NPCDialogue FindNpcTarget()
     {
         Collider[] nearbyColliders = Physics.OverlapSphere(
-            transform.position,
+            transform.position + Vector3.up,
             npcInteractionDistance,
             npcLayers,
             QueryTriggerInteraction.Collide);
@@ -78,7 +78,7 @@ public class PlayerInteraction : MonoBehaviour
     private HighlightableObject FindTarget()
     {
         Collider[] nearbyColliders = Physics.OverlapSphere(
-            transform.position,
+            transform.position + Vector3.up,
             selectionDistance,
             selectionLayers,
             QueryTriggerInteraction.Collide);
@@ -145,9 +145,9 @@ public class PlayerInteraction : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position, selectionDistance);
+        Gizmos.DrawWireSphere(transform.position + Vector3.up, selectionDistance);
 
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, npcInteractionDistance);
+        Gizmos.DrawWireSphere(transform.position + Vector3.up, npcInteractionDistance);
     }
 }
