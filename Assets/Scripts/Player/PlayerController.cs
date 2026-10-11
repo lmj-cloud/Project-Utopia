@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Cinemachine;
 using Unity.VisualScripting;
@@ -13,6 +14,13 @@ public class PlayerController : MonoBehaviour
     [Header("Weapon")]
     [SerializeField] private WeaponAssaultRifle weapon;
 
+    [Header("Interaction / UI")]
+    [SerializeField] private PlayerInteraction playerInteraction;
+    [SerializeField] private PlayerInventory playerInventory;
+    [SerializeField] private DialogueUI dialogueUI;
+    [SerializeField] private InventoryUI inventoryUI;
+    [SerializeField] private StoryProgress storyProgress;
+
     [Header("Animation")]
     [SerializeField] private float animationChangedSecond = 1f;
 
@@ -21,47 +29,95 @@ public class PlayerController : MonoBehaviour
     private PlayerAnimatorController playerAnimator;
     private bool canMove = true;
     private bool isAiming;
-
     private Vector2 animationInput;
     private float fireFacingUntil;
+    private readonly HashSet<Object> controlLocks = new();
 
-    // 총기 스크립트에서 조준 이동 상태를 확인할 때 사용할 수 있다.
     public bool IsAiming => isAiming;
+    public bool CanControlPlayer => isActiveAndEnabled && canMove && controlLocks.Count == 0 &&
+        playerStatus != null && !playerStatus.IsDead &&
+        !(dialogueUI != null && (dialogueUI.IsOpen || dialogueUI.WasClosedThisFrame)) &&
+        !(inventoryUI != null && (inventoryUI.IsOpen || inventoryUI.WasClosedThisFrame));
 
-    void Start()
+    private void Awake()
     {
         playerStatus = GetComponent<PlayerStatus>();
         playerMovement = GetComponent<PlayerMovement>();
         playerAnimator = GetComponent<PlayerAnimatorController>();
+        if (playerInteraction == null) playerInteraction = GetComponent<PlayerInteraction>();
+        if (playerInventory == null) playerInventory = GetComponent<PlayerInventory>();
     }
 
     private void OnEnable()
     {
-        if (weapon != null)
-            weapon.OnFired += OnWeaponFired;
+        if (weapon != null) weapon.OnFired += OnWeaponFired;
     }
 
     private void OnWeaponFired(Vector3 targetPoint)
     {
+        if (!CanControlPlayer) return;
         fireFacingUntil = Time.time + Mathf.Max(0.25f, weapon.AttackInterval + 0.05f);
-
         playerMovement.FaceImmediately(cameraController.Forward);
     }
 
-    void Update()
+    private void Update()
     {
-        UpdateCameraInput();
-
-        bool canControlPlayer = canMove && !playerStatus.IsDead;
-        if (!canControlPlayer)
+        if (playerStatus == null || playerStatus.IsDead)
         {
-            isAiming = false;
-            playerMovement.Stop();
-            if (weapon != null)
-                weapon.StopWeaponAction();
+            if (inventoryUI != null) inventoryUI.Close();
+            if (dialogueUI != null) dialogueUI.CancelDialogue();
+            BlockControl();
             return;
         }
 
+        Keyboard keyboard = Keyboard.current;
+
+        // Timeline에서 띄운 대사도 진행할 수 있도록, 대사 입력을 먼저 처리한다.
+        if (dialogueUI != null && dialogueUI.IsOpen)
+        {
+            BlockControl();
+            bool advance = keyboard != null && (keyboard.fKey.wasPressedThisFrame ||
+                keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame);
+            if (advance) dialogueUI.AdvanceDialogue();
+            return;
+        }
+
+        if (!canMove || controlLocks.Count > 0 ||
+            (dialogueUI != null && dialogueUI.WasClosedThisFrame) ||
+            (inventoryUI != null && inventoryUI.WasClosedThisFrame))
+        {
+            BlockControl();
+            return;
+        }
+
+        if (inventoryUI != null && inventoryUI.IsOpen)
+        {
+            BlockControl();
+            if (keyboard != null && (keyboard.iKey.wasPressedThisFrame || keyboard.escapeKey.wasPressedThisFrame))
+                inventoryUI.Close();
+            return;
+        }
+
+        if (keyboard != null && keyboard.iKey.wasPressedThisFrame && inventoryUI != null)
+        {
+            inventoryUI.Open();
+            BlockControl();
+            return;
+        }
+
+        if (playerInteraction != null) playerInteraction.SetInteractionEnabled(true);
+        if (keyboard != null && keyboard.fKey.wasPressedThisFrame && playerInteraction != null)
+        {
+            playerInteraction.TryInteract(playerInventory, dialogueUI, storyProgress);
+            // 같은 프레임에 시작한 대사/컷씬이 이동·발사보다 우선한다.
+            if (!CanControlPlayer)
+            {
+                BlockControl();
+                return;
+            }
+        }
+
+        UpdateCameraInput();
         Vector2 input = GetMoveInput();
         UpdateSpeed(input);
         UpdateMove(input);
@@ -72,47 +128,30 @@ public class PlayerController : MonoBehaviour
     private void UpdateCameraInput()
     {
         isAiming = Mouse.current != null && Mouse.current.rightButton.isPressed;
-
         if (Keyboard.current != null && Keyboard.current.vKey.wasPressedThisFrame)
             cameraController.ToggleView();
-
-        if (Mouse.current != null)
-            cameraController.Look(Mouse.current.delta.ReadValue());
+        if (Mouse.current != null) cameraController.Look(Mouse.current.delta.ReadValue());
     }
 
     private void UpdateSpeed(Vector2 input)
     {
         playerMovement.TargetSpeed = playerStatus.WalkSpeed;
-
-        bool wantsToSprint = Keyboard.current != null &&
-            Keyboard.current.leftShiftKey.isPressed;
-
+        bool wantsToSprint = Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed;
         if (wantsToSprint && input.sqrMagnitude > 0.01f &&
             playerStatus.TryUseStamina(playerStatus.RunStaminaCostPerSecond * Time.deltaTime))
-        {
             playerMovement.TargetSpeed = playerStatus.RunSpeed;
-        }
     }
 
     private void UpdateMove(Vector2 input)
     {
         Vector3 moveDirection = cameraController.GetMoveDirection(input);
         playerMovement.MoveTo(moveDirection);
-
         if (Time.time < fireFacingUntil)
-        {
             playerMovement.SetFacingDirection(cameraController.Forward, true);
-        }
         else if (cameraController.IsThirdPerson && !isAiming)
-        {
-            // 3인칭: 이동하는 방향을 바라본다. 멈추면 현재 방향을 유지한다.
             playerMovement.SetFacingDirection(moveDirection, false);
-        }
         else
-        {
-            // 1인칭: 이동 여부와 관계없이 카메라 방향을 바라본다.
             playerMovement.SetFacingDirection(cameraController.Forward, true);
-        }
     }
 
     private void UpdateJump()
@@ -123,97 +162,101 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 GetMoveInput()
     {
-        if (Keyboard.current == null)
-        {
-            return Vector2.zero;
-        }
-
         float horizontal = 0f;
         float vertical = 0f;
-
-        if (Keyboard.current.aKey.isPressed) horizontal -= 1f;
-        if (Keyboard.current.dKey.isPressed) horizontal += 1f;
-        if (Keyboard.current.sKey.isPressed) vertical -= 1f;
-        if (Keyboard.current.wKey.isPressed) vertical += 1f;
-
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard != null)
+        {
+            if (keyboard.aKey.isPressed) horizontal -= 1f;
+            if (keyboard.dKey.isPressed) horizontal += 1f;
+            if (keyboard.sKey.isPressed) vertical -= 1f;
+            if (keyboard.wKey.isPressed) vertical += 1f;
+        }
         float maxDelta = animationChangedSecond * Time.deltaTime;
-
         animationInput.x = Mathf.MoveTowards(animationInput.x, horizontal, maxDelta);
         animationInput.y = Mathf.MoveTowards(animationInput.y, vertical, maxDelta);
-
-        playerAnimator.MoveHorizontal = animationInput.x;
-        playerAnimator.MoveVertical = animationInput.y;
-
+        if (playerAnimator != null)
+        {
+            playerAnimator.MoveHorizontal = animationInput.x;
+            playerAnimator.MoveVertical = animationInput.y;
+        }
         return new Vector2(horizontal, vertical);
     }
 
     private void UpdateWeaponAction()
     {
         if (weapon == null) return;
-
         if (Mouse.current != null)
         {
-            // 좌클릭을 누르는 순간 발사 시작
-            if (Mouse.current.leftButton.wasPressedThisFrame)
-                weapon.StartWeaponAction();
-
-            // 좌클릭을 떼는 순간 발사 중지
-            else if (Mouse.current.leftButton.wasReleasedThisFrame)
-                weapon.StopWeaponAction();
+            if (Mouse.current.leftButton.wasPressedThisFrame) weapon.StartWeaponAction();
+            else if (Mouse.current.leftButton.wasReleasedThisFrame) weapon.StopWeaponAction();
         }
-        else
-        {
-            weapon.StopWeaponAction();
-        }
-
-        // R키를 누르는 순간 재장전
-        if (Keyboard.current != null &&
-            Keyboard.current.rKey.wasPressedThisFrame)
-        {
+        else weapon.StopWeaponAction();
+        if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
             weapon.StartReload();
+    }
+
+    private void BlockControl()
+    {
+        StopPlayerActions();
+        if (playerInteraction != null) playerInteraction.SetInteractionEnabled(false);
+    }
+
+    private void StopPlayerActions()
+    {
+        isAiming = false;
+        fireFacingUntil = 0f;
+        animationInput = Vector2.zero;
+        if (playerMovement != null) playerMovement.Stop();
+        if (weapon != null) weapon.StopWeaponAction();
+        // 컷씬이 애니메이터를 제어 중이면 파라미터를 계속 덮어쓰지 않는다.
+        if (playerAnimator != null && canMove && controlLocks.Count == 0)
+        {
+            playerAnimator.MoveHorizontal = 0f;
+            playerAnimator.MoveVertical = 0f;
+            playerAnimator.CurrentSpeed = 0f;
+            playerAnimator.OnAiming(false);
         }
     }
 
     private void LateUpdate()
     {
-        // 모든 Update가 끝난 뒤, 이번 프레임의 실제 이동 속도를 전달한다.
-        if (playerAnimator != null)
+        bool inventoryOpen = inventoryUI != null && inventoryUI.IsOpen;
+        Cursor.visible = inventoryOpen;
+        Cursor.lockState = inventoryOpen ? CursorLockMode.None : CursorLockMode.Locked;
+        if (playerAnimator != null && playerMovement != null && canMove && controlLocks.Count == 0)
         {
-            playerAnimator.CurrentSpeed = playerMovement.HorizontalVelocity.magnitude;
+            playerAnimator.CurrentSpeed = CanControlPlayer ? playerMovement.HorizontalVelocity.magnitude : 0f;
             playerAnimator.OnAiming(IsAiming);
         }
     }
 
-    private void OnDisable()
-    {
-        isAiming = false;
-        fireFacingUntil = 0f;
-
-        if (weapon != null)
-            weapon.OnFired -= OnWeaponFired;
-
-        if (weapon != null)
-            weapon.StopWeaponAction();
-
-        if (playerMovement != null)
-            playerMovement.Stop();
-
-        if (playerAnimator != null)
-            playerAnimator.CurrentSpeed = 0f;
-    }
-
-    // Timeline Signal 또는 대화 시스템에서 호출한다.
     public void SetMovementEnabled(bool enabled)
     {
+        if (!enabled) StopPlayerActions();
         canMove = enabled;
-        if (!enabled)
-        {
-            fireFacingUntil = 0f;
-            if (playerMovement != null)
-                playerMovement.Stop();
+        if (!enabled && playerInteraction != null) playerInteraction.SetInteractionEnabled(false);
+    }
 
-            if (weapon != null)
-                weapon.StopWeaponAction();
-        }
+    public void AcquireControlLock(Object owner)
+    {
+        if (owner == null) return;
+        StopPlayerActions();
+        controlLocks.Add(owner);
+        if (inventoryUI != null) inventoryUI.Close();
+        if (playerInteraction != null) playerInteraction.SetInteractionEnabled(false);
+    }
+
+    public void ReleaseControlLock(Object owner)
+    {
+        if (owner != null) controlLocks.Remove(owner);
+    }
+
+    private void OnDisable()
+    {
+        if (weapon != null) weapon.OnFired -= OnWeaponFired;
+        BlockControl();
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 }
