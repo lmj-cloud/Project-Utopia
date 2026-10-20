@@ -13,140 +13,116 @@ public class PlayerInteraction : MonoBehaviour
 
     private HighlightableObject currentTarget;
     private NPCDialogue currentNpcTarget;
+    private bool interactionEnabled = true;
 
     public HighlightableObject CurrentTarget => currentTarget;
 
     private void Update()
     {
+        if (!interactionEnabled) return;
+        RefreshTargets();
+    }
+
+    // 입력 검사는 PlayerController에서만 한다.
+    public void TryInteract(PlayerInventory inventory, DialogueUI dialogueUI, StoryProgress story)
+    {
+        if (!isActiveAndEnabled || !interactionEnabled) return;
+        if (dialogueUI != null && (dialogueUI.IsOpen || dialogueUI.WasClosedThisFrame)) return;
+
+        // Update 호출 순서에 관계없이 현재 위치에서 대상을 다시 확인한다.
+        RefreshTargets();
+        if (currentNpcTarget != null)
+        {
+            currentNpcTarget.StartDialogue();
+            return;
+        }
+        if (currentTarget == null) return;
+
+        InteractableObject interactable = currentTarget.GetComponent<InteractableObject>();
+        if (interactable != null) interactable.TryInteract(inventory, dialogueUI, story);
+        RefreshTargets();
+    }
+
+    public void SetInteractionEnabled(bool value)
+    {
+        interactionEnabled = value;
+        if (!value)
+        {
+            ChangeTarget(null);
+            currentNpcTarget = null;
+        }
+    }
+
+    private void RefreshTargets()
+    {
         ChangeTarget(FindTarget());
         currentNpcTarget = FindNpcTarget();
-
-        if (Keyboard.current != null && Keyboard.current.fKey.wasPressedThisFrame)
-        {
-            if (currentNpcTarget != null)
-            {
-                currentNpcTarget.StartDialogue();
-                return;
-            }
-
-            if (currentTarget == null)
-            {
-                return;
-            }
-
-            InteractableObject interactable = currentTarget.GetComponent<InteractableObject>();
-
-            if (interactable != null)
-            {
-                interactable.Interact();
-            }
-        }
     }
 
     private NPCDialogue FindNpcTarget()
     {
         Collider[] nearbyColliders = Physics.OverlapSphere(
-            transform.position + Vector3.up,
-            npcInteractionDistance,
-            npcLayers,
-            QueryTriggerInteraction.Collide);
+            transform.position + Vector3.up, npcInteractionDistance,
+            npcLayers, QueryTriggerInteraction.Collide);
 
         NPCDialogue nearestNpc = null;
         float nearestDistanceSquared = float.MaxValue;
-
         foreach (Collider nearbyCollider in nearbyColliders)
         {
             NPCDialogue candidate = nearbyCollider.GetComponentInParent<NPCDialogue>();
-
-            if (candidate == null)
-            {
-                continue;
-            }
-
+            if (candidate == null || !candidate.isActiveAndEnabled) continue;
             float distanceSquared = (candidate.transform.position - transform.position).sqrMagnitude;
-
             if (distanceSquared < nearestDistanceSquared)
             {
                 nearestDistanceSquared = distanceSquared;
                 nearestNpc = candidate;
             }
         }
-
         return nearestNpc;
     }
 
     private HighlightableObject FindTarget()
     {
         Collider[] nearbyColliders = Physics.OverlapSphere(
-            transform.position + Vector3.up,
-            selectionDistance,
-            selectionLayers,
-            QueryTriggerInteraction.Collide);
+            transform.position + Vector3.up, selectionDistance,
+            selectionLayers, QueryTriggerInteraction.Collide);
 
         HighlightableObject nearestTarget = null;
         float nearestDistanceSquared = float.MaxValue;
-
         foreach (Collider nearbyCollider in nearbyColliders)
         {
             HighlightableObject candidate = nearbyCollider.GetComponentInParent<HighlightableObject>();
-
-            if (candidate == null)
-            {
-                continue;
-            }
-
+            if (candidate == null || !candidate.isActiveAndEnabled) continue;
             InteractableObject interactable = candidate.GetComponent<InteractableObject>();
-
-            if (interactable == null || !interactable.CanInteract)
-            {
-                continue;
-            }
-
+            if (interactable == null || !interactable.CanInteract) continue;
             float distanceSquared = (candidate.transform.position - transform.position).sqrMagnitude;
-
             if (distanceSquared < nearestDistanceSquared)
             {
                 nearestDistanceSquared = distanceSquared;
                 nearestTarget = candidate;
             }
         }
-
         return nearestTarget;
     }
 
     private void ChangeTarget(HighlightableObject nextTarget)
     {
-        if (currentTarget == nextTarget)
-        {
-            return;
-        }
-
-        if (currentTarget != null)
-        {
-            currentTarget.SetHighlighted(false);
-        }
-
+        if (currentTarget == nextTarget) return;
+        if (currentTarget != null) currentTarget.SetHighlighted(false);
         currentTarget = nextTarget;
-
-        if (currentTarget != null)
-        {
-            currentTarget.SetHighlighted(true);
-        }
+        if (currentTarget != null) currentTarget.SetHighlighted(true);
     }
 
     private void OnDisable()
     {
-        if (currentTarget != null)
-        {
-            currentTarget.SetHighlighted(false);
-        }
+        ChangeTarget(null);
+        currentNpcTarget = null;
     }
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position + Vector3.up, selectionDistance);
-
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position + Vector3.up, npcInteractionDistance);
     }
