@@ -1,19 +1,87 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("°¡¼Ó, °¨¼Ó, È¸Àü")]
+    [Header("ê°€ì†, ê°ì†, íšŒì „")]
     [SerializeField, Min(0.01f)] private float acceleration = 12f;
     [SerializeField, Min(0.01f)] private float deceleration = 18f;
     [SerializeField, Min(0f)] private float turnSpeed = 360f;
 
-    [Header("Áß·Â, Á¡ÇÁ")]
+    [Header("ì¤‘ë ¥, ì í”„")]
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float groundedStickForce = -2f;
-    // ±âÁ¸ Inspector °ªÀ» À¯ÁöÇÑ´Ù. ½ÇÁ¦ ÀÇ¹Ì´Â Á¡ÇÁ ³ôÀÌ´Ù.
+    // ê¸°ì¡´ Inspector ê°’ì„ ìœ ì§€í•œë‹¤. ì‹¤ì œ ì˜ë¯¸ëŠ” ì í”„ ë†’ì´ë‹¤.
     [SerializeField, Min(0f)] private float jumpForce = 1.3f;
 
     private CharacterController characterController;
+    [Header("Crouch")]
+    [SerializeField, Min(0.1f)] private float crouchHeight = 1f;
+    [SerializeField, Min(0f)] private float crouchSpeed = 1.5f;
+    [SerializeField] private LayerMask standingObstructionMask = ~0;
+    [SerializeField, Min(0.001f)] private float standingClearance = 0.02f;
+    private float standingHeight;
+    private Vector3 standingCenter;
+    public event System.Action<DemoAction, UnityEngine.Object> Succeeded;
+    private float dodgeUntil;
+    private Vector3 dodgeVelocity;
+    private bool moveReported;
+    public bool CanDodge => IsSimulationEnabled && characterController != null && characterController.isGrounded && Time.time >= dodgeUntil;
+    public bool TryDodge(Vector3 direction, float speed, float duration)
+    {
+        if (!CanDodge || duration <= 0f) return false;
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.001f) direction = -transform.forward;
+        dodgeVelocity = direction.normalized * Mathf.Max(0f, speed);
+        dodgeUntil = Time.time + duration;
+        jumpRequested = false;
+        return true;
+    }
+    public void CancelDodge() { dodgeUntil = 0f; dodgeVelocity = Vector3.zero; }
+    public void Teleport(Vector3 position, Quaternion rotation)
+    {
+        Stop();
+        verticalVelocity = 0f;
+        bool wasEnabled = characterController != null && characterController.enabled;
+        if (wasEnabled) characterController.enabled = false;
+        transform.SetPositionAndRotation(position, rotation);
+        if (wasEnabled) characterController.enabled = true;
+    }
+    public bool IsGrounded => characterController != null && characterController.isGrounded;
+    public bool IsCrouching { get; private set; }
+
+    public void SetCrouching(bool requested)
+    {
+        if (!IsSimulationEnabled) return;
+        if (characterController == null || requested == IsCrouching) return;
+        if (!requested && IsCrouching && !CanStand()) return;
+        IsCrouching = requested;
+        float height = requested
+            ? Mathf.Clamp(crouchHeight, characterController.radius * 2f, standingHeight)
+            : standingHeight;
+        // Preserve the capsule bottom in local space.
+        characterController.height = height;
+        characterController.center = standingCenter + Vector3.up * ((height - standingHeight) * 0.5f);
+        if (requested) { jumpRequested = false; Succeeded?.Invoke(DemoAction.Crouch, this); }
+    }
+
+    private bool CanStand()
+    {
+        Vector3 scale = transform.lossyScale;
+        float radius = characterController.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
+        float height = standingHeight * Mathf.Abs(scale.y);
+        Vector3 center = transform.TransformPoint(standingCenter);
+        // Check the head's expansion volume, with full radius so ceiling edges cannot be missed.
+        Vector3 top = center + transform.up * Mathf.Max(0f, height * 0.5f - radius);
+        Vector3 bottom = top - transform.up * ((standingHeight - characterController.height) * Mathf.Abs(scale.y));
+        foreach (Collider hit in Physics.OverlapCapsule(bottom, top + transform.up * standingClearance,
+            radius, standingObstructionMask, QueryTriggerInteraction.Ignore))
+        {
+            if (hit == characterController || hit.transform == transform || hit.transform.IsChildOf(transform)) continue;
+            return false;
+        }
+        return true;
+    }
+
 
     private Vector3 moveDirection;
     private Vector3 facingDirection;
@@ -26,27 +94,39 @@ public class PlayerMovement : MonoBehaviour
 
     private bool rotateImmediately;
     private bool jumpRequested;
+    public bool IsSimulationEnabled { get; private set; } = true;
 
-    // Controller°¡ °È±â/´Ş¸®±â ¸ñÇ¥ ¼Óµµ¸¦ Àü´ŞÇÑ´Ù.
+    public void SetSimulationEnabled(bool value)
+    {
+        if (IsSimulationEnabled == value) return;
+        Stop();
+        verticalVelocity = 0f;
+        IsSimulationEnabled = value;
+    }
+
+    // Controllerê°€ ê±·ê¸°/ë‹¬ë¦¬ê¸° ëª©í‘œ ì†ë„ë¥¼ ì „ë‹¬í•œë‹¤.
     public float TargetSpeed
     {
         get => targetSpeed;
         set => targetSpeed = Mathf.Max(0f, value);
     }
 
-    // °¡¼Ó¡¤°¨¼ÓÀ¸·Î °è»êÇÑ ¼Óµµ. Ãæµ¹ ÈÄ ½ÇÁ¦ ¼Óµµ¿Í´Â ±¸ºĞÇÑ´Ù.
+    // ê°€ì†Â·ê°ì†ìœ¼ë¡œ ê³„ì‚°í•œ ì†ë„. ì¶©ëŒ í›„ ì‹¤ì œ ì†ë„ì™€ëŠ” êµ¬ë¶„í•œë‹¤.
     public float CurrentSpeed => currentSpeed;
 
-    // ½ÇÁ¦ ÀÌµ¿ ÈÄ ÃøÁ¤ÇÑ ¼öÆò ¼Óµµ. ¾Ö´Ï¸ŞÀÌ¼Ç¿¡ Àü´ŞÇÑ´Ù.
+    // ì‹¤ì œ ì´ë™ í›„ ì¸¡ì •í•œ ìˆ˜í‰ ì†ë„. ì• ë‹ˆë©”ì´ì…˜ì— ì „ë‹¬í•œë‹¤.
     public Vector3 HorizontalVelocity => horizontalVelocity;
 
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
+        standingHeight = characterController.height;
+        standingCenter = characterController.center;
     }
 
     private void Update()
     {
+        if (!IsSimulationEnabled) return;
         UpdateRotation();
         UpdateSpeed();
         UpdateTravelDirection();
@@ -54,16 +134,18 @@ public class PlayerMovement : MonoBehaviour
         UpdateMovement();
     }
 
-    // Controller°¡ Àü´ŞÇÑ ¿ùµå ±âÁØ ¼öÆò ¹æÇâÀ» ÀúÀåÇÑ´Ù.
+    // Controllerê°€ ì „ë‹¬í•œ ì›”ë“œ ê¸°ì¤€ ìˆ˜í‰ ë°©í–¥ì„ ì €ì¥í•œë‹¤.
     public void MoveTo(Vector3 direction)
     {
+        if (!IsSimulationEnabled) return;
         direction.y = 0f;
         moveDirection = Vector3.ClampMagnitude(direction, 1f);
     }
 
-    // immediately: ÀÏ¹İ 3ÀÎÄªÀº false, 1ÀÎÄª/Á¶ÁØÀº true.
+    // immediately: ì¼ë°˜ 3ì¸ì¹­ì€ false, 1ì¸ì¹­/ì¡°ì¤€ì€ true.
     public void SetFacingDirection(Vector3 direction, bool immediately)
     {
+        if (!IsSimulationEnabled) return;
         direction.y = 0f;
         facingDirection = direction;
         rotateImmediately = immediately;
@@ -71,19 +153,22 @@ public class PlayerMovement : MonoBehaviour
 
     public void FaceImmediately(Vector3 direction)
     {
+        if (!IsSimulationEnabled) return;
         SetFacingDirection(direction, true);
         UpdateRotation();
     }
 
     public void Jump()
     {
-        jumpRequested = true;
+        if (!IsSimulationEnabled) return;
+        if (!IsCrouching) jumpRequested = true;
     }
 
-    // »ç¸Á¡¤Á¶ÀÛ ±İÁö ¶§ Áï½Ã ¼öÆò ÀÌµ¿À» ¸ØÃá´Ù. Áß·ÂÀº À¯ÁöÇÑ´Ù.
-    // ÀÏ¹İÀûÀÎ Å° ÇØÁ¦´Â ÀÌ ¸Ş¼­µå¸¦ È£ÃâÇÏÁö ¾Ê°í MoveTo(Vector3.zero)¸¦ »ç¿ëÇÑ´Ù.
+    // ì‚¬ë§Â·ì¡°ì‘ ê¸ˆì§€ ë•Œ ì¦‰ì‹œ ìˆ˜í‰ ì´ë™ì„ ë©ˆì¶˜ë‹¤. ì¤‘ë ¥ì€ ìœ ì§€í•œë‹¤.
+    // ì¼ë°˜ì ì¸ í‚¤ í•´ì œëŠ” ì´ ë©”ì„œë“œë¥¼ í˜¸ì¶œí•˜ì§€ ì•Šê³  MoveTo(Vector3.zero)ë¥¼ ì‚¬ìš©í•œë‹¤.
     public void Stop()
     {
+        CancelDodge();
         moveDirection = Vector3.zero;
         facingDirection = Vector3.zero;
         travelDirection = Vector3.zero;
@@ -113,8 +198,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateSpeed()
     {
-        // ÀÔ·ÂÀÌ ¾øÀ¸¸é 0, ÀÖÀ¸¸é °È±â/´Ş¸®±â ¸ñÇ¥ ¼Óµµ±îÁö º¯È­ÇÑ´Ù.
-        float desiredSpeed = targetSpeed * moveDirection.magnitude;
+        // ì…ë ¥ì´ ì—†ìœ¼ë©´ 0, ìˆìœ¼ë©´ ê±·ê¸°/ë‹¬ë¦¬ê¸° ëª©í‘œ ì†ë„ê¹Œì§€ ë³€í™”í•œë‹¤.
+        float desiredSpeed = (IsCrouching ? Mathf.Min(targetSpeed, crouchSpeed) : targetSpeed) * moveDirection.magnitude;
+        if (IsCrouching) currentSpeed = Mathf.Min(currentSpeed, crouchSpeed);
         float changeRate = desiredSpeed > currentSpeed ? acceleration : deceleration;
 
         currentSpeed = Mathf.MoveTowards(
@@ -125,14 +211,14 @@ public class PlayerMovement : MonoBehaviour
     {
         if (rotateImmediately)
         {
-            // 1ÀÎÄª/Á¶ÁØ: Ä«¸Ş¶ó ±âÁØ ÀüÈÄÁÂ¿ì·Î ÀÌµ¿ÇÑ´Ù.
-            // Å°¸¦ ¶¼¸é ¸¶Áö¸· ÀÌµ¿ ¹æÇâÀ» À¯ÁöÇÏ¸ç °¨¼ÓÇÑ´Ù.
+            // 1ì¸ì¹­/ì¡°ì¤€: ì¹´ë©”ë¼ ê¸°ì¤€ ì „í›„ì¢Œìš°ë¡œ ì´ë™í•œë‹¤.
+            // í‚¤ë¥¼ ë–¼ë©´ ë§ˆì§€ë§‰ ì´ë™ ë°©í–¥ì„ ìœ ì§€í•˜ë©° ê°ì†í•œë‹¤.
             if (moveDirection.sqrMagnitude > 0.0001f)
                 travelDirection = moveDirection.normalized;
         }
         else
         {
-            // ÀÏ¹İ 3ÀÎÄª: ¸öÀÌ È¸ÀüÇÏ´Â ¹æÇâÀ» µû¶ó ÀÌµ¿ÇÑ´Ù.
+            // ì¼ë°˜ 3ì¸ì¹­: ëª¸ì´ íšŒì „í•˜ëŠ” ë°©í–¥ì„ ë”°ë¼ ì´ë™í•œë‹¤.
             travelDirection = transform.forward;
             travelDirection.y = 0f;
             travelDirection.Normalize();
@@ -143,10 +229,13 @@ public class PlayerMovement : MonoBehaviour
     {
         bool isGrounded = characterController.isGrounded;
 
-        if (jumpRequested && isGrounded && verticalVelocity <= 0f && gravity < 0f)
+        if (jumpRequested && !IsCrouching && isGrounded && verticalVelocity <= 0f && gravity < 0f)
+        {
             verticalVelocity = Mathf.Sqrt(jumpForce * -2f * gravity);
+            Succeeded?.Invoke(DemoAction.Jump, this);
+        }
 
-        // °øÁß¿¡¼­ ´©¸¥ Á¡ÇÁ°¡ ÂøÁö ÈÄ ½ÇÇàµÇÁö ¾Êµµ·Ï ¿äÃ»À» ¼ÒºñÇÑ´Ù.
+        // ê³µì¤‘ì—ì„œ ëˆ„ë¥¸ ì í”„ê°€ ì°©ì§€ í›„ ì‹¤í–‰ë˜ì§€ ì•Šë„ë¡ ìš”ì²­ì„ ì†Œë¹„í•œë‹¤.
         jumpRequested = false;
 
         if (isGrounded && verticalVelocity < 0f)
@@ -157,13 +246,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateMovement()
     {
-        Vector3 requestedHorizontalVelocity = travelDirection * currentSpeed;
+        Vector3 requestedHorizontalVelocity = Time.time < dodgeUntil ? dodgeVelocity : travelDirection * currentSpeed;
         Vector3 finalVelocity = requestedHorizontalVelocity + Vector3.up * verticalVelocity;
 
-        // ½ÇÁ¦ ÀÌµ¿Àº ÀÌ ÇÑ °÷¿¡¼­¸¸ Ã³¸®ÇÑ´Ù.
+        // ì‹¤ì œ ì´ë™ì€ ì´ í•œ ê³³ì—ì„œë§Œ ì²˜ë¦¬í•œë‹¤.
         characterController.Move(finalVelocity * Time.deltaTime);
 
-        // CollisionFlags´Â CharacterController°¡ ÀÌµ¿ÇÏ¸é¼­ ¾î´À ¹æÇâ¿¡¼­ Ãæµ¹Çß´ÂÁö ¾Ë·ÁÁÖ´Â enumÀÌ´Ù.
+        // CollisionFlagsëŠ” CharacterControllerê°€ ì´ë™í•˜ë©´ì„œ ì–´ëŠ ë°©í–¥ì—ì„œ ì¶©ëŒí–ˆëŠ”ì§€ ì•Œë ¤ì£¼ëŠ” enumì´ë‹¤.
         if ((characterController.collisionFlags & CollisionFlags.Above) != 0 &&
             verticalVelocity > 0f)
         {
@@ -172,5 +261,8 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 actualVelocity = characterController.velocity;
         horizontalVelocity = new Vector3(actualVelocity.x, 0f, actualVelocity.z);
+        bool moving = horizontalVelocity.sqrMagnitude > 0.01f;
+        if (moving && !moveReported) Succeeded?.Invoke(DemoAction.Move, this);
+        moveReported = moving;
     }
 }

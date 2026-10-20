@@ -1,22 +1,24 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
 public class AmmoEvent : UnityEngine.Events.UnityEvent<int, int> { }
 [System.Serializable]
-public class MagazineEvent : UnityEngine.Events.UnityEvent<int> { }
+public class ReserveAmmoEvent : UnityEngine.Events.UnityEvent<int> { }
 
 public class WeaponAssaultRifle : MonoBehaviour
 {
     public event System.Action<Vector3> OnFired;
+    public event System.Action<UnityEngine.Object> OnDamageApplied;
+    public event System.Action<WeaponAssaultRifle> OnReloadCompleted;
     public float AttackInterval => weaponSetting.attackRate;
     public bool IsReloading => isReload;
 
     [HideInInspector]
     public AmmoEvent onAmmoEvent = new AmmoEvent();
     [HideInInspector]
-    public MagazineEvent onMagazineEvent = new MagazineEvent();
+    public ReserveAmmoEvent onReserveAmmoEvent = new ReserveAmmoEvent();
 
     [Header("Camera")]
     [SerializeField] private PlayerCameraController cameraController;
@@ -43,9 +45,51 @@ public class WeaponAssaultRifle : MonoBehaviour
     [Header("Weapon Setting")]
     [SerializeField] private WeaponSetting weaponSetting;
 
-    private float lastAttackTime = 0;
+    [Header("Shot Raycast Filters")]
+    [SerializeField] private LayerMask shotLayers = Physics.DefaultRaycastLayers;
+    [SerializeField] private QueryTriggerInteraction shotTriggerInteraction = QueryTriggerInteraction.Collide;
+    [SerializeField] private Collider[] ignoredShotColliders = new Collider[0];
+
+    private float lastAttackTime = float.NegativeInfinity;
     private bool isReload = false;
+    private int reloadRequestId;
+    private bool ammoInitialized;
     private Coroutine attackRoutine;
+    private Coroutine reloadRoutine;
+    private bool isEquipped = true;
+    private PlayerController playerController;
+    private bool CanUse => isEquipped && isActiveAndEnabled &&
+        (playerController == null || playerController.CanUseWeapons);
+
+    public void SetEquipped(bool value)
+    {
+        if (isEquipped == value) return;
+        CancelWeaponActions();
+        isEquipped = value;
+        if (value && isActiveAndEnabled)
+        {
+            PlaySound(audioClipTakeOutWeapon);
+            NotifyAmmoChanged();
+        }
+    }
+
+    public void CancelWeaponActions()
+    {
+        StopWeaponAction();
+        if (reloadRoutine != null) StopCoroutine(reloadRoutine);
+        reloadRoutine = null;
+        bool wasReloading = isReload;
+        isReload = false;
+        if (wasReloading)
+        {
+            if (animator != null) animator.OnReloadCancelled();
+        }
+        if (muzzleFlashRoutine != null) StopCoroutine(muzzleFlashRoutine);
+        muzzleFlashRoutine = null;
+        HideMuzzleFlashes();
+        if (audioSource != null) audioSource.Stop();
+    }
+
     private Coroutine muzzleFlashRoutine;
 
     private AudioSource audioSource;
@@ -55,41 +99,65 @@ public class WeaponAssaultRifle : MonoBehaviour
     private Camera mainCamera;
 
     public WeaponName WeaponName => weaponSetting.weaponName;
-    public int CurrentMagazine => weaponSetting.currentMagazine;
-    public int MaxMagazine => weaponSetting.maxMagazine;
+    public int MagazineCapacity => weaponSetting.maxAmmo;
+    public int CurrentAmmo => weaponSetting.currentAmmo;
+    public int ReserveAmmo => weaponSetting.reserveAmmo;
+    public int TotalAmmo => weaponSetting.currentAmmo + weaponSetting.reserveAmmo;
+    public int InitialTotalAmmo => weaponSetting.initialTotalAmmo;
 
-    private bool UseFirstPerson => cameraController != null && !cameraController.IsThirdPerson;
-
-    private Transform ActiveBulletSpawnPoint => UseFirstPerson && firstPersonBulletSpawnPoint != null ? firstPersonBulletSpawnPoint : bulletSpawnPoint;
-
-    private Transform ActiveCasingSpawnPoint => UseFirstPerson && firstPersonCasingSpawnPoint != null ? firstPersonCasingSpawnPoint : casingSpawnPoint;
+    // Gameplay always uses the actual third-person muzzle. First-person references remain for story effects.
+    private Transform ActiveBulletSpawnPoint => bulletSpawnPoint;
+    private Transform ActiveCasingSpawnPoint => casingSpawnPoint;
 
     void Awake()
     {
         audioSource = GetComponent<AudioSource>();
+        playerController = GetComponentInParent<PlayerController>();
         animator = GetComponentInParent<PlayerAnimatorController>();
         casingMemoryPool = GetComponent<CasingMemoryPool>();
         impactMemoryPool = GetComponent<ImpactMemoryPool>();
         mainCamera = Camera.main;
 
-        weaponSetting.currentMagazine = weaponSetting.maxMagazine;
-        weaponSetting.currentAmmo = weaponSetting.maxAmmo;
+        InitializeAmmo();
+    }
+
+    public void ResetAmmoForDemo()
+    {
+        CancelWeaponActions();
+        ammoInitialized = false;
+        InitializeAmmo();
+    }
+
+    private void InitializeAmmo()
+    {
+        if (ammoInitialized) return;
+        ammoInitialized = true;
+        weaponSetting.maxAmmo = Mathf.Max(0, weaponSetting.maxAmmo);
+        weaponSetting.initialTotalAmmo = Mathf.Max(0, weaponSetting.initialTotalAmmo);
+        weaponSetting.currentAmmo = Mathf.Min(weaponSetting.maxAmmo, weaponSetting.initialTotalAmmo);
+        weaponSetting.reserveAmmo = weaponSetting.initialTotalAmmo - weaponSetting.currentAmmo;
+    }
+
+    private void NotifyAmmoChanged()
+    {
+        if (!ammoInitialized) return;
+        onAmmoEvent.Invoke(weaponSetting.currentAmmo, weaponSetting.maxAmmo);
+        onReserveAmmoEvent.Invoke(weaponSetting.reserveAmmo);
     }
 
     private void OnEnable()
     {
         PlaySound(audioClipTakeOutWeapon);
         HideMuzzleFlashes();
-        onMagazineEvent.Invoke(weaponSetting.currentMagazine);
-        onAmmoEvent.Invoke(weaponSetting.currentAmmo, weaponSetting.maxAmmo);
+        NotifyAmmoChanged();
     }
 
     public void StartWeaponAction(int type = 0)
     {
-        if (type != 0 || isReload || !isActiveAndEnabled)
+        if (type != 0 || isReload || !CanUse)
             return;
 
-        if (weaponSetting.isAutomaticAttack)
+        if (weaponSetting.weaponName != WeaponName.Pistol && weaponSetting.isAutomaticAttack)
         {
             if (attackRoutine == null)
                 attackRoutine = StartCoroutine(OnAttackLoop());
@@ -111,33 +179,36 @@ public class WeaponAssaultRifle : MonoBehaviour
 
     public void StartReload()
     {
-        if (isReload || !isActiveAndEnabled || weaponSetting.currentMagazine <= 0 || weaponSetting.currentAmmo >= weaponSetting.maxAmmo)
+        if (isReload || !CanUse || weaponSetting.reserveAmmo <= 0 || weaponSetting.currentAmmo >= weaponSetting.maxAmmo)
             return;
 
         StopWeaponAction();
-        StartCoroutine(OnReload());
+        reloadRoutine = StartCoroutine(OnReload());
     }
 
     private IEnumerator OnAttackLoop()
     {
-        while (true)
+        while (CanUse)
         {
             OnAttack();
             yield return null;
         }
+        attackRoutine = null;
     }
 
     public void OnAttack()
     {
-        if (isReload || !isActiveAndEnabled || mainCamera == null || ActiveBulletSpawnPoint == null || weaponSetting.currentAmmo <= 0 || Time.time - lastAttackTime <= weaponSetting.attackRate)
+        if (isReload || !CanUse || mainCamera == null || ActiveBulletSpawnPoint == null || weaponSetting.currentAmmo <= 0 || Time.time - lastAttackTime <= weaponSetting.attackRate)
             return;
 
         lastAttackTime = Time.time;
         weaponSetting.currentAmmo--;
-        onAmmoEvent.Invoke(weaponSetting.currentAmmo, weaponSetting.maxAmmo);
+        NotifyAmmoChanged();
 
         Vector3 targetPoint = GetTargetPoint();
         OnFired?.Invoke(targetPoint);
+        // Resolve damage before optional animation/audio/casing effects can fail.
+        TwoStepRaycast(targetPoint);
 
         if (animator != null)
             animator.OnFire();
@@ -151,7 +222,6 @@ public class WeaponAssaultRifle : MonoBehaviour
         if (casingMemoryPool != null && spawnPoint != null)
             casingMemoryPool.SpawnCasing(spawnPoint.position, spawnPoint.right);
 
-        TwoStepRaycast(targetPoint);
     }
 
     private IEnumerator OnMuzzleFlashEffect()
@@ -159,8 +229,8 @@ public class WeaponAssaultRifle : MonoBehaviour
         float endTime = Time.time + Mathf.Max(0.01f, weaponSetting.attackRate * 0.3f);
         while (Time.time < endTime)
         {
-            // ÂªÀº ¹ß»ç È¿°ú µµÁß ½ÃÁ¡À» ¹Ù²Ù´õ¶óµµ ÇöÀç ½ÃÁ¡ÀÇ È¿°ú¸¸ Ç¥½ÃÇÑ´Ù.
-            bool firstPerson = UseFirstPerson && firstPersonMuzzleFlashEffect != null;
+            // ì§§ì€ ë°œì‚¬ íš¨ê³¼ ë„ì¤‘ ì‹œì ì„ ë°”ê¾¸ë”ë¼ë„ í˜„ìž¬ ì‹œì ì˜ íš¨ê³¼ë§Œ í‘œì‹œí•œë‹¤.
+            bool firstPerson = false;
             if (muzzleFlashEffect != null)
                 muzzleFlashEffect.SetActive(!firstPerson);
             if (firstPersonMuzzleFlashEffect != null)
@@ -183,20 +253,34 @@ public class WeaponAssaultRifle : MonoBehaviour
     private IEnumerator OnReload()
     {
         isReload = true;
+        int requestId = ++reloadRequestId;
+        if (!isReload || requestId != reloadRequestId) yield break;
+        if (!CanUse) { CancelWeaponActions(); yield break; }
 
-        animator.OnReload();
+        if (animator != null) animator.OnReload();
         PlaySound(audioClipReload);
 
         yield return new WaitForSeconds(reloadDuration);
 
-        weaponSetting.currentMagazine--;
-        weaponSetting.currentAmmo = weaponSetting.maxAmmo;
+        if (!isReload || requestId != reloadRequestId) yield break;
+        if (!CanUse)
+        {
+            isReload = false;
+            reloadRoutine = null;
+            if (animator != null) animator.OnReloadCancelled();
+            yield break;
+        }
+        int amount = Mathf.Min(Mathf.Max(0, weaponSetting.maxAmmo - weaponSetting.currentAmmo),
+            Mathf.Max(0, weaponSetting.reserveAmmo));
+        weaponSetting.currentAmmo += amount;
+        weaponSetting.reserveAmmo -= amount;
         isReload = false;
+        reloadRoutine = null;
         if (animator != null)
             animator.OnReloadFinished();
 
-        onMagazineEvent.Invoke(weaponSetting.currentMagazine);
-        onAmmoEvent.Invoke(weaponSetting.currentAmmo, weaponSetting.maxAmmo);
+        NotifyAmmoChanged();
+        OnReloadCompleted?.Invoke(this);
     }
 
     private Vector3 GetTargetPoint()
@@ -204,7 +288,7 @@ public class WeaponAssaultRifle : MonoBehaviour
         Ray ray = mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         Debug.DrawRay(ray.origin, ray.direction * weaponSetting.attackDistance, Color.red);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, weaponSetting.attackDistance))
+        if (TryGetShotHit(ray.origin, ray.direction, out RaycastHit hit))
             return hit.point;
 
         return ray.origin + ray.direction * weaponSetting.attackDistance;
@@ -212,7 +296,7 @@ public class WeaponAssaultRifle : MonoBehaviour
 
     private void TwoStepRaycast(Vector3 targetPoint)
     {
-        // OnFired¿¡¼­ ¸öÀÌ È¸ÀüÇÑ µÚ ÇöÀç ½ÃÁ¡ÀÇ ÃÑ±¸ À§Ä¡¸¦ »ç¿ëÇÑ´Ù.
+        // OnFiredì—ì„œ ëª¸ì´ íšŒì „í•œ ë’¤ í˜„ìž¬ ì‹œì ì˜ ì´êµ¬ ìœ„ì¹˜ë¥¼ ì‚¬ìš©í•œë‹¤.
         Transform spawnPoint = ActiveBulletSpawnPoint;
         if (spawnPoint == null)
             return;
@@ -222,8 +306,9 @@ public class WeaponAssaultRifle : MonoBehaviour
             return;
 
         Vector3 attackDirection = delta.normalized;
-        if (Physics.Raycast(spawnPoint.position, attackDirection, out RaycastHit hit, weaponSetting.attackDistance))
+        if (TryGetShotHit(spawnPoint.position, attackDirection, out RaycastHit hit))
         {
+            ApplyHitDamage(hit.collider);
             if (impactMemoryPool != null)
                 impactMemoryPool.SpawnImpact(hit);
         }
@@ -232,8 +317,50 @@ public class WeaponAssaultRifle : MonoBehaviour
             attackDirection * weaponSetting.attackDistance, Color.blue);
     }
 
+    private bool TryGetShotHit(Vector3 origin, Vector3 direction, out RaycastHit hit)
+    {
+        if (ignoredShotColliders == null || ignoredShotColliders.Length == 0)
+            return Physics.Raycast(origin, direction, out hit, weaponSetting.attackDistance, shotLayers, shotTriggerInteraction);
+
+        // RaycastAll is unordered: choose the nearest non-ignored hit, including walls.
+        hit = default;
+        float nearestDistance = float.PositiveInfinity;
+        bool found = false;
+        foreach (RaycastHit candidate in Physics.RaycastAll(origin, direction, weaponSetting.attackDistance, shotLayers, shotTriggerInteraction))
+        {
+            bool ignored = false;
+            foreach (Collider excluded in ignoredShotColliders)
+                if (excluded != null && excluded == candidate.collider) { ignored = true; break; }
+            if (ignored || candidate.distance >= nearestDistance) continue;
+            nearestDistance = candidate.distance;
+            hit = candidate;
+            found = true;
+        }
+        return found;
+    }
+
+    private void ApplyHitDamage(Collider hitCollider)
+    {
+        if (hitCollider == null) return;
+        EnemyHitbox hitbox = hitCollider.GetComponent<EnemyHitbox>();
+        if (hitbox != null)
+        {
+            // A missing EnemyHealth must not fall back to another damage recipient.
+            EnemyHealth owner = hitbox.Health;
+            bool applied = hitbox.TryTakeDamage(weaponSetting.attackDamage);
+            if (applied && owner != null) OnDamageApplied?.Invoke(owner);
+            return;
+        }
+        CombatTarget target = hitCollider.GetComponentInParent<CombatTarget>();
+        if (target != null)
+        {
+            if (target.TryTakeDamage(weaponSetting.attackDamage)) OnDamageApplied?.Invoke(target);
+        }
+    }
+
     private void PlaySound(AudioClip clip)
     {
+        if (audioSource == null || clip == null) return;
         audioSource.Stop();
         audioSource.clip = clip;
         audioSource.Play();
@@ -241,13 +368,12 @@ public class WeaponAssaultRifle : MonoBehaviour
 
     private void OnDisable()
     {
+        CancelWeaponActions();
         StopAllCoroutines();
         attackRoutine = null;
         muzzleFlashRoutine = null;
         isReload = false;
         HideMuzzleFlashes();
-        if (animator != null)
-            animator.OnReloadFinished();
         if (audioSource != null)
             audioSource.Stop();
     }

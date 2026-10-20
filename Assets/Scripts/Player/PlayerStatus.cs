@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerStatus : MonoBehaviour
 {
@@ -33,6 +33,8 @@ public class PlayerStatus : MonoBehaviour
     public float StaminaNormalized => currentStamina / maxStamina;
     public float RunStaminaCostPerSecond => runStaminaCostPerSecond;
 
+    public event System.Action Damaged;
+    public event System.Action Died;
     public bool IsDead { get; private set; }
 
     private void Awake()
@@ -85,7 +87,9 @@ public class PlayerStatus : MonoBehaviour
         {
             IsDead = true;
             Debug.Log("Player died.", this);
+            Died?.Invoke();
         }
+        Damaged?.Invoke();
     }
 
     public void Heal(float amount)

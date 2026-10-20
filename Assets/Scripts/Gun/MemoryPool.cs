@@ -96,7 +96,7 @@ public class MemoryPool
         {
             PoolItem poolItem = poolItemList[i];
 
-            if(poolItem.gameObject == removeObject)
+            if(poolItem.gameObject == removeObject && poolItem.isActive)
             {
                 activeCount--;
 

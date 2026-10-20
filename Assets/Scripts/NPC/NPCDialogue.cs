@@ -1,26 +1,75 @@
-using UnityEngine;
+ï»¿using UnityEngine;
+using UnityEngine.Events;
 
 public class NPCDialogue : MonoBehaviour
 {
     [SerializeField] private DialogueUI dialogueUI;
 
-    [TextArea(2, 5)]
-    [SerializeField] private string dialogue = "¿­½ÉÈ÷ ÇØ¶ó";
+    [Header("Dialogue Sequence")]
+    [SerializeField, TextArea(2, 5)] private string[] dialogueLines;
+    [SerializeField] private string npcName = "";
+    [SerializeField] private DialogueSpeaker[] lineSpeakers = new DialogueSpeaker[0];
+    [Header("Completion")]
+    [SerializeField] private UnityEvent onDialogueCompleted = new();
+    private bool dialogueInProgress;
+    [SerializeField] private GameFlowManager flow;
+    [SerializeField] private TutorialManager tutorial;
+    private GameFlowStage requestedStage;
+    private int flowRevision;
+
+    public bool CanStartDialogue
+    {
+        get
+        {
+            if (!isActiveAndEnabled || dialogueInProgress || dialogueUI == null ||
+                !dialogueUI.IsReady || dialogueUI.IsOpen || dialogueUI.WasClosedThisFrame)
+                return false;
+            if (dialogueLines != null)
+                foreach (string line in dialogueLines)
+                    if (!string.IsNullOrWhiteSpace(line)) return true;
+            return false;
+        }
+    }
 
     public void StartDialogue()
     {
+        if (!isActiveAndEnabled || dialogueInProgress) return;
         if (dialogueUI == null)
         {
-            Debug.LogWarning($"{name}ÀÇ Dialogue UI°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogWarning($"{name}ì˜ Dialogue UIê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
             return;
         }
 
-        // ´ëÈ­¸¦ ´Ý´Â µ¥ »ç¿ëÇÑ E Å°°¡ °°Àº ÇÁ·¹ÀÓ¿¡ ´Ù½Ã ´ëÈ­¸¦ ¿­Áö ¾Ê°Ô ÇÑ´Ù.
+        // ëŒ€í™”ë¥¼ ë‹«ì€ í”„ë ˆìž„ì—ëŠ” F ìƒí˜¸ìž‘ìš©ìœ¼ë¡œ ë‹¤ì‹œ ì—´ì§€ ì•ŠëŠ”ë‹¤.
         if (dialogueUI.IsOpen || dialogueUI.WasClosedThisFrame)
         {
             return;
         }
 
-        dialogueUI.OpenDialogue(dialogue);
+        if (!CanStartDialogue) return;
+        if (flow != null) { requestedStage = flow.CurrentStage; flowRevision = flow.Revision; }
+        dialogueInProgress = dialogueUI.TryOpenSequence(
+            dialogueLines, lineSpeakers, npcName,
+            () => { if (this != null) CompleteDialogue(); },
+            () => { if (this != null) dialogueInProgress = false; });
+    }
+    private void CompleteDialogue()
+    {
+        if (!dialogueInProgress) return;
+        dialogueInProgress = false;
+        GameFlowStage stage = requestedStage;
+        int revision = flowRevision;
+        if (isActiveAndEnabled)
+        {
+            if (tutorial != null) tutorial.OnDialogueCompleted(this);
+            onDialogueCompleted.Invoke();
+            if (flow != null) flow.TryCompleteStage(stage, revision, this);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (dialogueInProgress && dialogueUI != null) dialogueUI.CancelDialogue();
+        dialogueInProgress = false;
     }
 }

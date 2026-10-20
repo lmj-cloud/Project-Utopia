@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class ThirdPersonAimController : MonoBehaviour
 {
@@ -8,8 +8,8 @@ public class ThirdPersonAimController : MonoBehaviour
     [SerializeField] private WeaponAssaultRifle weapon;
 
     [Header("Animator IK")]
-    [Tooltip("ÇöÀç ±¸¼º: Base Layer = 0, Rifle Layer = 1. Rifle LayerÀÇ IK Pass¸¦ ÄÒ´Ù.")]
-    [SerializeField, Min(0)] private int ikLayerIndex = 1;
+    [Tooltip("Base Layer = 0. UpperLayerë„ IK Passë¥¼ ì¼œê³ , ê°€ì¤‘ì¹˜ê°€ ìˆì„ ë•Œë§Œ ë§ˆì§€ë§‰ ë ˆì´ì–´ì—ì„œ í•œ ë²ˆ ë³´ì •í•œë‹¤.")]
+    [SerializeField, Min(0)] private int ikLayerIndex = 0;
 
     [Header("Aim Pitch")]
     [SerializeField, Range(0f, 80f)] private float maxUpAngle = 60f;
@@ -23,11 +23,21 @@ public class ThirdPersonAimController : MonoBehaviour
     [SerializeField, Min(0f)] private float upperChestWeight = 0.25f;
 
     private Animator animator;
+    private int upperIKLayer = -1;
     private Transform spine;
     private Transform chest;
     private Transform upperChest;
     private float currentPitch;
     private float aimWeight;
+    private int appliedFrame = -1;
+    private readonly Quaternion[] animatedRotations = new Quaternion[3];
+    private readonly Quaternion[] appliedRotations = new Quaternion[3];
+    private readonly bool[] hasPitchOffset = new bool[3];
+
+    private bool CanApplyPitch => playerController != null && playerController.CanApplyRifleAim &&
+        (weapon == null || weapon == playerController.CurrentWeapon) &&
+        cameraController != null && cameraController.isActiveAndEnabled && cameraController.IsThirdPerson &&
+        animator != null && animator.isActiveAndEnabled && animator.runtimeAnimatorController != null;
 
     private void Awake()
     {
@@ -35,48 +45,70 @@ public class ThirdPersonAimController : MonoBehaviour
 
         if (playerController == null || cameraController == null)
         {
-            Debug.LogError("ThirdPersonAimController: Player Controller¿Í Camera Controller¸¦ ¿¬°áÇÏ¼¼¿ä.", this);
+            Debug.LogError("ThirdPersonAimController: Player Controllerì™€ Camera Controllerë¥¼ ì—°ê²°í•˜ì„¸ìš”.", this);
             enabled = false;
             return;
         }
 
-        if (animator.avatar == null || !animator.avatar.isValid || !animator.isHuman)
+        if (animator == null || animator.avatar == null || !animator.avatar.isValid || !animator.isHuman)
         {
-            Debug.LogError("ThirdPersonAimController: À¯È¿ÇÑ Humanoid Avatar°¡ ÇÊ¿äÇÕ´Ï´Ù.", this);
+            Debug.LogError("ThirdPersonAimController: ìœ íš¨í•œ Humanoid Avatarê°€ í•„ìš”í•©ë‹ˆë‹¤.", this);
             enabled = false;
             return;
         }
 
-        if (ikLayerIndex >= animator.layerCount)
+        if (ikLayerIndex < 0 || ikLayerIndex >= animator.layerCount)
         {
-            Debug.LogError("ThirdPersonAimController: IK Layer Index¸¦ Animator ·¹ÀÌ¾î ¹øÈ£¿¡ ¸ÂÃß¼¼¿ä.", this);
+            Debug.LogError("ThirdPersonAimController: IK Layer Indexë¥¼ Animator ë ˆì´ì–´ ë²ˆí˜¸ì— ë§ì¶”ì„¸ìš”.", this);
             enabled = false;
             return;
         }
 
+        upperIKLayer = animator.GetLayerIndex("UpperLayer");
         spine = animator.GetBoneTransform(HumanBodyBones.Spine);
         chest = animator.GetBoneTransform(HumanBodyBones.Chest);
         upperChest = animator.GetBoneTransform(HumanBodyBones.UpperChest);
     }
 
+    private void Update()
+    {
+        // Remove only our still-present offset before this frame's animation evaluates.
+        // An Animator/Timeline pose already written by another owner is left untouched.
+        RestorePitchOffsets();
+        if (!CanApplyPitch) ResetPitchState();
+    }
+
     private void OnAnimatorIK(int layerIndex)
     {
-        // ´Ù¸¥ ·¹ÀÌ¾î¿¡¼­µµ IK Pass°¡ ÄÑÁ® ÀÖÀ» ¶§ Áßº¹ Àû¿ëÀ» ¸·´Â´Ù.
-        if (!isActiveAndEnabled || layerIndex != ikLayerIndex)
+        // ë‹¤ë¥¸ ë ˆì´ì–´ì—ì„œë„ IK Passê°€ ì¼œì ¸ ìˆì„ ë•Œ ì¤‘ë³µ ì ìš©ì„ ë§‰ëŠ”ë‹¤.
+        // ìƒì²´ í–‰ë™ì€ ë§ˆì§€ë§‰ IK Passì—ì„œ, ì¼ë°˜ ì´ë™ì€ Baseì—ì„œ ì ìš©í•´ ë®ì–´ì“°ê¸°ì™€ ì¤‘ë³µì„ í”¼í•œë‹¤.
+        int selectedLayer = animator != null && upperIKLayer >= 0 && upperIKLayer < animator.layerCount &&
+            animator.GetLayerWeight(upperIKLayer) > 0f ? upperIKLayer : ikLayerIndex;
+        if (!isActiveAndEnabled || layerIndex != selectedLayer)
             return;
 
-        bool isAiming = playerController.isActiveAndEnabled &&
-            cameraController.isActiveAndEnabled &&
-            cameraController.IsThirdPerson &&
-            playerController.IsAiming &&
-            (weapon == null || !weapon.IsReloading);
-
-        float targetWeight = isAiming ? 1f : 0f;
-        aimWeight = Mathf.MoveTowards(aimWeight, targetWeight, aimBlendSpeed * Time.deltaTime);
-
-        // Ä«¸Ş¶óÀÇ pitch´Â À§¸¦ º¸¸é À½¼ö, ¾Æ·¡¸¦ º¸¸é ¾ç¼ö´Ù.
+        if (!CanApplyPitch)
+        {
+            ResetPitchState();
+            return;
+        }
+        if (appliedFrame == Time.frameCount) return;
+        appliedFrame = Time.frameCount;
+        // ì¹´ë©”ë¼ì˜ pitchëŠ” ìœ„ë¥¼ ë³´ë©´ ìŒìˆ˜, ì•„ë˜ë¥¼ ë³´ë©´ ì–‘ìˆ˜ë‹¤.
         float targetPitch = Mathf.Clamp(cameraController.Pitch, -maxUpAngle, maxDownAngle);
-        currentPitch = Mathf.MoveTowards(currentPitch, targetPitch, pitchSpeed * Time.deltaTime);
+        if (playerController.RifleFiredThisFrame)
+        {
+            // ë°œì‚¬ í™•ì • í”„ë ˆì„ì€ ë¸”ë Œë“œ ì§€ì—° ì—†ì´, ì´ í”„ë ˆì„ì˜ ìµœì¢… IK Passì— ë°˜ì˜í•œë‹¤.
+            aimWeight = 1f;
+            currentPitch = targetPitch;
+        }
+        else
+        {
+            bool requested = playerController.WantsRifleAimCorrection;
+            aimWeight = Mathf.MoveTowards(aimWeight, requested ? 1f : 0f, aimBlendSpeed * Time.deltaTime);
+            if (requested) currentPitch = Mathf.MoveTowards(currentPitch, targetPitch, pitchSpeed * Time.deltaTime);
+            else if (aimWeight <= 0f) currentPitch = 0f;
+        }
 
         if (aimWeight <= 0f)
             return;
@@ -88,13 +120,13 @@ public class ThirdPersonAimController : MonoBehaviour
         if (totalWeight <= 0f)
             return;
 
-        // UpperChest°¡ ¾ø´Â ¸ğµ¨µµ ³²Àº »À°¡ Á¶ÁØ °¢µµ¸¦ ³ª´©¾î ´ã´çÇÑ´Ù.
+        // UpperChestê°€ ì—†ëŠ” ëª¨ë¸ë„ ë‚¨ì€ ë¼ˆê°€ ì¡°ì¤€ ê°ë„ë¥¼ ë‚˜ëˆ„ì–´ ë‹´ë‹¹í•œë‹¤.
         float pitchToApply = currentPitch * aimWeight;
         Vector3 worldPitchAxis = playerController.transform.right;
 
-        ApplyPitch(HumanBodyBones.Spine, spine, pitchToApply * spineShare / totalWeight, worldPitchAxis);
-        ApplyPitch(HumanBodyBones.Chest, chest, pitchToApply * chestShare / totalWeight, worldPitchAxis);
-        ApplyPitch(HumanBodyBones.UpperChest, upperChest, pitchToApply * upperChestShare / totalWeight, worldPitchAxis);
+        ApplyPitch(HumanBodyBones.Spine, spine, pitchToApply * spineShare / totalWeight, worldPitchAxis, 0);
+        ApplyPitch(HumanBodyBones.Chest, chest, pitchToApply * chestShare / totalWeight, worldPitchAxis, 1);
+        ApplyPitch(HumanBodyBones.UpperChest, upperChest, pitchToApply * upperChestShare / totalWeight, worldPitchAxis, 2);
     }
 
     private static float GetAvailableWeight(Transform bone, float weight)
@@ -102,22 +134,46 @@ public class ThirdPersonAimController : MonoBehaviour
         return bone != null && bone.parent != null ? Mathf.Max(0f, weight) : 0f;
     }
 
-    private void ApplyPitch(HumanBodyBones boneId, Transform bone, float angle, Vector3 worldAxis)
+    private void ApplyPitch(HumanBodyBones boneId, Transform bone, float angle, Vector3 worldAxis, int index)
     {
         if (bone == null || bone.parent == null || Mathf.Approximately(angle, 0f))
             return;
 
-        // »À¸¶´Ù ·ÎÄÃ ÃàÀÌ ´Ù¸£¹Ç·Î PlayerÀÇ ¿À¸¥ÂÊ ¹æÇâÀ» ºÎ¸ğ °ø°£À¸·Î º¯È¯ÇÑ´Ù.
+        // ë¼ˆë§ˆë‹¤ ë¡œì»¬ ì¶•ì´ ë‹¤ë¥´ë¯€ë¡œ Playerì˜ ì˜¤ë¥¸ìª½ ë°©í–¥ì„ ë¶€ëª¨ ê³µê°„ìœ¼ë¡œ ë³€í™˜í•œë‹¤.
         Vector3 localAxis = Quaternion.Inverse(bone.parent.rotation) * worldAxis;
         Quaternion pitchOffset = Quaternion.AngleAxis(angle, localAxis);
 
-        // ÇöÀç ÇÁ·¹ÀÓÀÇ ¾Ö´Ï¸ŞÀÌ¼Ç ÀÚ¼¼¿¡ È¸ÀüÀ» ´õÇÑ´Ù. ½ÃÀÛ ÀÚ¼¼·Î µ¤¾î¾²Áö ¾Ê´Â´Ù.
-        animator.SetBoneLocalRotation(boneId, pitchOffset * bone.localRotation);
+        // í˜„ì¬ í”„ë ˆì„ì˜ ì• ë‹ˆë©”ì´ì…˜ ìì„¸ì— íšŒì „ì„ ë”í•œë‹¤. ì‹œì‘ ìì„¸ë¡œ ë®ì–´ì“°ì§€ ì•ŠëŠ”ë‹¤.
+        Quaternion animatedRotation = bone.localRotation;
+        Quaternion correctedRotation = pitchOffset * animatedRotation;
+        animatedRotations[index] = animatedRotation;
+        appliedRotations[index] = correctedRotation;
+        hasPitchOffset[index] = true;
+        animator.SetBoneLocalRotation(boneId, correctedRotation);
     }
 
-    private void OnDisable()
+    private void RestorePitchOffsets()
     {
+        RestorePitchOffset(spine, 0);
+        RestorePitchOffset(chest, 1);
+        RestorePitchOffset(upperChest, 2);
+    }
+
+    private void RestorePitchOffset(Transform bone, int index)
+    {
+        if (!hasPitchOffset[index]) return;
+        if (bone != null && Quaternion.Angle(bone.localRotation, appliedRotations[index]) < 0.01f)
+            bone.localRotation = animatedRotations[index];
+        hasPitchOffset[index] = false;
+    }
+
+    private void ResetPitchState()
+    {
+        RestorePitchOffsets();
         currentPitch = 0f;
         aimWeight = 0f;
+        appliedFrame = -1;
     }
+
+    private void OnDisable() => ResetPitchState();
 }
