@@ -5,8 +5,14 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 대사에 사용할 화자 이름과 표시 정보를 보관한다.
+/// </summary>
 public enum DialogueSpeaker { NPC = 0, Player = 1 }
 
+/// <summary>
+/// 대사 타이핑과 Enter 진행·유지 입력, 화자 표시 및 대화 완료·취소 콜백을 관리한다.
+/// </summary>
 public class DialogueUI : MonoBehaviour
 {
     [Header("UI References")]
@@ -51,6 +57,9 @@ public class DialogueUI : MonoBehaviour
     public bool WasClosedThisFrame => closedFrame == Time.frameCount;
     public bool IsReady => isActiveAndEnabled && dialoguePanel != null && dialogueText != null;
 
+    /// <summary>
+    /// 다른 실행 로직이 시작되기 전에 필요한 참조와 초기 상태를 준비한다.
+    /// </summary>
     private void Awake()
     {
         if (dialoguePanel != null) dialoguePanel.SetActive(false);
@@ -60,17 +69,29 @@ public class DialogueUI : MonoBehaviour
     }
 
     // 기존 NPCDialogue나 Inspector의 UnityEvent에서도 호출할 수 있는 메서드.
+    /// <summary>
+    /// 기존 대사 열기 호출을 현재 대화 시퀀스 요청 경로로 전달한다.
+    /// </summary>
     public void OpenDialogue(string text)
     {
         TryOpenSequence(new[] { text }, null, null);
     }
 
+    /// <summary>
+    /// 표시 참조와 대사·화자 정보를 확인하고 완료·취소 콜백을 가진 대화 시퀀스를 연다.
+    /// </summary>
     public bool TryOpenSequence(string[] dialogueLines, Action onCompleted, Action onCancelled)
         => TryOpenSequence(dialogueLines, null, null, DialogueSpeaker.Player, onCompleted, onCancelled);
 
+    /// <summary>
+    /// 표시 참조와 대사·화자 정보를 확인하고 완료·취소 콜백을 가진 대화 시퀀스를 연다.
+    /// </summary>
     public bool TryOpenSequence(string[] dialogueLines, DialogueSpeaker[] speakers, string npcName, Action onCompleted, Action onCancelled)
         => TryOpenSequence(dialogueLines, speakers, npcName, DialogueSpeaker.NPC, onCompleted, onCancelled);
 
+    /// <summary>
+    /// 표시 참조와 대사·화자 정보를 확인하고 완료·취소 콜백을 가진 대화 시퀀스를 연다.
+    /// </summary>
     private bool TryOpenSequence(string[] dialogueLines, DialogueSpeaker[] speakers, string npcName,
         DialogueSpeaker defaultSpeaker, Action onCompleted, Action onCancelled)
     {
@@ -103,6 +124,9 @@ public class DialogueUI : MonoBehaviour
     }
 
     // PlayerController가 전달한 Enter 상태를 저장하고 LateUpdate에서 프레임당 한 번 처리한다.
+    /// <summary>
+    /// 현재 프레임의 Enter 누름·유지 상태를 대화 진행 판정에 전달한다.
+    /// </summary>
     public void SetAdvanceInput(bool pressed, bool held, bool released)
     {
         if (!IsOpen || Time.frameCount <= openedFrame || WasClosedThisFrame) return;
@@ -113,12 +137,18 @@ public class DialogueUI : MonoBehaviour
     }
 
     // Preserve existing UnityEvent callers without creating another progression path.
+    /// <summary>
+    /// 외부에서 들어온 대화 진행 요청을 입력 처리 상태에 반영한다.
+    /// </summary>
     public void AdvanceDialogue()
     {
         if (IsOpen && Time.frameCount > openedFrame && !WasClosedThisFrame)
             advanceRequested = true;
     }
 
+    /// <summary>
+    /// 한 프레임의 Enter 누름·유지 상태를 확정해 타이핑과 대사 진행 및 안내 게이지를 갱신한다.
+    /// </summary>
     private void LateUpdate()
     {
         if (!IsOpen || Time.frameCount <= openedFrame || WasClosedThisFrame || processedFrame == Time.frameCount) return;
@@ -181,6 +211,9 @@ public class DialogueUI : MonoBehaviour
             AdvanceCurrentLine(false);
     }
 
+    /// <summary>
+    /// 현재 줄을 넘기고 마지막 줄이면 대화 완료를 처리한다.
+    /// </summary>
     private void AdvanceCurrentLine(bool fastAdvance)
     {
         if (isTyping)
@@ -193,6 +226,9 @@ public class DialogueUI : MonoBehaviour
         else ShowCurrentLine();
     }
 
+    /// <summary>
+    /// 진행 중 타이핑을 끝내 현재 줄 전체를 표시한다.
+    /// </summary>
     private void CompleteCurrentLine()
     {
         StopTyping();
@@ -200,11 +236,17 @@ public class DialogueUI : MonoBehaviour
         lineDisplayedAt = Time.unscaledTime;
     }
 
+    /// <summary>
+    /// Enter 유지 진행률에 맞추어 안내 UI의 채움 정도를 갱신한다.
+    /// </summary>
     private void UpdateEnterFill(float progress)
     {
         if (enterFillImage != null) enterFillImage.fillAmount = progress;
     }
 
+    /// <summary>
+    /// Enter 유지 시간과 유지 입력 상태를 초기화한다.
+    /// </summary>
     private void ResetHoldState()
     {
         holdStartedAt = -1f;
@@ -213,6 +255,9 @@ public class DialogueUI : MonoBehaviour
         if (enterFillImage != null) enterFillImage.fillAmount = 0f;
     }
 
+    /// <summary>
+    /// 현재 줄의 진행·확정 입력 상태를 초기화한다.
+    /// </summary>
     private void ResetAdvanceState()
     {
         ResetHoldState();
@@ -225,9 +270,18 @@ public class DialogueUI : MonoBehaviour
     }
 
     // 마지막 문장을 넘긴 경우만 정상 완료이고 중간 닫기는 취소다.
+    /// <summary>
+    /// 현재 대화 시퀀스의 정상 종료를 요청한다.
+    /// </summary>
     public void CloseDialogue() => FinishDialogue(lines != null && lineIndex >= lines.Length);
+    /// <summary>
+    /// 현재 대화를 취소 종료하여 완료와 구분된 콜백을 전달한다.
+    /// </summary>
     public void CancelDialogue() => FinishDialogue(false);
 
+    /// <summary>
+    /// 현재 줄과 화자 표시를 설정하고 대사 타이핑을 시작한다.
+    /// </summary>
     private void ShowCurrentLine()
     {
         StopTyping();
@@ -247,6 +301,9 @@ public class DialogueUI : MonoBehaviour
         typingCoroutine = StartCoroutine(TypeText(characterCount));
     }
 
+    /// <summary>
+    /// 시간에 따라 표시 문자 수를 늘려 대사 타이핑을 진행한다.
+    /// </summary>
     private IEnumerator TypeText(int characterCount)
     {
         float visibleCharacters = 0f;
@@ -263,6 +320,9 @@ public class DialogueUI : MonoBehaviour
         lineDisplayedAt = Time.unscaledTime;
     }
 
+    /// <summary>
+    /// 남아 있는 대사 타이핑 Coroutine을 중단하고 참조를 해제한다.
+    /// </summary>
     private void StopTyping()
     {
         if (typingCoroutine != null) StopCoroutine(typingCoroutine);
@@ -270,6 +330,9 @@ public class DialogueUI : MonoBehaviour
         isTyping = false;
     }
 
+    /// <summary>
+    /// 대화 표시·입력을 정리하고 해당 종료 종류에 맞는 콜백을 한 번 전달한다.
+    /// </summary>
     private void FinishDialogue(bool completed)
     {
         if (!IsOpen) return;
@@ -290,6 +353,9 @@ public class DialogueUI : MonoBehaviour
         callback?.Invoke();
     }
 
+    /// <summary>
+    /// 비활성화 시 이 컴포넌트가 남긴 진행 상태나 이벤트 연결을 정리한다.
+    /// </summary>
     private void OnDisable()
     {
         CancelDialogue();

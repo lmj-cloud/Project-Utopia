@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// 적의 부위별 피해와 체력, 사망 이벤트 및 체력 초기화에 따른 생명주기를 관리한다.
+/// </summary>
 public class EnemyHealth : MonoBehaviour
 {
     [Header("Health")]
@@ -25,11 +28,25 @@ public class EnemyHealth : MonoBehaviour
     public float MaxHealth => maxHealth;
     public float CurrentHealth => currentHealth;
     public bool IsDead => isDead;
+    public int LifeVersion { get; private set; }
+    /// <summary>실제 양수 피해가 적용된 순서. 기존 UnityEvent와 코드 구독의 중복 피격 반응을 구분한다.</summary>
+    public int DamageVersion { get; private set; }
+    /// <summary>실제 체력 감소가 확정된 경우에만 알리는 코드 연결용 이벤트.</summary>
+    public event System.Action Damaged;
 
+    /// <summary>
+    /// 다른 실행 로직이 시작되기 전에 필요한 참조와 초기 상태를 준비한다.
+    /// </summary>
     private void Awake() => ResetHealth();
 
+    /// <summary>
+    /// 기존 외부 호출 경로를 유지하면서 피해 적용을 요청한다.
+    /// </summary>
     public void TakeDamage(float baseDamage, EnemyHitPart part) => TryTakeDamage(baseDamage, part);
 
+    /// <summary>
+    /// 유효한 피해와 생존 상태를 검사한 뒤 체력 감소와 피격 알림을 처리한다.
+    /// </summary>
     public bool TryTakeDamage(float baseDamage, EnemyHitPart part)
     {
         if (!isActiveAndEnabled || isDead || notifyingDamage || baseDamage <= 0f ||
@@ -49,10 +66,12 @@ public class EnemyHealth : MonoBehaviour
 
         currentHealth = Mathf.Max(0f, currentHealth - amount);
         isDead = currentHealth <= 0f;
+        DamageVersion++;
         notifyingDamage = true;
         try
         {
             onDamaged.Invoke();
+            Damaged?.Invoke();
             partEvent.Invoke();
             if (isDead) onDied.Invoke();
         }
@@ -64,11 +83,15 @@ public class EnemyHealth : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 체력과 사망 상태를 초기화한다. 진행 중 피해 알림이 있으면 초기화를 뒤로 미룬다.
+    /// </summary>
     [ContextMenu("Combat/Reset Health")]
     public void ResetHealth()
     {
         if (notifyingDamage) { resetRequested = true; return; }
         resetRequested = false;
+        LifeVersion++;
         if (maxHealth <= 0f || float.IsNaN(maxHealth) || float.IsInfinity(maxHealth)) maxHealth = 100f;
         currentHealth = maxHealth;
         isDead = false;

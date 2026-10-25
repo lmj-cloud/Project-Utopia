@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// CharacterController를 통해 수평 이동, 회전, 중력, 점프, 앉기 및 회피 이동을 처리한다.
+/// </summary>
 public class PlayerMovement : MonoBehaviour
 {
     [Header("가속, 감속, 회전")]
@@ -26,6 +29,9 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 dodgeVelocity;
     private bool moveReported;
     public bool CanDodge => IsSimulationEnabled && characterController != null && characterController.isGrounded && Time.time >= dodgeUntil;
+    /// <summary>
+    /// 접지와 이동 시뮬레이션 조건을 확인하여 회피 방향·속도·지속 시간을 기록한다. 스태미나는 호출자가 검사한다.
+    /// </summary>
     public bool TryDodge(Vector3 direction, float speed, float duration)
     {
         if (!CanDodge || duration <= 0f) return false;
@@ -36,7 +42,13 @@ public class PlayerMovement : MonoBehaviour
         jumpRequested = false;
         return true;
     }
+    /// <summary>
+    /// 회피 시간과 회피 속도를 비워 일반 이동 상태로 되돌린다.
+    /// </summary>
     public void CancelDodge() { dodgeUntil = 0f; dodgeVelocity = Vector3.zero; }
+    /// <summary>
+    /// 기존 이동과 수직 속도를 정리한 뒤 CharacterController를 보호하며 위치·회전을 옮긴다.
+    /// </summary>
     public void Teleport(Vector3 position, Quaternion rotation)
     {
         Stop();
@@ -49,6 +61,9 @@ public class PlayerMovement : MonoBehaviour
     public bool IsGrounded => characterController != null && characterController.isGrounded;
     public bool IsCrouching { get; private set; }
 
+    /// <summary>
+    /// 앉기 요청과 천장 공간을 검사하고 발 위치를 유지하며 캡슐 높이를 변경한다.
+    /// </summary>
     public void SetCrouching(bool requested)
     {
         if (!IsSimulationEnabled) return;
@@ -64,6 +79,9 @@ public class PlayerMovement : MonoBehaviour
         if (requested) { jumpRequested = false; Succeeded?.Invoke(DemoAction.Crouch, this); }
     }
 
+    /// <summary>
+    /// 앉은 캡슐 위쪽에 서 있을 공간이 있는지 물리 검사한다.
+    /// </summary>
     private bool CanStand()
     {
         Vector3 scale = transform.lossyScale;
@@ -96,6 +114,9 @@ public class PlayerMovement : MonoBehaviour
     private bool jumpRequested;
     public bool IsSimulationEnabled { get; private set; } = true;
 
+    /// <summary>
+    /// 이동 시뮬레이션의 허용 여부를 바꾸고 중지 시 남은 이동을 정리한다.
+    /// </summary>
     public void SetSimulationEnabled(bool value)
     {
         if (IsSimulationEnabled == value) return;
@@ -117,6 +138,9 @@ public class PlayerMovement : MonoBehaviour
     // 실제 이동 후 측정한 수평 속도. 애니메이션에 전달한다.
     public Vector3 HorizontalVelocity => horizontalVelocity;
 
+    /// <summary>
+    /// 다른 실행 로직이 시작되기 전에 필요한 참조와 초기 상태를 준비한다.
+    /// </summary>
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
@@ -124,6 +148,9 @@ public class PlayerMovement : MonoBehaviour
         standingCenter = characterController.center;
     }
 
+    /// <summary>
+    /// 시뮬레이션이 허용될 때 회전·수평 속도·수직 속도를 갱신하여 실제 이동을 적용한다.
+    /// </summary>
     private void Update()
     {
         if (!IsSimulationEnabled) return;
@@ -135,6 +162,9 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // Controller가 전달한 월드 기준 수평 방향을 저장한다.
+    /// <summary>
+    /// 수평 이동 요청 방향을 기록하여 실제 이동 갱신에서 사용한다.
+    /// </summary>
     public void MoveTo(Vector3 direction)
     {
         if (!IsSimulationEnabled) return;
@@ -143,6 +173,9 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // immediately: 일반 3인칭은 false, 1인칭/조준은 true.
+    /// <summary>
+    /// 플레이어가 바라볼 방향과 회전 방식의 요청을 기록한다.
+    /// </summary>
     public void SetFacingDirection(Vector3 direction, bool immediately)
     {
         if (!IsSimulationEnabled) return;
@@ -151,6 +184,9 @@ public class PlayerMovement : MonoBehaviour
         rotateImmediately = immediately;
     }
 
+    /// <summary>
+    /// 수평 기준 방향으로 플레이어를 즉시 회전시킨다.
+    /// </summary>
     public void FaceImmediately(Vector3 direction)
     {
         if (!IsSimulationEnabled) return;
@@ -158,6 +194,9 @@ public class PlayerMovement : MonoBehaviour
         UpdateRotation();
     }
 
+    /// <summary>
+    /// 지면과 현재 이동 상태를 검사하여 점프를 예약한다.
+    /// </summary>
     public void Jump()
     {
         if (!IsSimulationEnabled) return;
@@ -166,6 +205,9 @@ public class PlayerMovement : MonoBehaviour
 
     // 사망·조작 금지 때 즉시 수평 이동을 멈춘다. 중력은 유지한다.
     // 일반적인 키 해제는 이 메서드를 호출하지 않고 MoveTo(Vector3.zero)를 사용한다.
+    /// <summary>
+    /// 수평 이동·회피·점프 요청을 정리하여 움직임을 멈춘다.
+    /// </summary>
     public void Stop()
     {
         CancelDodge();
@@ -178,6 +220,9 @@ public class PlayerMovement : MonoBehaviour
         jumpRequested = false;
     }
 
+    /// <summary>
+    /// 지정된 시선 방향에 맞추어 즉시 또는 제한된 속도로 회전한다.
+    /// </summary>
     private void UpdateRotation()
     {
         if (facingDirection.sqrMagnitude < 0.0001f)
@@ -196,6 +241,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 현재 속도를 목표 속도로 부드럽게 변경한다.
+    /// </summary>
     private void UpdateSpeed()
     {
         // 입력이 없으면 0, 있으면 걷기/달리기 목표 속도까지 변화한다.
@@ -207,6 +255,9 @@ public class PlayerMovement : MonoBehaviour
             currentSpeed, desiredSpeed, changeRate * Time.deltaTime);
     }
 
+    /// <summary>
+    /// 현재 이동 요청에 가속·감속을 적용하여 수평 이동 방향과 속도를 갱신한다.
+    /// </summary>
     private void UpdateTravelDirection()
     {
         if (rotateImmediately)
@@ -225,6 +276,9 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 접지 여부와 점프 요청을 처리하고 중력을 수직 속도에 누적한다.
+    /// </summary>
     private void UpdateVerticalVelocity()
     {
         bool isGrounded = characterController.isGrounded;
@@ -244,6 +298,9 @@ public class PlayerMovement : MonoBehaviour
             verticalVelocity += gravity * Time.deltaTime;
     }
 
+    /// <summary>
+    /// 수평·수직·회피 속도를 합쳐 기존 CharacterController.Move 경로로 실제 이동한다.
+    /// </summary>
     private void UpdateMovement()
     {
         Vector3 requestedHorizontalVelocity = Time.time < dodgeUntil ? dodgeVelocity : travelDirection * currentSpeed;

@@ -7,9 +7,15 @@ using UnityEngine.Timeline;
 using UnityEngine.Rendering.Universal;
 using Capstone.Direction;
 
+/// <summary>
+/// 격리된 연출 테스트 Scene과 빈 Timeline을 생성하는 기존 Editor 메뉴를 제공한다.
+/// </summary>
 public static class DirectionSetup
 {
     const string Root="Assets/Capstone/Direction";
+    /// <summary>
+    /// 기존 Editor 메뉴에서 격리된 연출 테스트 Scene과 임시 연결을 생성한다.
+    /// </summary>
     [MenuItem("Capstone/Direction/Create isolated S03 test scene")]
     public static void CreateTestScene()
     {
@@ -48,6 +54,9 @@ public static class DirectionSetup
         Debug.Log("S03 test scene created. Open it alone before Play to avoid duplicate AudioListeners. Press F8. This scene has no real player: input restore must also be tested in the gameplay scene.");
         AssetDatabase.SaveAssets();
     }
+    /// <summary>
+    /// 기존 Editor 메뉴에서 지정 길이의 빈 시네마틱 Timeline 에셋을 생성한다.
+    /// </summary>
     [MenuItem("Capstone/Direction/Create 120 second cinematic Timeline")]
     public static void CreateCinematic()
     {

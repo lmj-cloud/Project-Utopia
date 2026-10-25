@@ -1,13 +1,13 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1102 &-2795273579163114607
+--- !u!1102 &-772179107591117902
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: InventoryDetail
+  m_Name: InventoryDetailOpen
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -61,11 +61,11 @@ AnimatorStateMachine:
     m_State: {fileID: 2789217504065292277}
     m_Position: {x: 290, y: 140, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: 6742062304785815608}
-    m_Position: {x: 530, y: 60, z: 0}
+    m_State: {fileID: -772179107591117902}
+    m_Position: {x: 530, y: 80, z: 0}
   - serializedVersion: 1
-    m_State: {fileID: -2795273579163114607}
-    m_Position: {x: 530, y: 200, z: 0}
+    m_State: {fileID: 3791602203076818583}
+    m_Position: {x: 520, y: 200, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -102,14 +102,14 @@ AnimatorState:
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
   m_TimeParameter: 
---- !u!1102 &6742062304785815608
+--- !u!1102 &3791602203076818583
 AnimatorState:
   serializedVersion: 6
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: InventoryEquipment
+  m_Name: InventoryDetailClose
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions: []
@@ -122,7 +122,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 61f66111504f64f40af7f335a5ad7ef6, type: 2}
+  m_Motion: {fileID: 7400000, guid: 3bbcd5676ad5c424a81f28bc10ba09f2, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

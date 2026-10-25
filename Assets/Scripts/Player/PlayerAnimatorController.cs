@@ -1,8 +1,54 @@
 ﻿using Unity.VisualScripting;
 using UnityEngine;
 
+/// <summary>
+/// 장비와 플레이어 상태를 Animator 파라미터와 상태로 전달하고 상체 행동과 컷신 자세를 조율한다.
+/// </summary>
 public class PlayerAnimatorController : MonoBehaviour
 {
+    public Animator CombatAnimator { get { return thirdPersonAnimator; } }
+
+    /// <summary>
+    /// 새 근접 행동 후 복귀할 장비별 이동 Motion이 실제로 연결되어 있는지 확인한다.
+    /// </summary>
+    public bool HasCombatLocomotion()
+    {
+        if (equipment == null) return false;
+        string group;
+        if (equipment.CurrentKind == PlayerEquipmentKind.Gloves) group = "MMA";
+        else if (equipment.CurrentKind == PlayerEquipmentKind.Dagger) group = "Knife";
+        else return false;
+        return HasThirdPersonMotion("Base Layer." + group + ".Locomotion");
+    }
+
+    /// <summary>
+    /// 전투 프로필과 잠금 소유권을 확인하고 상체 Layer를 정리한 뒤 지정 모션을 요청한다.
+    /// </summary>
+    public bool TryPlayCombatAction(CombatAnimationProfile profile, CombatActionKind action, Object owner)
+    {
+        if (profile == null || IsDead) return false;
+        if (AnimationPoseLocked && (owner == null || playerController == null || !playerController.CanContinueOwnedCombat(owner))) return false;
+        string reason;
+        if (!profile.CanPlay(thirdPersonAnimator, action, out reason)) return false;
+        CombatAnimationProfile.Binding binding = profile.GetBinding(action);
+        combatRestorePending = false;
+        // 전신 행동은 상체 발사/재장전과 동시에 자세를 덮어쓰지 않는다.
+        if (thirdPersonWeaponLayer < thirdPersonAnimator.layerCount) thirdPersonAnimator.SetLayerWeight(thirdPersonWeaponLayer, 0f);
+        activeUpperState = null;
+        thirdPersonAnimator.Play(Animator.StringToHash(binding.statePath), thirdPersonAnimator.GetLayerIndex(binding.layerName), 0f);
+        return true;
+    }
+
+    /// <summary>
+    /// 다른 잠금이 없으면 이동 자세를 복구하고, 잠겨 있으면 복구를 뒤로 미룬다.
+    /// </summary>
+    public void EndCombatAction()
+    {
+        // 다른 컷신 소유자가 잠근 상태에서는 게임플레이 자세를 강제로 복구하지 않는다.
+        combatRestorePending = AnimationPoseLocked;
+        if (!combatRestorePending && !IsDead) RestoreLocomotion();
+    }
+    private bool combatRestorePending;
     [Header("Animators")]
     [SerializeField] private Animator firstPersonAnimator;
     [SerializeField] private Animator thirdPersonAnimator;
@@ -11,6 +57,9 @@ public class PlayerAnimatorController : MonoBehaviour
     [SerializeField, Min(0)] private int firstPersonWeaponLayer = 0;
     [SerializeField, Min(0)] private int thirdPersonWeaponLayer = 1;
 
+    /// <summary>
+    /// 총기별 발사·재장전·장착에 사용할 1·3인칭 Animator 상태와 Trigger 이름을 묶는다.
+    /// </summary>
     [System.Serializable]
     private class WeaponAnimationNames
     {
@@ -47,6 +96,9 @@ public class PlayerAnimatorController : MonoBehaviour
     [SerializeField] private string grabTrigger = "onGrab";
     [SerializeField] private string assassinationTrigger = "onAssassinate";
     [SerializeField] private string equipTrigger = "onEquip";
+    /// <summary>
+    /// Animator 상태 경로와 실제 재생 가능한 Animation Clip 참조를 짝지어 보관한다.
+    /// </summary>
     [System.Serializable]
     private class ThirdPersonMotion
     {
@@ -54,6 +106,7 @@ public class PlayerAnimatorController : MonoBehaviour
         public AnimationClip motion;
     }
 
+    // 상태가 있다는 이유만으로 빈 모션을 재생하지 않도록 실제 Clip 연결을 확인하는 목록.
     [Header("Third Person Motion Availability (Empty states stay inactive)")]
     [SerializeField] private ThirdPersonMotion[] thirdPersonMotions = new ThirdPersonMotion[0];
     [SerializeField] private string upperNeutralState = "UpperLayer.Neutral";
@@ -70,6 +123,7 @@ public class PlayerAnimatorController : MonoBehaviour
     [SerializeField] private string mmaGrabState = "Base Layer.MMA.Grab";
     [SerializeField] private string knifeAssassinateState = "Base Layer.Knife.Assassinate";
     [SerializeField] private string knifeTakedownState = "Base Layer.Knife.Takedown";
+    // 컷신 소유자가 요청할 수 있는 실제 1인칭 모션 연결 목록.
     [Header("Optional Story First Person Motions")]
     [SerializeField] private ThirdPersonMotion[] firstPersonStoryMotions = new ThirdPersonMotion[0];
     private UnityEngine.Object storyAnimationOwner;
@@ -77,6 +131,9 @@ public class PlayerAnimatorController : MonoBehaviour
     private int storyRequestId;
     private UnityEngine.Object storyRequestOwner;
     private readonly System.Collections.Generic.Dictionary<string, bool> storyBoolValues = new();
+    /// <summary>
+    /// 컷신 요청과 Animator 소유권을 검사하고 원래 값을 보관한 뒤 1인칭 bool을 변경한다.
+    /// </summary>
     public bool SetStoryFirstPersonBool(UnityEngine.Object owner, int id, string parameter, bool value)
     {
         if (owner == null || owner != storyAnimationOwner || storyCutscene == null || id != storyRequestId ||
@@ -89,6 +146,9 @@ public class PlayerAnimatorController : MonoBehaviour
     public int StoryFirstPersonLayer => firstPersonWeaponLayer;
     public Animator StoryFirstPersonAnimator => firstPersonAnimator;
     public bool StoryFirstPersonReady => firstPersonAnimator != null && firstPersonAnimator.runtimeAnimatorController != null;
+    /// <summary>
+    /// 유효한 컷신 소유자와 요청 번호로 1인칭 Animator 사용을 예약한다.
+    /// </summary>
     public bool BeginStoryFirstPerson(UnityEngine.Object owner, CutsceneController source, UnityEngine.Object requestOwner, int id)
     {
         if (owner == null || storyAnimationOwner != null || !StoryFirstPersonReady || source == null || !source.OwnsRequest(requestOwner, id)) return false;
@@ -99,6 +159,9 @@ public class PlayerAnimatorController : MonoBehaviour
         firstPersonAnimator.enabled = true;
         return true;
     }
+    /// <summary>
+    /// 해당 컷신이 소유한 요청과 실제 Clip 연결을 확인하고 1인칭 상태를 재생한다.
+    /// </summary>
     public bool PlayStoryFirstPerson(UnityEngine.Object owner, int id, string state, int layer = -1)
     {
         if (layer < 0) layer = firstPersonWeaponLayer;
@@ -112,6 +175,9 @@ public class PlayerAnimatorController : MonoBehaviour
                     if (clip == binding.motion) { firstPersonAnimator.Play(Animator.StringToHash(path), layer, 0f); return true; }
         return false;
     }
+    /// <summary>
+    /// 요청이 일치하면 보관한 파라미터를 복구하고 1인칭 Animator 사용을 종료한다.
+    /// </summary>
     public void EndStoryFirstPerson(UnityEngine.Object owner, int id)
     {
         if (owner != storyAnimationOwner || id != storyRequestId) return;
@@ -142,6 +208,9 @@ public class PlayerAnimatorController : MonoBehaviour
     private WeaponName currentWeapon;
     private WeaponAnimationNames Names => currentWeapon == WeaponName.Pistol ? pistolAnimations : rifleAnimations;
 
+    /// <summary>
+    /// 활성 Animator에 지정 이름과 자료형의 파라미터가 있는지 확인한다.
+    /// </summary>
     private static bool HasParameter(Animator target, string name, AnimatorControllerParameterType type)
     {
         if (target == null || !target.isActiveAndEnabled || target.runtimeAnimatorController == null || string.IsNullOrEmpty(name)) return false;
@@ -150,7 +219,13 @@ public class PlayerAnimatorController : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// 현재 앉기 상태를 선택된 Animator 파라미터에 전달한다.
+    /// </summary>
     public void OnCrouching(bool value) => SetBool(crouchParameter, value);
+    /// <summary>
+    /// 무기 종류와 재장전 상태를 정리하고 해당 장비의 이동·장착 애니메이션을 요청한다.
+    /// </summary>
     public void OnWeaponChanged(WeaponName value)
     {
         OnReloadFinished();
@@ -162,6 +237,9 @@ public class PlayerAnimatorController : MonoBehaviour
         OnEquip();
     }
 
+    /// <summary>
+    /// 총기와 근접 장비를 구분하여 장비 파라미터 및 애니메이션 변경을 전달한다.
+    /// </summary>
     public void OnEquipmentChanged(PlayerEquipmentKind value)
     {
         if (value == PlayerEquipmentKind.AssaultRifle || value == PlayerEquipmentKind.Pistol)
@@ -175,12 +253,18 @@ public class PlayerAnimatorController : MonoBehaviour
         Trigger(equipTrigger);
     }
 
+    /// <summary>
+    /// 잠금·사망 상태를 검사한 뒤 선택된 Animator Trigger를 요청한다.
+    /// </summary>
     private void Trigger(string name)
     {
         if (AnimationPoseLocked || IsDead) return;
         TriggerParameter(thirdPersonAnimator, name);
     }
 
+    /// <summary>
+    /// 유효한 Trigger를 초기화한 뒤 설정하여 이번 요청을 전달한다.
+    /// </summary>
     private static void TriggerParameter(Animator target, string name)
     {
         if (!HasParameter(target, name, AnimatorControllerParameterType.Trigger)) return;
@@ -188,11 +272,20 @@ public class PlayerAnimatorController : MonoBehaviour
         target.SetTrigger(name);
     }
 
+    /// <summary>
+    /// 현재 장비와 강공격 여부에 맞는 기존 펀치 상태 경로를 선택한다.
+    /// </summary>
     private string PunchPath(bool strong) => equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves
         ? (strong ? mmaHeavyPunchState : mmaPunchState) : (strong ? defaultHeavyPunchState : defaultPunchState);
+    /// <summary>
+    /// 암살 여부에 맞는 기존 잡기 또는 단검 암살 상태 경로를 선택한다.
+    /// </summary>
     private string GrabPath(bool assassination) => assassination ? knifeAssassinateState :
         equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Dagger ? knifeTakedownState : mmaGrabState;
 
+    /// <summary>
+    /// 실제 근접 Motion이 준비된 상태에만 애니메이션 요청을 전달한다.
+    /// </summary>
     private void RequestMeleeAnimation(string trigger, string firstState, string thirdState)
     {
         if (AnimationPoseLocked || IsDead) return;
@@ -200,15 +293,27 @@ public class PlayerAnimatorController : MonoBehaviour
         // 3인칭은 Trigger 전이 한 경로만 사용한다. Empty State에는 요청하지 않는다.
         if (HasThirdPersonMotion(thirdState)) TriggerParameter(thirdPersonAnimator, trigger);
     }
+    /// <summary>
+    /// 현재 장비의 기존 일반 펀치 애니메이션을 요청한다.
+    /// </summary>
     public void OnPunch() => RequestMeleeAnimation(punchTrigger, punchState, PunchPath(false));
+    /// <summary>
+    /// 현재 근접 장비의 기존 강공격 애니메이션을 요청한다.
+    /// </summary>
     public void OnStrongAttack(bool dagger) => RequestMeleeAnimation(dagger ? strongDaggerTrigger : strongPunchTrigger,
         dagger ? strongDaggerState : strongPunchState, dagger ? knifeHeavyAttackState : PunchPath(true));
+    /// <summary>
+    /// 방어 상태를 전달하고 방어 종료 시 상체 방어 동작을 정리한다.
+    /// </summary>
     public void OnDefense(bool value)
     {
         isDefending = value && !IsDead;
         SetBool(defenseParameter, isDefending);
         if (!isDefending && (activeUpperState == guardState || activeUpperState == guardHitState)) ResetUpperLayer();
     }
+    /// <summary>
+    /// 실제 피격 Motion이 준비되었을 때 상체 동작을 정리하고 피격 Trigger를 전달한다.
+    /// </summary>
     public void OnHit()
     {
         if (AnimationPoseLocked || IsDead) return;
@@ -218,12 +323,18 @@ public class PlayerAnimatorController : MonoBehaviour
             TriggerParameter(thirdPersonAnimator, hitTrigger);
         }
     }
+    /// <summary>
+    /// 방어 피격에 해당하는 상체 행동을 요청한다.
+    /// </summary>
     public void OnDefenseHit()
     {
         if (AnimationPoseLocked || IsDead) return;
         ResetTrigger(thirdPersonAnimator, hitTrigger);
         StartUpperLayer(guardHitState);
     }
+    /// <summary>
+    /// 재장전과 방어 상태를 정리하고 사망 상태를 Animator에 전달한다.
+    /// </summary>
     public void OnDeath()
     {
         isReloading = false;
@@ -231,6 +342,9 @@ public class PlayerAnimatorController : MonoBehaviour
         ResetUpperLayer();
         if (!AnimationPoseLocked) SetBool("IsDead", true);
     }
+    /// <summary>
+    /// 성공한 이동 행동 중 점프에 대응하는 실제 Motion이 있으면 점프 Trigger를 전달한다.
+    /// </summary>
     private void MovementSucceeded(DemoAction action, UnityEngine.Object source)
     {
         if (action != DemoAction.Jump || AnimationPoseLocked || IsDead) return;
@@ -240,6 +354,9 @@ public class PlayerAnimatorController : MonoBehaviour
             TriggerParameter(thirdPersonAnimator, "onJump");
         }
     }
+    /// <summary>
+    /// 글러브 장비의 실제 쓰러짐 Motion이 있을 때 전신 행동을 요청한다.
+    /// </summary>
     public void OnKnockdown()
     {
         if (AnimationPoseLocked || IsDead || equipment == null || equipment.CurrentKind != PlayerEquipmentKind.Gloves) return;
@@ -249,10 +366,25 @@ public class PlayerAnimatorController : MonoBehaviour
             TriggerParameter(thirdPersonAnimator, "onKnockdown");
         }
     }
+    /// <summary>
+    /// 기존 회피 Trigger를 요청한다.
+    /// </summary>
     public void OnDodge() => Trigger(dodgeTrigger);
+    /// <summary>
+    /// 기존 단검 일반 공격의 Motion을 검사하고 애니메이션을 요청한다.
+    /// </summary>
     public void OnDaggerAttack() => RequestMeleeAnimation(daggerTrigger, daggerState, knifeAttackState);
+    /// <summary>
+    /// 기존 잡기 Motion을 검사하고 애니메이션을 요청한다.
+    /// </summary>
     public void OnGrab() => RequestMeleeAnimation(grabTrigger, grabState, GrabPath(false));
+    /// <summary>
+    /// 기존 암살 Motion을 검사하고 애니메이션을 요청한다.
+    /// </summary>
     public void OnAssassinate() => RequestMeleeAnimation(assassinationTrigger, assassinationState, GrabPath(true));
+    /// <summary>
+    /// 장착 Trigger와 설정된 장비 Layer 상태 재생을 요청한다.
+    /// </summary>
     public void OnEquip()
     {
         Trigger(equipTrigger);
@@ -267,20 +399,35 @@ public class PlayerAnimatorController : MonoBehaviour
     [SerializeField] private string grabState;
     [SerializeField] private string assassinationState;
     [SerializeField] private int meleeLayer;
+    /// <summary>
+    /// 해당 장비의 일반 근접 공격에 실제 Motion이 있는지 확인한다.
+    /// </summary>
     public bool CanPlayMelee(bool dagger) => HasThirdPersonMotion(dagger ? knifeAttackState : PunchPath(false));
+    /// <summary>
+    /// 해당 장비의 강공격에 실제 Motion이 있는지 확인한다.
+    /// </summary>
     public bool CanPlayStrongMelee(bool dagger) => HasThirdPersonMotion(dagger ? knifeHeavyAttackState : PunchPath(true));
+    /// <summary>
+    /// 잡기 또는 암살 상태에 실제 Motion이 연결되어 있는지 확인한다.
+    /// </summary>
     public bool CanPlayGrab(bool assassination) => HasThirdPersonMotion(GrabPath(assassination));
 
     [Header("Medication Animation")]
     [SerializeField] private string medicationState;
     [SerializeField] private int medicationLayer;
     public bool CanPlayMedication => HasThirdPersonMotion(medicationState);
+    /// <summary>
+    /// 지정된 애니메이션을 재생할 수 있는 참조와 상태 조건인지 검사한다.
+    /// </summary>
     private static bool CanPlay(Animator target, string state, int layer)
     {
         if (target == null || !target.isActiveAndEnabled || target.runtimeAnimatorController == null || string.IsNullOrWhiteSpace(state) || layer < 0 || layer >= target.layerCount) return false;
         string path = state.Contains(".") ? state : target.GetLayerName(layer) + "." + state;
         return target.HasState(layer, Animator.StringToHash(path));
     }
+    /// <summary>
+    /// 근접 Trigger와 방어·상체 상태를 정리하고 허용된 경우 이동 자세로 복구한다.
+    /// </summary>
     public void OnMeleeCancelled()
     {
         ResetTrigger(thirdPersonAnimator, strongPunchTrigger);
@@ -293,12 +440,18 @@ public class PlayerAnimatorController : MonoBehaviour
         if (!AnimationPoseLocked && !IsDead && thirdPersonAnimator != null && thirdPersonAnimator.isActiveAndEnabled &&
             thirdPersonAnimator.GetCurrentAnimatorStateInfo(0).IsTag("FullBodyAction")) RestoreLocomotion();
     }
+    /// <summary>
+    /// 설정된 복약 상태와 Layer의 재생을 요청한다.
+    /// </summary>
     public void OnMedication() => Play(medicationState, medicationLayer, 0f);
 
     private float currentSpeed;
     private float moveHorizontal;
     private float moveVertical;
 
+    /// <summary>
+    /// 다른 실행 로직이 시작되기 전에 필요한 참조와 초기 상태를 준비한다.
+    /// </summary>
     void Awake()
     {
         playerController = GetComponent<PlayerController>();
@@ -309,6 +462,9 @@ public class PlayerAnimatorController : MonoBehaviour
         PrepareAnimator(thirdPersonAnimator);
     }
 
+    /// <summary>
+    /// 캐릭터 이동은 이동 담당자가 처리하도록 Root Motion을 끄고 Animator 갱신 방식을 준비한다.
+    /// </summary>
     private void PrepareAnimator(Animator target)
     {
         if (target == null)
@@ -350,6 +506,9 @@ public class PlayerAnimatorController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 유효한 float 파라미터가 있을 때만 Animator 값을 전달한다.
+    /// </summary>
     private void SetFloat(string parameter, float value)
     {
         if (AnimationPoseLocked) return;
@@ -357,6 +516,9 @@ public class PlayerAnimatorController : MonoBehaviour
             thirdPersonAnimator.SetFloat(parameter, value);
     }
 
+    /// <summary>
+    /// 유효한 bool 파라미터가 있을 때만 Animator 값을 전달한다.
+    /// </summary>
     private void SetBool(string parameter, bool value)
     {
         if (AnimationPoseLocked) return;
@@ -364,16 +526,25 @@ public class PlayerAnimatorController : MonoBehaviour
             thirdPersonAnimator.SetBool(parameter, value);
     }
 
+    /// <summary>
+    /// 현재 조준 상태를 Animator에 전달한다.
+    /// </summary>
     public void OnAiming(bool isAiming)
     {
         SetBool("IsAim", isAiming);
     }
 
+    /// <summary>
+    /// 현재 총기의 상체 발사 상태를 요청한다.
+    /// </summary>
     public void OnFire()
     {
         if (!AnimationPoseLocked && !IsDead) StartUpperLayer(Names.thirdPersonFire);
     }
 
+    /// <summary>
+    /// 재장전 bool과 현재 총기 상체 상태를 설정한다.
+    /// </summary>
     public void OnReload()
     {
         reloadCancellationPending = false;
@@ -383,11 +554,17 @@ public class PlayerAnimatorController : MonoBehaviour
         if (!AnimationPoseLocked && !IsDead) StartUpperLayer(Names.thirdPersonReloadState);
     }
 
+    /// <summary>
+    /// 해당 Animator의 유효한 재장전 Trigger를 전달한다.
+    /// </summary>
     private void TriggerReload(Animator target)
     {
         TriggerParameter(target, "onReload");
     }
 
+    /// <summary>
+    /// 재장전 취소 상태를 기록하고 복구 가능한 자세와 파라미터를 정리한다.
+    /// </summary>
     public void OnReloadCancelled()
     {
         OnReloadFinished();
@@ -397,12 +574,18 @@ public class PlayerAnimatorController : MonoBehaviour
         RestoreReloadPose();
     }
 
+    /// <summary>
+    /// 플레이어 피격·사망 및 이동 성공 알림을 Animator 갱신에 연결한다.
+    /// </summary>
     private void OnEnable()
     {
         if (status != null) { status.Damaged += OnHit; status.Died += OnDeath; }
         if (movement != null) movement.Succeeded += MovementSucceeded;
         upperResetPending = true;
     }
+    /// <summary>
+    /// 피격·사망·이동 알림을 해제하고 남은 애니메이션 상태를 정리한다.
+    /// </summary>
     private void OnDisable()
     {
         if (storyAnimationOwner != null) EndStoryFirstPerson(storyAnimationOwner, storyRequestId);
@@ -412,9 +595,17 @@ public class PlayerAnimatorController : MonoBehaviour
         isDefending = false;
         ResetUpperLayer();
     }
+    /// <summary>
+    /// 잠금이 없을 때 보류 자세 복구와 장비·접지 파라미터, 상체 Layer를 갱신한다.
+    /// </summary>
     private void Update()
     {
         if (AnimationPoseLocked) return;
+        if (combatRestorePending)
+        {
+            combatRestorePending = false;
+            if (!IsDead) RestoreLocomotion();
+        }
         RestoreReloadPose();
         SetBool("IsDead", IsDead);
         if (equipment != null && HasParameter(thirdPersonAnimator, weaponParameter, AnimatorControllerParameterType.Int))
@@ -422,6 +613,9 @@ public class PlayerAnimatorController : MonoBehaviour
         if (movement != null && movement.IsSimulationEnabled) SetBool("IsGrounded", movement.IsGrounded);
         UpdateUpperLayer();
     }
+    /// <summary>
+    /// 상태 경로와 바인딩 및 Controller Clip 참조가 실제로 일치하는지 확인한다.
+    /// </summary>
     private bool HasThirdPersonMotion(string state)
     {
         if (!CanPlay(thirdPersonAnimator, state, state != null && state.StartsWith("UpperLayer.") ? thirdPersonWeaponLayer : 0)) return false;
@@ -434,6 +628,9 @@ public class PlayerAnimatorController : MonoBehaviour
         }
         return false;
     }
+    /// <summary>
+    /// 실제 상체 Motion이 있을 때 Layer를 켜고 재생 상태와 시작 프레임을 기록한다.
+    /// </summary>
     private void StartUpperLayer(string state)
     {
         if (!HasThirdPersonMotion(state)) return;
@@ -443,6 +640,9 @@ public class PlayerAnimatorController : MonoBehaviour
         thirdPersonAnimator.SetLayerWeight(thirdPersonWeaponLayer, 1f);
         PlayState(thirdPersonAnimator, state, thirdPersonWeaponLayer, 0f);
     }
+    /// <summary>
+    /// 상체 행동을 정리하고, 잠금 중이면 자세 초기화를 뒤로 미룬다.
+    /// </summary>
     private void ResetUpperLayer()
     {
         activeUpperState = null;
@@ -453,6 +653,9 @@ public class PlayerAnimatorController : MonoBehaviour
         PlayState(thirdPersonAnimator, upperNeutralState, thirdPersonWeaponLayer, 0f);
         upperResetPending = false;
     }
+    /// <summary>
+    /// 전신 행동·방어·재장전과 모션 종료 시점에 맞추어 상체 Layer를 유지하거나 복구한다.
+    /// </summary>
     private void UpdateUpperLayer()
     {
         if (thirdPersonAnimator == null || !thirdPersonAnimator.isActiveAndEnabled || thirdPersonAnimator.runtimeAnimatorController == null ||
@@ -476,6 +679,9 @@ public class PlayerAnimatorController : MonoBehaviour
         if (upper.IsName(upperNeutralState) || (!reload && !guard && upper.normalizedTime >= 1f)) ResetUpperLayer();
         else if ((reload && !isReloading) || (guard && !isDefending)) ResetUpperLayer();
     }
+    /// <summary>
+    /// 현재 장비·앉기·조준 상태에 맞는 준비된 이동 상태를 선택한다.
+    /// </summary>
     private void RestoreLocomotion()
     {
         PlayerEquipmentKind kind = equipment != null ? equipment.CurrentKind : PlayerEquipmentKind.BareHands;
@@ -489,6 +695,9 @@ public class PlayerAnimatorController : MonoBehaviour
         PlayState(thirdPersonAnimator, path, 0, 0f);
     }
 
+    /// <summary>
+    /// 입력 잠금이 해제된 뒤 보류했던 재장전 파라미터와 자세를 복구한다.
+    /// </summary>
     private void RestoreReloadPose()
     {
         if (!reloadCancellationPending || AnimationPoseLocked) return;
@@ -503,6 +712,9 @@ public class PlayerAnimatorController : MonoBehaviour
         reloadCancellationPending = firstPersonReloadCancellationPending || thirdPersonReloadCancellationPending;
     }
 
+    /// <summary>
+    /// 재장전 상태와 상체 동작을 정리하고 파라미터 복구를 요청한다.
+    /// </summary>
     public void OnReloadFinished()
     {
         isReloading = false;
@@ -511,6 +723,9 @@ public class PlayerAnimatorController : MonoBehaviour
         ResetReloadTriggers(thirdPersonAnimator);
     }
 
+    /// <summary>
+    /// 해당 Animator의 재장전 Trigger들을 초기화한다.
+    /// </summary>
     private void ResetReloadTriggers(Animator target)
     {
         ResetTrigger(target, rifleAnimations.firstPersonReloadTrigger);
@@ -519,17 +734,26 @@ public class PlayerAnimatorController : MonoBehaviour
         ResetTrigger(target, pistolAnimations.thirdPersonReloadTrigger);
     }
 
+    /// <summary>
+    /// 유효한 Trigger 파라미터만 초기화한다.
+    /// </summary>
     private static void ResetTrigger(Animator target, string name)
     {
         if (HasParameter(target, name, AnimatorControllerParameterType.Trigger)) target.ResetTrigger(name);
     }
 
+    /// <summary>
+    /// 설정된 애니메이션 재생 요청을 실제 Animator 상태 검사 경로로 전달한다.
+    /// </summary>
     public void Play(string stateName, int layer, float normalizedTime)
     {
         PlayState(thirdPersonAnimator, stateName,
             layer < 0 ? thirdPersonWeaponLayer : layer, normalizedTime);
     }
 
+    /// <summary>
+    /// 잠금과 실제 Motion 준비 여부를 확인한 뒤 지정 Animator 상태를 재생한다.
+    /// </summary>
     private void PlayState(Animator target, string stateName, int layer, float normalizedTime)
     {
         if (AnimationPoseLocked || target == firstPersonAnimator) return;
@@ -549,6 +773,9 @@ public class PlayerAnimatorController : MonoBehaviour
         if (target.HasState(layer, hash)) target.Play(hash, layer, normalizedTime);
     }
 
+    /// <summary>
+    /// 선택된 Layer에서 현재 재생 중인 상태가 지정 상태인지 확인한다.
+    /// </summary>
     public bool CurrentAnimationIs(string name)
     {
         // 기존 호출과 호환: 전신 Animator의 Base Layer를 우선 확인한다.

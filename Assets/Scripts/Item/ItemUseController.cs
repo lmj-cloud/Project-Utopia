@@ -3,10 +3,19 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// 공격 판정 시점을 타이머 또는 Animation Event 중 어느 경로로 결정할지 구분한다.
+/// </summary>
 public enum ActionTimingMode { Timer = 0, AnimationEvent = 1 }
 
+/// <summary>
+/// 복약 아이템이 인벤토리 또는 월드 오브젝트에서 제공되는지 구분한다.
+/// </summary>
 public enum MedicineSource { Inventory = 0, World = 1 }
 
+/// <summary>
+/// 아이템 소유와 사용 조건을 검사하고 사용 예약, 컷신 완료 확인, 소비와 취소를 처리한다.
+/// </summary>
 public class ItemUseController : MonoBehaviour
 {
     [SerializeField] private PlayerController playerController;
@@ -14,6 +23,7 @@ public class ItemUseController : MonoBehaviour
     [SerializeField] private StoryProgress storyProgress;
     [SerializeField, HideInInspector] private PlayerAnimatorController animator;
     [SerializeField] private ItemData medicine;
+    // 아이템 사용이나 진행의 선행 조건으로 확인할 스토리 플래그.
     [SerializeField] private string requiredFlag;
     [SerializeField, HideInInspector] private ActionTimingMode timing;
     [SerializeField, HideInInspector] private float useDuration;
@@ -24,6 +34,9 @@ public class ItemUseController : MonoBehaviour
     [SerializeField] private UnityEvent onFailed = new();
     [SerializeField] private CutsceneController useTimeline;
     [SerializeField] private InteractableObject worldMedicine;
+    /// <summary>
+    /// 사용 아이템과 연결된 컷신, 시작·완료·취소 알림을 묶는다.
+    /// </summary>
     [Serializable]
     public class ItemUseBinding
     {
@@ -51,19 +64,39 @@ public class ItemUseController : MonoBehaviour
     private bool usingItem;
     [SerializeField] private GameFlowManager flow;
     private GameFlowStage requestedStage;
+    // 행동 시작 시 보관한 진행 버전. 완료 시 현재 단계와 함께 검증한다.
     private int flowRevision;
+    // 비동기 타격·완료 콜백이 현재 행동에 속하는지 구분하는 요청 번호.
     private int requestId;
     public int RequestId => requestId;
     public bool IsUsing => usingItem;
     public event Action<DemoAction, UnityEngine.Object> Succeeded;
+    /// <summary>
+    /// 기존 외부 호출 경로를 통해 인벤토리 복약을 요청한다.
+    /// </summary>
     public void UseMedicine() => TryUseMedicine();
+    /// <summary>
+    /// 인벤토리에 연결된 약의 사용 조건과 컷신 준비 여부를 검사하여 사용을 요청한다.
+    /// </summary>
     public bool TryUseMedicine()
     {
         return TryUse(MedicineSource.Inventory);
     }
+    /// <summary>
+    /// 월드에 놓인 약을 사용하는 기존 호출 경로를 전달한다.
+    /// </summary>
     public void UseWorldMedicine() => TryUseWorldMedicine();
+    /// <summary>
+    /// 월드 약 오브젝트와 복약 조건을 검사하여 사용을 요청한다.
+    /// </summary>
     public bool TryUseWorldMedicine() => TryUse(MedicineSource.World);
+    /// <summary>
+    /// 현재 선택된 퀵슬롯 아이템의 사용을 요청한다.
+    /// </summary>
     public void UseSelectedItem() => TryUseSelectedItem();
+    /// <summary>
+    /// 퀵슬롯 아이템과 사용 연출 연결을 검사하고 실제 사용 예약을 시작한다.
+    /// </summary>
     public bool TryUseSelectedItem()
     {
         if (usingItem || !isActiveAndEnabled || playerController == null || !playerController.CanControlPlayer || inventory == null) return false;
@@ -89,6 +122,9 @@ public class ItemUseController : MonoBehaviour
         if (!timeline.TryPlay(this, out timelineId)) { Finish(); binding?.onFailed.Invoke(); onFailed.Invoke(); return false; }
         binding?.onStarted.Invoke(); if (medication) onStarted.Invoke(); return usingItem;
     }
+    /// <summary>
+    /// 아이템 출처·조건과 Timeline 준비를 확인하고 현재 사용 요청을 예약한다.
+    /// </summary>
     private bool TryUse(MedicineSource source)
     {
         if (usingItem) return false;
@@ -121,6 +157,9 @@ public class ItemUseController : MonoBehaviour
         onStarted.Invoke();
         return usingItem;
     }
+    /// <summary>
+    /// 연결된 컷신 완료가 현재 요청과 일치할 때만 후속 완료를 처리한다.
+    /// </summary>
     private void OnTimelineCompleted(CutsceneController source, int id)
     {
         if (!usingItem || source != activeTimeline || id != timelineId) return;
@@ -130,10 +169,16 @@ public class ItemUseController : MonoBehaviour
         try { CompleteUse(requestId); }
         finally { timelineConfirmed = false; }
     }
+    /// <summary>
+    /// 현재 요청에 해당하는 컷신 취소를 받아 진행 중 행동을 정리한다.
+    /// </summary>
     private void OnTimelineCancelled(CutsceneController source, int id)
     {
         if (usingItem && source == activeTimeline && id == timelineId) CancelUse();
     }
+    /// <summary>
+    /// 확인된 컷신 완료 요청에 대해서만 아이템 소비와 완료 알림을 확정한다.
+    /// </summary>
     public void CompleteUse(int id)
     {
         if (!usingItem || id != requestId || id != confirmedRequestId || !timelineConfirmed) return;
@@ -167,7 +212,13 @@ public class ItemUseController : MonoBehaviour
             binding?.onFailed.Invoke(); onFailed.Invoke();
         }
     }
+    /// <summary>
+    /// 현재 사용 요청 번호와 일치하는 완료 알림인지 검사한다.
+    /// </summary>
     public void CompleteUseFromAnimation(int id) { if (timing == ActionTimingMode.AnimationEvent) CompleteUse(id); }
+    /// <summary>
+    /// 현재 아이템 사용의 Timeline 연결과 예약·잠금 상태를 정리한다.
+    /// </summary>
     private void Finish(bool keepReservation = false)
     {
         usingItem = false;
@@ -182,6 +233,9 @@ public class ItemUseController : MonoBehaviour
         if (!keepReservation && inventory != null) inventory.ReleaseUse(this);
         if (playerController != null) playerController.ReleaseControlLock(this);
     }
+    /// <summary>
+    /// 진행 중 사용을 취소하고 아이템을 소비하지 않은 채 예약·제어 상태를 복구한다.
+    /// </summary>
     public void CancelUse()
     {
         if (!usingItem) return;
@@ -196,6 +250,12 @@ public class ItemUseController : MonoBehaviour
         binding?.onCancelled.Invoke();
         onCancelled.Invoke();
     }
+    /// <summary>
+    /// 매 프레임 현재 상태와 입력을 확인하여 이 컴포넌트의 동작을 갱신한다.
+    /// </summary>
     private void Update() { if (usingItem && (playerController == null || !playerController.IsAlive || (equippedUse && (inventory == null || !inventory.IsUseLocked)))) CancelUse(); }
+    /// <summary>
+    /// 비활성화 시 이 컴포넌트가 남긴 진행 상태나 이벤트 연결을 정리한다.
+    /// </summary>
     private void OnDisable() => CancelUse();
 }

@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// 현재 게임의 스토리·훈련 진행 단계를 구분한다. 기존 숫자 값은 유지한다.
+/// </summary>
 public enum GameFlowStage
 {
     WaitingForFamilyDialogue = 0,
@@ -19,6 +22,9 @@ public enum GameFlowStage
     DemoEnded = 13
 }
 
+/// <summary>
+/// 스토리 단계와 완료 요청의 출처·버전을 검사하여 진행 이벤트와 재시작 초기화를 관리한다.
+/// </summary>
 public class GameFlowManager : MonoBehaviour
 {
     public const string FamilyTalkedFlag = "FamilyTalked";
@@ -27,6 +33,7 @@ public class GameFlowManager : MonoBehaviour
 
     [Header("Story Progress")]
     [SerializeField] private StoryProgress storyProgress;
+    // Start 시점에 기본 진행 흐름을 자동으로 시작할지 선택한다.
     [SerializeField] private bool beginOnStart = true;
 
     [Header("Current Stage")]
@@ -38,16 +45,21 @@ public class GameFlowManager : MonoBehaviour
     [SerializeField] private UnityEvent onWaitingForArenaIntro = new();
     [SerializeField] private UnityEvent onArenaPlay = new();
 
+    /// <summary>
+    /// 진행 단계별 완료 출처, 컷신, 목표 문구와 진입·종료 이벤트를 연결한다.
+    /// </summary>
     [System.Serializable]
     public class StageBinding
     {
         public GameFlowStage stage;
+        // 해당 진행 단계의 완료 요청을 허용할 대상 오브젝트.
         public UnityEngine.Object completionSource;
         public CutsceneController timeline;
         public string objective;
         public UnityEvent onEnter = new();
         public UnityEvent onExit = new();
     }
+    // 진행 단계별 컷신과 역할 연결이 준비된 경우에만 확장 진행 구성을 활성화한다.
     [Header("Optional Storyboard (disabled until roles/assets are connected)")]
     [SerializeField] private bool storyboardEnabled;
     [SerializeField] private StageBinding[] stages = new StageBinding[0];
@@ -79,9 +91,13 @@ public class GameFlowManager : MonoBehaviour
     private static System.Collections.Generic.List<string> restartFlags;
     private static string restartScenePath;
     private bool authorizedCompletion;
+    // 진행 단계의 버전. 이전 단계에서 뒤늦게 온 완료 요청을 거부하는 데 사용한다.
     private int revision;
     private bool restarting;
     public int Revision => revision;
+    /// <summary>
+    /// 다른 실행 로직이 시작되기 전에 필요한 참조와 초기 상태를 준비한다.
+    /// </summary>
     private void Awake()
     {
         if (restartFlags != null && storyProgress != null && UnityEngine.SceneManagement.SceneManager.GetActiveScene().path == restartScenePath)
@@ -101,11 +117,17 @@ public class GameFlowManager : MonoBehaviour
     public GameFlowStage CurrentStage => currentStage;
     public bool HasBegun => hasBegun;
 
+    /// <summary>
+    /// 컴포넌트의 초기 실행 시점에 설정된 시작 동작을 요청한다.
+    /// </summary>
     private void Start()
     {
         if (beginOnStart) BeginFlow();
     }
 
+    /// <summary>
+    /// 기존 기본 진행 조건 또는 연결된 스토리보드에 따라 첫 진행 단계를 시작한다.
+    /// </summary>
     [ContextMenu("Flow/Begin Flow")]
     public void BeginFlow()
     {
@@ -134,6 +156,9 @@ public class GameFlowManager : MonoBehaviour
             family ? GameFlowStage.WaitingForFrontDoor : GameFlowStage.WaitingForFamilyDialogue);
     }
 
+    /// <summary>
+    /// 가족 대화 완료를 진행 플래그와 다음 단계 요청에 반영한다.
+    /// </summary>
     [ContextMenu("Flow/Notify Family Dialogue Completed")]
     public void OnFamilyDialogueCompleted()
     {
@@ -143,6 +168,9 @@ public class GameFlowManager : MonoBehaviour
         EnterStage(GameFlowStage.WaitingForFrontDoor);
     }
 
+    /// <summary>
+    /// 현관 상호작용 완료가 현재 단계와 맞는지 검사하여 다음 진행을 요청한다.
+    /// </summary>
     [ContextMenu("Flow/Notify Front Door Interacted")]
     public void OnFrontDoorInteracted()
     {
@@ -152,6 +180,9 @@ public class GameFlowManager : MonoBehaviour
         EnterStage(GameFlowStage.WaitingForArenaIntro);
     }
 
+    /// <summary>
+    /// 경기장 도입 완료를 확인하고 실제 플레이 단계 진입을 요청한다.
+    /// </summary>
     [ContextMenu("Flow/Notify Arena Intro Completed")]
     public void OnArenaIntroCompleted()
     {
@@ -162,12 +193,18 @@ public class GameFlowManager : MonoBehaviour
         EnterStage(GameFlowStage.ArenaPlay);
     }
 
+    /// <summary>
+    /// 현재 단계에서 해당 완료 요청을 수락할 수 있는지 확인한다.
+    /// </summary>
     private bool CanComplete(GameFlowStage expected)
     {
         return isActiveAndEnabled && hasBegun && !invokingStageEvent &&
             storyProgress != null && currentStage == expected;
     }
 
+    /// <summary>
+    /// 이전 단계의 종료와 새 단계의 목표·진입 이벤트 및 연결 동작을 적용한다.
+    /// </summary>
     private void EnterStage(GameFlowStage stage)
     {
         StageBinding previous = hasEnteredStage ? FindBinding(currentStage) : null;
@@ -205,12 +242,18 @@ public class GameFlowManager : MonoBehaviour
             invokingStageEvent = false;
         }
     }
+    /// <summary>
+    /// 현재 진행 단계에 연결된 실제 컷신의 재생을 요청한다.
+    /// </summary>
     public void PlayCurrentStageTimeline()
     {
         StageBinding binding = FindBinding(currentStage);
         if (hasBegun && binding != null && binding.timeline != null) binding.timeline.PlayCutscene();
     }
     private bool hasEnteredStage;
+    /// <summary>
+    /// 주어진 진행 단계와 일치하는 연결 데이터를 찾는다.
+    /// </summary>
     private StageBinding FindBinding(GameFlowStage stage)
     {
         if (stages == null) return null;
@@ -218,6 +261,9 @@ public class GameFlowManager : MonoBehaviour
             if (binding != null && binding.stage == stage) return binding;
         return null;
     }
+    /// <summary>
+    /// 단계·버전·완료 출처를 확인해 오래되거나 잘못된 완료 요청을 거부한다.
+    /// </summary>
     public bool TryCompleteStage(GameFlowStage expected, int requestRevision, UnityEngine.Object source)
     {
         if (!storyboardEnabled || !CanComplete(expected) || requestRevision != revision || source == null) return false;
@@ -247,6 +293,9 @@ public class GameFlowManager : MonoBehaviour
         }
         finally { authorizedCompletion = false; }
     }
+    /// <summary>
+    /// 진행 중 연출과 UI·전투를 정리한 뒤 기존 초기 상태 및 재시작 정책을 적용한다.
+    /// </summary>
     [ContextMenu("Flow/Restart Demo")]
     public void RestartDemo()
     {

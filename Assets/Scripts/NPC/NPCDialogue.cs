@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
+/// <summary>
+/// NPC 대화의 거리·선행 조건을 검사하고 대화 완료에 따른 진행 플래그와 이벤트를 전달한다.
+/// </summary>
 public class NPCDialogue : MonoBehaviour
 {
     [SerializeField] private DialogueUI dialogueUI;
@@ -15,6 +18,7 @@ public class NPCDialogue : MonoBehaviour
     [SerializeField] private GameFlowManager flow;
     [SerializeField] private TutorialManager tutorial;
     private GameFlowStage requestedStage;
+    // 행동 시작 시 보관한 진행 버전. 완료 시 현재 단계와 함께 검증한다.
     private int flowRevision;
 
     public bool CanStartDialogue
@@ -31,6 +35,9 @@ public class NPCDialogue : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// NPC의 선행 조건과 대화 준비 여부를 검사한 뒤 대화를 연다.
+    /// </summary>
     public void StartDialogue()
     {
         if (!isActiveAndEnabled || dialogueInProgress) return;
@@ -53,6 +60,9 @@ public class NPCDialogue : MonoBehaviour
             () => { if (this != null) CompleteDialogue(); },
             () => { if (this != null) dialogueInProgress = false; });
     }
+    /// <summary>
+    /// NPC 대화 성공을 확정하고 연결된 진행 플래그와 후속 이벤트를 알린다.
+    /// </summary>
     private void CompleteDialogue()
     {
         if (!dialogueInProgress) return;
@@ -67,6 +77,9 @@ public class NPCDialogue : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 비활성화 시 이 컴포넌트가 남긴 진행 상태나 이벤트 연결을 정리한다.
+    /// </summary>
     private void OnDisable()
     {
         if (dialogueInProgress && dialogueUI != null) dialogueUI.CancelDialogue();

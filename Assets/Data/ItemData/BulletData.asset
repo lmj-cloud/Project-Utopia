@@ -15,3 +15,8 @@ MonoBehaviour:
   itemName: "7.62mm \uCD1D\uC54C"
   description: "\uC640 \uCD1D\uC54C!@"
   icon: {fileID: 21300000, guid: 3f5ecaf8c37880d4e928619af9b9e927, type: 3}
+  category: 1
+  usable: 0
+  consumable: 1
+  consumePerUse: 1
+  medicationItem: 0
