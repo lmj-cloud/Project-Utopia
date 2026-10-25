@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3e01d273b25bc0e4682898391432dbf0
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/MI_RustyRails.hlsl
+  uploadId: 696499

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 238e8b090c3ff364186875fe04ec2006
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 373432
+  packageName: Tactical Car Driving
+  packageVersion: 1.0
+  assetPath: Assets/Wolff's Studio/TacticalCarDriving/Demo/AnimatorController/Hijack02.controller
+  uploadId: 899434

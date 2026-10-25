@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b67d61f274dc3be49959967dfc98b136
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/M_Skybox_Inst_Valleys_03.hlsl
+  uploadId: 696499

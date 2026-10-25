@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: abc00000000010708781917219936725
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/MI_Rubble.shader
+  uploadId: 696499

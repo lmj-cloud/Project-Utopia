@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: abc00000000012023589750325587003
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/HDRP/Shaders/MI_Texpanel.shader
+  uploadId: 696499

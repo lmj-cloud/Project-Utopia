@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: be7be031eb7afcf42b302a4f0e80bc28
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 373432
+  packageName: Tactical Car Driving
+  packageVersion: 1.0
+  assetPath: Assets/Wolff's Studio/TacticalCarDriving/Demo/AnimatorController/Exit02.controller
+  uploadId: 899434

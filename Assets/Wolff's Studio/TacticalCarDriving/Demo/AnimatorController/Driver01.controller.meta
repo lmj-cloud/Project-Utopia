@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f7a93dd2f097d6846aa160dffba9691b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 373432
+  packageName: Tactical Car Driving
+  packageVersion: 1.0
+  assetPath: Assets/Wolff's Studio/TacticalCarDriving/Demo/AnimatorController/Driver01.controller
+  uploadId: 899434

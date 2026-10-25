@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 34e5d94e13b19eb42a07732c5aea053a
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/HDRP/Shaders/MI_BlackBrick.hlsl
+  uploadId: 696499

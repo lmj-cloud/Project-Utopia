@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 23f6dfd2d4799cd499cb9806a53e3d14
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 15600000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 373432
+  packageName: Tactical Car Driving
+  packageVersion: 1.0
+  assetPath: Assets/Wolff's Studio/TacticalCarDriving/Demo/Terrain/T_TacticalCarDriving.asset
+  uploadId: 899434

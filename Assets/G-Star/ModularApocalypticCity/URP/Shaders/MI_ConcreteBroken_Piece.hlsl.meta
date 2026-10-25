@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c1fc1678ac575c14a9008bae51a96b0f
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/MI_ConcreteBroken_Piece.hlsl
+  uploadId: 696499

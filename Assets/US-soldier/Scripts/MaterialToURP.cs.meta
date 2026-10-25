@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 0e5db81b4fe3b4c4a9a9de3b515202bd
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 306456
+  packageName: Soldier-AAA
+  packageVersion: 1.0
+  assetPath: Assets/US-soldier/Scripts/MaterialToURP.cs
+  uploadId: 727021

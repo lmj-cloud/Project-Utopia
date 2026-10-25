@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: c27ffbdef83e93c46bcc0415a9051a59
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 625f186215c104763be7675aa2d941aa, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 321052
+  packageName: Underground - Modular Abandoned Basement & Bunker Environment URP
+  packageVersion: 1.0
+  assetPath: Assets/Ilumisoft/Underground Environment/Shaders/Decal Color.shadergraph
+  uploadId: 758865

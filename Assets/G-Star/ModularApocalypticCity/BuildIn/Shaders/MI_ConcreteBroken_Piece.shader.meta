@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: abc00000000014617318066502170047
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/BuildIn/Shaders/MI_ConcreteBroken_Piece.shader
+  uploadId: 696499

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: abc00000000000547934493692416253
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/BuildIn/Shaders/MI_CineMat_CameraBody.shader
+  uploadId: 696499

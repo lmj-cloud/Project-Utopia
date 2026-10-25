@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 85be67e24195d0640bdabeab050d262d
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 321052
+  packageName: Underground - Modular Abandoned Basement & Bunker Environment URP
+  packageVersion: 1.0
+  assetPath: Assets/Ilumisoft/Underground Environment/Scenes/Sample/Sample Baking
+    Set-Default.CellProbeOcclusionData.bytes
+  uploadId: 758865

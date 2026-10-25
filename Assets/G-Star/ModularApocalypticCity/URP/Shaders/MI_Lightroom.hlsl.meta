@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ed3304f98f7c819449a391070a2486b4
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/MI_Lightroom.hlsl
+  uploadId: 696499

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d609a9833e43656439388ba125878c61
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/MI_AsphaltBroken.hlsl
+  uploadId: 696499

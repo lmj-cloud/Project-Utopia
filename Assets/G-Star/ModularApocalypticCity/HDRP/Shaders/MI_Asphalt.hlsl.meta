@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 399c5a79d3948814a9f4d14abcd9221a
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/HDRP/Shaders/MI_Asphalt.hlsl
+  uploadId: 696499

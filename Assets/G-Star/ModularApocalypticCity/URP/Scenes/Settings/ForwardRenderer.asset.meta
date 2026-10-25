@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 875d0bc3d12c12f418ade7f55b82af2c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Scenes/Settings/ForwardRenderer.asset
+  uploadId: 696499

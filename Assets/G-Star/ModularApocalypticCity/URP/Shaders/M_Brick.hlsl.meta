@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3bc688dfe0e2d7240b82d31f31b75996
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/M_Brick.hlsl
+  uploadId: 696499
