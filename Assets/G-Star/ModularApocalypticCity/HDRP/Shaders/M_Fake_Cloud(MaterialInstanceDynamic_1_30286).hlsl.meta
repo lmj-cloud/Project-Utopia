@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0448f2f664e53ba438957e0e3ba6f822
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/HDRP/Shaders/M_Fake_Cloud(MaterialInstanceDynamic_1_30286).hlsl
+  uploadId: 696499

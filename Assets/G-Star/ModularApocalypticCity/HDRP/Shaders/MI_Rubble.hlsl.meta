@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e3d789853f0a60a489c45d28ce461757
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/HDRP/Shaders/MI_Rubble.hlsl
+  uploadId: 696499

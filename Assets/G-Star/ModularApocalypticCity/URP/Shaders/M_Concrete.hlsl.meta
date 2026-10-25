@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 36da76349650c114db23ffab4fb7ebe2
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/M_Concrete.hlsl
+  uploadId: 696499

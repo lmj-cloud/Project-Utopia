@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: babc1134995b5b445a744078a0284630
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/MI_CineMat_CamViewFinder.hlsl
+  uploadId: 696499

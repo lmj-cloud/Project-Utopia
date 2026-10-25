@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7c1921cb86880764d8a6da02ea6dd3ad
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/MI_BridgeStuff.hlsl
+  uploadId: 696499

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c3333ad48d946cc428d337080a183939
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/HDRP/Shaders/MI_Breadshop_Brick_2.hlsl
+  uploadId: 696499

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3afd5abf35a38dc44a899be32d11d2ce
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/MI_Texpanel.hlsl
+  uploadId: 696499

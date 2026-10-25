@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 976cc4c2f49c8c941b3ae87813b499e9
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 301974
+  packageName: 3D Boxing Arena Pack
+  packageVersion: 1.0
+  assetPath: Assets/3D Boxing Arena Pack/Animations/Cylinder.controller
+  uploadId: 718197

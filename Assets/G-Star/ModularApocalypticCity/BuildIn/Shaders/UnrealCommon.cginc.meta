@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a10f15379ec5c344987e3abd4bc6f1bd
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/BuildIn/Shaders/UnrealCommon.cginc
+  uploadId: 696499

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ad717250f7d521145891baf2b552f090
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/WorldGridMaterial.hlsl
+  uploadId: 696499

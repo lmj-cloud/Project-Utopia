@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3bbc66eba14efd448934c986171d6ff3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 112000000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 301974
+  packageName: 3D Boxing Arena Pack
+  packageVersion: 1.0
+  assetPath: Assets/3D Boxing Arena Pack/Scenes/SampleScene/LightingData.asset
+  uploadId: 718197

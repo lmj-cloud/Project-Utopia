@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 349a195d4e608bc40aa44e5ea3028ac5
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/HDRP/HDRPDefaultResources/HDRenderPipelineGlobalSettings.asset
+  uploadId: 696499

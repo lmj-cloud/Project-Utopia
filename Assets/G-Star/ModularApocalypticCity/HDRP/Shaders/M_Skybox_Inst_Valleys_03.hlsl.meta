@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d897989e20efc1e4aa059931c1136055
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/HDRP/Shaders/M_Skybox_Inst_Valleys_03.hlsl
+  uploadId: 696499

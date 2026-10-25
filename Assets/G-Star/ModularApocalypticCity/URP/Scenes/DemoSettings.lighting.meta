@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e58c6db61d9df4d45addf96f7bc4720a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Scenes/DemoSettings.lighting
+  uploadId: 696499

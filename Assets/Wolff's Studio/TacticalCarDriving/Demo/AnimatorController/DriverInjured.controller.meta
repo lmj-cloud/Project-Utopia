@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 16f01e3c9cbb20341a153b2578a3213f
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 373432
+  packageName: Tactical Car Driving
+  packageVersion: 1.0
+  assetPath: Assets/Wolff's Studio/TacticalCarDriving/Demo/AnimatorController/DriverInjured.controller
+  uploadId: 899434

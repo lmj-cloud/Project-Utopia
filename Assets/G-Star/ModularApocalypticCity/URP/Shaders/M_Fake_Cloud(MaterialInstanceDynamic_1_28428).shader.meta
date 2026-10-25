@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: abc00000000013254084566150682676
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 288842
+  packageName: Modular Apocalyptic City
+  packageVersion: 1.0
+  assetPath: Assets/G-Star/ModularApocalypticCity/URP/Shaders/M_Fake_Cloud(MaterialInstanceDynamic_1_28428).shader
+  uploadId: 696499

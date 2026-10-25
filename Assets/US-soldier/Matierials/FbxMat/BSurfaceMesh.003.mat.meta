@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 472f5a39632fee8469e081e57a5bbfda
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 306456
+  packageName: Soldier-AAA
+  packageVersion: 1.0
+  assetPath: Assets/US-soldier/Matierials/FbxMat/BSurfaceMesh.003.mat
+  uploadId: 727021
