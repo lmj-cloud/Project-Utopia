@@ -1,7 +1,14 @@
 fileFormatVersion: 2
 guid: e7d7c96f1c13e8b41b4578e7e58e8ca3
+AssetOrigin:
+  serializedVersion: 1
+  productId: 306456
+  packageName: Soldier-AAA
+  packageVersion: 1.0
+  assetPath: Assets/US-soldier/Mesh/US-Soldier.fbx
+  uploadId: 727021
 ModelImporter:
-  serializedVersion: 21202
+  serializedVersion: 24300
   internalIDToNameTable: []
   externalObjects:
   - first:
@@ -384,6 +391,7 @@ ModelImporter:
     materialName: 0
     materialSearch: 1
     materialLocation: 1
+    searchTexturesGlobally: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
@@ -391,8 +399,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 1
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -415,6 +421,7 @@ ModelImporter:
     addColliders: 0
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
+    importPhysicalCameras: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -432,6 +439,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
@@ -442,6 +452,7 @@ ModelImporter:
     secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -877,11 +888,581 @@ ModelImporter:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       scale: {x: 1, y: 1, z: 1}
+    - name: 22
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: akum
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: antana
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: azov
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Bag4.1
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 99.99999, y: 99.99999, z: 100}
+    - name: Bag4.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 99.99999, y: 100, z: 99.99999}
+    - name: batareyka
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: batareyka.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: batareyka.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: BodyArmor
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: boots
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: BSurfaceMesh
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: BSurfaceMesh.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: BSurfaceMesh.003
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: BSurfaceMesh.004
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: BSurfaceMesh.014
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 99.99999, y: 100, z: 100}
+    - name: camera
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Cap
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Cap.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: carabine
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 99.99999}
+    - name: carabine.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 99.99999}
+    - name: carabine.003
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 99.99999, y: 100, z: 100}
+    - name: carabine.004
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Cylinder
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: eye_low.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: flag
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: flag.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: flag2
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: flag2.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 99.99999, y: 100, z: 99.99999}
+    - name: flag3
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: flag3.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: flag4
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: flag5
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: flag6
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: fonar
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: GlassesOkoLow
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: glasssesramLow
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: glove.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Gun
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Gun2
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: Headphone
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Headphone.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: headphoneHelmet
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: headphoneHelmet.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: helmet
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: hhhead
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Holster
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: Holster.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: koburkoleno.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: koburkoleno.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: logoarm
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: logoarm.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: logoarm2
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: logoarm2.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: logoarm2.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: logoarm2.003
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: logohelmet
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: logohelmet.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: logohelmet.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: m18
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: m18.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: m18.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: m18.003
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: magaz.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: magaz.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: magaz.004
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Mask.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: meshok
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: mikrophone
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: nightvizione
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: nightvizione.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: p1
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 99.99999, y: 100, z: 100}
+    - name: p2
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: p3
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: p4
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 99.99999, y: 100, z: 100}
+    - name: p5
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: p6
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 99.99999, y: 100, z: 100}
+    - name: p7
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: p8
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 99.99999, y: 100, z: 100}
+    - name: p9
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: p10
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: pak1
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: pak1.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: portphel
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Pounch1
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: Pounch1.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Pounch1.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 99.99999, y: 100, z: 100}
+    - name: Pounch1.003
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: Pounch1.004
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: Pounch1.005
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 99.99999}
+    - name: Pounch1.006
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: PounchMag
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: PounchMag.001
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: PounchMag.002
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: racio
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
     - name: root
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 100, y: 100, z: 100}
+    - name: ik_foot_root
+      parentName: root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.000000059604645, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 0.9999839, z: 0.9999841}
+    - name: ik_foot_l
+      parentName: ik_foot_root
+      position: {x: -0.0017076278, y: 0.00080721144, z: 0.0013465798}
+      rotation: {x: 0.020530302, y: 0.7122334, z: -0.011723479, w: 0.7015444}
+      scale: {x: 0.9999762, y: 0.99997586, z: 0.999978}
+    - name: ik_foot_l_end
+      parentName: ik_foot_l
+      position: {x: -1.2340023e-10, y: 0.0023196614, z: 1.0477379e-10}
+      rotation: {x: 0.00000012200326, y: -0.00000008940697, z: 0.00000004377216, w: 1}
+      scale: {x: 1.0000217, y: 1.0000311, z: 1.0000176}
+    - name: ik_foot_l_end_end
+      parentName: ik_foot_l_end
+      position: {x: -1.5599652e-10, y: 0.00231966, z: -4.4237822e-11}
+      rotation: {x: -0.00000008381903, y: 0.000000059604645, z: -9.3132246e-10, w: 1}
+      scale: {x: 1.0000005, y: 1.0000049, z: 0.99999565}
+    - name: ik_foot_l_end_end_end
+      parentName: ik_foot_l_end_end
+      position: {x: -0, y: 0.0023196605, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: ik_foot_r
+      parentName: ik_foot_root
+      position: {x: 0.0017076161, y: 0.0008071978, z: 0.0013465564}
+      rotation: {x: 0.70154154, y: 0.01172431, z: 0.7122362, w: -0.0205311}
+      scale: {x: 0.99998945, y: 0.9999963, z: 0.9999972}
+    - name: ik_foot_r_end
+      parentName: ik_foot_r
+      position: {x: 1.5599652e-10, y: 0.0023196596, z: -3.958121e-11}
+      rotation: {x: -0.00000007916242, y: -0.000002474655, z: -0.000000008381903, w: 1}
+      scale: {x: 1.000035, y: 1.0000441, z: 1.0000259}
+    - name: ik_foot_r_end_end
+      parentName: ik_foot_r_end
+      position: {x: 2.188608e-10, y: 0.0023196612, z: 1.2805686e-10}
+      rotation: {x: 0.00000008009378, y: -0.0000004773465, z: 0.000000012106958, w: 1}
+      scale: {x: 1.0000422, y: 1.0000284, z: 1.00002}
+    - name: ik_foot_r_end_end_end
+      parentName: ik_foot_r_end_end
+      position: {x: -0, y: 0.0023196621, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: ik_hand_root
+      parentName: root
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.000000059604645, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 0.9999841, z: 0.9999841}
+    - name: ik_hand_gun
+      parentName: ik_hand_root
+      position: {x: 0.0056646806, y: 0.000033513777, z: 0.011168038}
+      rotation: {x: 0.61884964, y: 0.06954112, z: -0.38913608, w: 0.6787948}
+      scale: {x: 1.0000017, y: 1, z: 1.0000013}
+    - name: ik_hand_l
+      parentName: ik_hand_gun
+      position: {x: -0.0077885226, y: -0.006960327, z: 0.0043869377}
+      rotation: {x: 0.6874743, y: 0.6143576, z: -0.3872258, w: -0.0000002440065}
+      scale: {x: 0.99985766, y: 1.000027, z: 1.0001264}
+    - name: ik_hand_l_end
+      parentName: ik_hand_l
+      position: {x: 0.000000079665334, y: 0.0056645763, z: -0.0000000812672}
+      rotation: {x: -0.000000647847, y: 0.00000016866406, z: -0.00000047683716, w: 1}
+      scale: {x: 1.000005, y: 1.0000032, z: 1.000017}
+    - name: ik_hand_l_end_end
+      parentName: ik_hand_l_end
+      position: {x: -6.3329936e-10, y: 0.0056646043, z: 1.4901161e-10}
+      rotation: {x: -0.0000000403968, y: -0.000000012637329, z: -0.00000014901163, w: 1}
+      scale: {x: 1.000002, y: 1.0000126, z: 1.0000049}
+    - name: ik_hand_l_end_end_end
+      parentName: ik_hand_l_end_end
+      position: {x: -0, y: 0.005664601, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: ik_hand_r
+      parentName: ik_hand_gun
+      position: {x: 0.000000025470507, y: -0.00000019600236, z: -0.00000001645647}
+      rotation: {x: -0.000000059604645, y: -0.000000040978193, z: -0.00000015646219, w: 1}
+      scale: {x: 1.0000002, y: 0.99999464, z: 0.9999896}
+    - name: ik_hand_r_end
+      parentName: ik_hand_r
+      position: {x: 0.0000000010617077, y: 0.0056646066, z: 7.4505804e-11}
+      rotation: {x: 0.00000008940697, y: -0.000000081956365, z: -0.000000026077021, w: 1}
+      scale: {x: 1.0000001, y: 0.9999995, z: 1.0000044}
+    - name: ik_hand_r_end_end
+      parentName: ik_hand_r_end
+      position: {x: 1.862645e-10, y: 0.005664608, z: -3.7252902e-11}
+      rotation: {x: 0.00000014901164, y: 0.000000070780544, z: 0.00000030547378, w: 1}
+      scale: {x: 1.0000056, y: 1.0000069, z: 1.0000019}
+    - name: ik_hand_r_end_end_end
+      parentName: ik_hand_r_end_end
+      position: {x: -0, y: 0.0056646066, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
     - name: pelvis
       parentName: root
       position: {x: 1.1939563e-14, y: 0.00010561741, z: 0.009674999}
@@ -904,8 +1485,8 @@ ModelImporter:
       scale: {x: 1.0000074, y: 1.0000144, z: 1.0000136}
     - name: clavicle_l
       parentName: spine_03
-      position: {x: -0.0011885212, y: -0.0002732323, z: -0.0003782037}
-      rotation: {x: -0.148661, y: 0.73421574, z: 0.05666425, w: -0.6600123}
+      position: {x: -0.00116, y: -0.00019, z: -0.00063}
+      rotation: {x: -0.14866102, y: 0.7342158, z: 0.056664255, w: -0.66001236}
       scale: {x: 0.99999344, y: 1.0000418, z: 1.0000175}
     - name: upperarm_l
       parentName: clavicle_l
@@ -915,7 +1496,7 @@ ModelImporter:
     - name: lowerarm_l
       parentName: upperarm_l
       position: {x: -0.0030339577, y: 0.0000000072829422, z: 0.00000012502073}
-      rotation: {x: -0.06551637, y: 0.039087407, z: 0.034675214, w: 0.9964825}
+      rotation: {x: -0.065516375, y: 0.03908741, z: 0.03467522, w: 0.99648255}
       scale: {x: 0.9996202, y: 1.0004165, z: 0.99998945}
     - name: hand_l
       parentName: lowerarm_l
@@ -925,12 +1506,12 @@ ModelImporter:
     - name: index_01_l
       parentName: hand_l
       position: {x: -0.0015189244, y: 0.00018654532, z: -0.00013632633}
-      rotation: {x: -0.15138717, y: 0.06852285, z: -0.18962535, w: 0.96769243}
+      rotation: {x: -0.15138718, y: 0.068522856, z: -0.18962537, w: 0.9676925}
       scale: {x: 1.0006745, y: 1.0008162, z: 0.99862933}
     - name: index_02_l
       parentName: index_01_l
       position: {x: -0.0004256404, y: -0.000000006946502, z: -0.000051005183}
-      rotation: {x: 0.018719312, y: 0.059866376, z: -0.035481542, w: 0.99740005}
+      rotation: {x: 0.018719308, y: 0.059866376, z: -0.035481535, w: 0.99740005}
       scale: {x: 1.0017684, y: 0.99847436, z: 0.99979687}
     - name: index_03_l
       parentName: index_02_l
@@ -965,7 +1546,7 @@ ModelImporter:
     - name: middle_03_l
       parentName: middle_02_l
       position: {x: -0.0003616426, y: 0.00000018551945, z: -0.00004806608}
-      rotation: {x: -0.11239381, y: 0.021251248, z: 0.68982285, w: 0.71488506}
+      rotation: {x: -0.11239381, y: 0.021251246, z: 0.68982285, w: 0.714885}
       scale: {x: 0.99640286, y: 1.003586, z: 1.0000635}
     - name: middle_03_l_end
       parentName: middle_03_l
@@ -985,7 +1566,7 @@ ModelImporter:
     - name: pinky_01_l
       parentName: hand_l
       position: {x: -0.0013049392, y: 0.0003387154, z: 0.00062557665}
-      rotation: {x: -0.20373143, y: 0.087647304, z: -0.1690327, w: 0.96033293}
+      rotation: {x: -0.20373145, y: 0.08764731, z: -0.16903271, w: 0.960333}
       scale: {x: 1.0001794, y: 1.0015367, z: 0.9984135}
     - name: pinky_02_l
       parentName: pinky_01_l
@@ -1020,7 +1601,7 @@ ModelImporter:
     - name: ring_02_l
       parentName: ring_01_l
       position: {x: -0.00043910358, y: -0.00000010854564, z: -0.000058358757}
-      rotation: {x: 0.009349255, y: 0.00834824, z: -0.036372192, w: 0.9992597}
+      rotation: {x: 0.009349255, y: 0.0083482405, z: -0.036372192, w: 0.99925977}
       scale: {x: 1.0016891, y: 0.99835205, z: 1.0001312}
     - name: ring_03_l
       parentName: ring_02_l
@@ -1065,8 +1646,7 @@ ModelImporter:
     - name: thumb_03_l_end_end
       parentName: thumb_03_l_end
       position: {x: -5.2154064e-10, y: 0.00040621584, z: -8.230563e-10}
-      rotation: {x: -0.000000024913557, y: 0.00000039488089, z: -0.00000039384747,
-        w: 1}
+      rotation: {x: -0.000000024913557, y: 0.00000039488089, z: -0.00000039384747, w: 1}
       scale: {x: 1.000017, y: 1.0000318, z: 1.0000092}
     - name: thumb_03_l_end_end_end
       parentName: thumb_03_l_end_end
@@ -1096,8 +1676,7 @@ ModelImporter:
     - name: upperarm_twist_01_l
       parentName: upperarm_l
       position: {x: -0.000049959926, y: 0.0000000043446198, z: 0.00000011293683}
-      rotation: {x: -0.00000027567143, y: -0.00000025331968, z: 0.00000046193588,
-        w: 1}
+      rotation: {x: -0.00000027567143, y: -0.00000025331968, z: 0.00000046193588, w: 1}
       scale: {x: 0.99999917, y: 0.99999195, z: 1.0000024}
     - name: upperarm_twist_01_l_end
       parentName: upperarm_twist_01_l
@@ -1116,7 +1695,7 @@ ModelImporter:
       scale: {x: 1, y: 1, z: 1}
     - name: clavicle_r
       parentName: spine_03
-      position: {x: -0.0011885313, y: -0.00027322868, z: 0.00037820358}
+      position: {x: -0.00117, y: -0.00019, z: 0.00069}
       rotation: {x: -0.72955096, y: -0.14951675, z: -0.6646717, w: -0.060097504}
       scale: {x: 0.999995, y: 1.0000275, z: 1.0000025}
     - name: upperarm_r
@@ -1157,8 +1736,7 @@ ModelImporter:
     - name: index_03_r_end_end
       parentName: index_03_r_end
       position: {x: -6.705522e-10, y: 0.0003393797, z: 4.4703483e-10}
-      rotation: {x: -0.00000057183047, y: -0.00000003818285, z: -0.0000008709179,
-        w: 1}
+      rotation: {x: -0.00000057183047, y: -0.00000003818285, z: -0.0000008709179, w: 1}
       scale: {x: 1.0000044, y: 0.9999962, z: 0.99999934}
     - name: index_03_r_end_end_end
       parentName: index_03_r_end_end
@@ -1168,7 +1746,7 @@ ModelImporter:
     - name: middle_01_r
       parentName: hand_r
       position: {x: 0.0012244454, y: -0.00012929074, z: -0.000057070552}
-      rotation: {x: 0.025286937, y: 0.040114053, z: -0.12933494, w: 0.9904665}
+      rotation: {x: 0.025286939, y: 0.040114056, z: -0.12933496, w: 0.99046654}
       scale: {x: 0.9997727, y: 0.9994154, z: 1.0008175}
     - name: middle_02_r
       parentName: middle_01_r
@@ -1178,7 +1756,7 @@ ModelImporter:
     - name: middle_03_r
       parentName: middle_02_r
       position: {x: 0.00036497563, y: -0.0000002544187, z: 0.000000007972121}
-      rotation: {x: 0.033528443, y: 0.033162788, z: -0.7072529, w: 0.7053861}
+      rotation: {x: 0.033528443, y: 0.033162784, z: -0.7072529, w: 0.70538604}
       scale: {x: 0.9946427, y: 1.0058157, z: 0.9996423}
     - name: middle_03_r_end
       parentName: middle_03_r
@@ -1198,7 +1776,7 @@ ModelImporter:
     - name: pinky_01_r
       parentName: hand_r
       position: {x: 0.0011646263, y: -0.00030592922, z: -0.00049841905}
-      rotation: {x: -0.120887935, y: 0.093627095, z: -0.091310866, w: 0.9840134}
+      rotation: {x: -0.12088794, y: 0.0936271, z: -0.09131087, w: 0.98401344}
       scale: {x: 0.99848664, y: 1.0001317, z: 1.0014082}
     - name: pinky_02_r
       parentName: pinky_01_r
@@ -1238,7 +1816,7 @@ ModelImporter:
     - name: ring_03_r
       parentName: ring_02_r
       position: {x: 0.00034769543, y: 0.000000009682208, z: 2.2351741e-10}
-      rotation: {x: -0.021024587, y: -0.021038583, z: -0.7072246, w: 0.70636314}
+      rotation: {x: -0.021024585, y: -0.02103858, z: -0.70722455, w: 0.7063631}
       scale: {x: 0.9971762, y: 1.0022116, z: 1.0006567}
     - name: ring_03_r_end
       parentName: ring_03_r
@@ -1263,12 +1841,12 @@ ModelImporter:
     - name: thumb_02_r
       parentName: thumb_01_r
       position: {x: 0.0003308557, y: -0.00014332814, z: -0.000008559525}
-      rotation: {x: 0.17232184, y: -0.02236663, z: -0.23979814, w: 0.9551449}
+      rotation: {x: 0.17232186, y: -0.022366632, z: -0.23979816, w: 0.95514494}
       scale: {x: 0.97970885, y: 1.0167454, z: 1.0039511}
     - name: thumb_03_r
       parentName: thumb_02_r
       position: {x: 0.00040616095, y: 2.2351741e-10, z: 0.00000016022473}
-      rotation: {x: 0.01539709, y: 0.015642397, z: -0.7034829, w: 0.7103731}
+      rotation: {x: 0.015397091, y: 0.015642399, z: -0.703483, w: 0.71037316}
       scale: {x: 0.97422314, y: 1.0246166, z: 1.0014484}
     - name: thumb_03_r_end
       parentName: thumb_03_r
@@ -1353,7 +1931,7 @@ ModelImporter:
     - name: thigh_l
       parentName: pelvis
       position: {x: 0.00014481027, y: -0.000053144035, z: -0.000900585}
-      rotation: {x: 0.073781095, y: 0.06845825, z: 0.008117407, w: 0.9948889}
+      rotation: {x: 0.0737811, y: 0.06845826, z: 0.008117408, w: 0.99488896}
       scale: {x: 1.0000231, y: 1.000018, z: 1.0000187}
     - name: calf_l
       parentName: thigh_l
@@ -1368,14 +1946,12 @@ ModelImporter:
     - name: calf_twist_01_l_end
       parentName: calf_twist_01_l
       position: {x: -7.4505804e-11, y: 0.0030336753, z: -7.4505804e-11}
-      rotation: {x: 0.00000010454096, y: -0.000000014202669, z: -0.00000011209522,
-        w: 1}
+      rotation: {x: 0.00000010454096, y: -0.000000014202669, z: -0.00000011209522, w: 1}
       scale: {x: 1.0000327, y: 1.0000316, z: 1.0000294}
     - name: calf_twist_01_l_end_end
       parentName: calf_twist_01_l_end
       position: {x: 1.3969838e-10, y: 0.0030336764, z: 3.7252902e-11}
-      rotation: {x: -0.000000089174144, y: 0.00000006007029, z: -0.00000006536039,
-        w: 1}
+      rotation: {x: -0.000000089174144, y: 0.00000006007029, z: -0.00000006536039, w: 1}
       scale: {x: 1.0000408, y: 1.0000385, z: 1.0000193}
     - name: calf_twist_01_l_end_end_end
       parentName: calf_twist_01_l_end_end
@@ -1415,14 +1991,12 @@ ModelImporter:
     - name: thigh_twist_01_l_end
       parentName: thigh_twist_01_l
       position: {x: 3.1664968e-10, y: 0.0032333157, z: 3.5390257e-10}
-      rotation: {x: -0.00000008195638, y: -0.00000008926508, z: -0.0000000042125516,
-        w: 1}
+      rotation: {x: -0.00000008195638, y: -0.00000008926508, z: -0.0000000042125516, w: 1}
       scale: {x: 1.000007, y: 0.99999493, z: 1.0000008}
     - name: thigh_twist_01_l_end_end
       parentName: thigh_twist_01_l_end
       position: {x: -6.61239e-10, y: 0.003233317, z: 3.7252902e-11}
-      rotation: {x: 0.000000022351742, y: -0.0000000010732036, z: 0.00000002229353,
-        w: 1}
+      rotation: {x: 0.000000022351742, y: -0.0000000010732036, z: 0.00000002229353, w: 1}
       scale: {x: 1.0000112, y: 1.000013, z: 0.99999285}
     - name: thigh_twist_01_l_end_end_end
       parentName: thigh_twist_01_l_end_end
@@ -1447,8 +2021,7 @@ ModelImporter:
     - name: calf_twist_01_r_end
       parentName: calf_twist_01_r
       position: {x: 3.5390257e-10, y: 0.0030336902, z: 1.6763806e-10}
-      rotation: {x: -0.000000031897798, y: 0.0000015692785, z: -0.00000045059005,
-        w: 1}
+      rotation: {x: -0.000000031897798, y: 0.0000015692785, z: -0.00000045059005, w: 1}
       scale: {x: 0.99998754, y: 0.9999823, z: 0.9999758}
     - name: calf_twist_01_r_end_end
       parentName: calf_twist_01_r_end
@@ -1473,8 +2046,7 @@ ModelImporter:
     - name: ball_r_end
       parentName: ball_r
       position: {x: 6.519258e-11, y: 0.0019598803, z: -1.5133991e-10}
-      rotation: {x: -0.0000000067884667, y: -0.000000009151334, z: -0.0000006832609,
-        w: 1}
+      rotation: {x: -0.0000000067884667, y: -0.000000009151334, z: -0.0000006832609, w: 1}
       scale: {x: 1.0000007, y: 0.9999988, z: 1.0000108}
     - name: ball_r_end_end
       parentName: ball_r_end
@@ -1506,371 +2078,27 @@ ModelImporter:
       position: {x: -0, y: 0.0032333287, z: 0}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
-    - name: ik_foot_root
-      parentName: root
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.000000059604645, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 0.9999839, z: 0.9999841}
-    - name: ik_foot_l
-      parentName: ik_foot_root
-      position: {x: -0.0017076278, y: 0.00080721144, z: 0.0013465798}
-      rotation: {x: 0.020530296, y: 0.7122334, z: -0.011723476, w: 0.7015444}
-      scale: {x: 0.9999762, y: 0.99997586, z: 0.999978}
-    - name: ik_foot_l_end
-      parentName: ik_foot_l
-      position: {x: -1.2340023e-10, y: 0.0023196614, z: 1.0477379e-10}
-      rotation: {x: 0.00000012200326, y: -0.00000008940697, z: 0.00000004377216, w: 1}
-      scale: {x: 1.0000217, y: 1.0000311, z: 1.0000176}
-    - name: ik_foot_l_end_end
-      parentName: ik_foot_l_end
-      position: {x: -1.5599652e-10, y: 0.00231966, z: -4.4237822e-11}
-      rotation: {x: -0.00000008381903, y: 0.000000059604645, z: -9.3132246e-10, w: 1}
-      scale: {x: 1.0000005, y: 1.0000049, z: 0.99999565}
-    - name: ik_foot_l_end_end_end
-      parentName: ik_foot_l_end_end
-      position: {x: -0, y: 0.0023196605, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: ik_foot_r
-      parentName: ik_foot_root
-      position: {x: 0.0017076161, y: 0.0008071978, z: 0.0013465564}
-      rotation: {x: 0.70154154, y: 0.01172431, z: 0.7122362, w: -0.0205311}
-      scale: {x: 0.99998945, y: 0.9999963, z: 0.9999972}
-    - name: ik_foot_r_end
-      parentName: ik_foot_r
-      position: {x: 1.5599652e-10, y: 0.0023196596, z: -3.958121e-11}
-      rotation: {x: -0.00000007916242, y: -0.000002474655, z: -0.000000008381903,
-        w: 1}
-      scale: {x: 1.000035, y: 1.0000441, z: 1.0000259}
-    - name: ik_foot_r_end_end
-      parentName: ik_foot_r_end
-      position: {x: 2.188608e-10, y: 0.0023196612, z: 1.2805686e-10}
-      rotation: {x: 0.00000008009378, y: -0.0000004773465, z: 0.000000012106958, w: 1}
-      scale: {x: 1.0000422, y: 1.0000284, z: 1.00002}
-    - name: ik_foot_r_end_end_end
-      parentName: ik_foot_r_end_end
-      position: {x: -0, y: 0.0023196621, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: ik_hand_root
-      parentName: root
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.000000059604645, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 0.9999841, z: 0.9999841}
-    - name: ik_hand_gun
-      parentName: ik_hand_root
-      position: {x: 0.0056646806, y: 0.000033513777, z: 0.011168038}
-      rotation: {x: 0.61884964, y: 0.06954112, z: -0.38913608, w: 0.6787948}
-      scale: {x: 1.0000017, y: 1, z: 1.0000013}
-    - name: ik_hand_l
-      parentName: ik_hand_gun
-      position: {x: -0.0077885226, y: -0.006960327, z: 0.0043869377}
-      rotation: {x: 0.6874743, y: 0.6143576, z: -0.3872258, w: -0.0000002440065}
-      scale: {x: 0.99985766, y: 1.000027, z: 1.0001264}
-    - name: ik_hand_l_end
-      parentName: ik_hand_l
-      position: {x: 0.000000079665334, y: 0.0056645763, z: -0.0000000812672}
-      rotation: {x: -0.000000647847, y: 0.00000016866406, z: -0.00000047683716, w: 1}
-      scale: {x: 1.000005, y: 1.0000032, z: 1.000017}
-    - name: ik_hand_l_end_end
-      parentName: ik_hand_l_end
-      position: {x: -6.3329936e-10, y: 0.0056646043, z: 1.4901161e-10}
-      rotation: {x: -0.0000000403968, y: -0.000000012637329, z: -0.00000014901163,
-        w: 1}
-      scale: {x: 1.000002, y: 1.0000126, z: 1.0000049}
-    - name: ik_hand_l_end_end_end
-      parentName: ik_hand_l_end_end
-      position: {x: -0, y: 0.005664601, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: ik_hand_r
-      parentName: ik_hand_gun
-      position: {x: 0.000000025470507, y: -0.00000019600236, z: -0.00000001645647}
-      rotation: {x: -0.000000059604645, y: -0.000000040978193, z: -0.00000015646219,
-        w: 1}
-      scale: {x: 1.0000002, y: 0.99999464, z: 0.9999896}
-    - name: ik_hand_r_end
-      parentName: ik_hand_r
-      position: {x: 0.0000000010617077, y: 0.0056646066, z: 7.4505804e-11}
-      rotation: {x: 0.00000008940697, y: -0.000000081956365, z: -0.000000026077021,
-        w: 1}
-      scale: {x: 1.0000001, y: 0.9999995, z: 1.0000044}
-    - name: ik_hand_r_end_end
-      parentName: ik_hand_r_end
-      position: {x: 1.862645e-10, y: 0.005664608, z: -3.7252902e-11}
-      rotation: {x: 0.00000014901164, y: 0.000000070780544, z: 0.00000030547378, w: 1}
-      scale: {x: 1.0000056, y: 1.0000069, z: 1.0000019}
-    - name: ik_hand_r_end_end_end
-      parentName: ik_hand_r_end_end
-      position: {x: -0, y: 0.0056646066, z: 0}
-      rotation: {x: 0, y: -0, z: -0, w: 1}
-      scale: {x: 1, y: 1, z: 1}
-    - name: fonar
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: m18
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: batareyka
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Holster
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: Bag4.002
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 99.99999, y: 100, z: 99.99999}
-    - name: flag2.002
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 99.99999, y: 100, z: 99.99999}
-    - name: p3
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: akum
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: watch
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: hhhead
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: sumka3
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: ShoulderArmour
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: sumka3.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: logohelmet.002
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: p2
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: flag5
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: azov
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: portphel
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: GlassesOkoLow
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: pak1
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: koburkoleno.002
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: glove.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: p1
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 99.99999, y: 100, z: 100}
-    - name: headphoneHelmet.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: sumka2.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: logohelmet
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Pounch1.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
     - name: SCISSORS
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 100, y: 100, z: 99.99999}
-    - name: m18.002
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: BSurfaceMesh
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: boots
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: glasssesramLow
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: flag3
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: batareyka.002
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Pounch1.002
+    - name: shevrone
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 99.99999, y: 100, z: 100}
-    - name: carabine
+    - name: shnyr
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 99.99999}
-    - name: m18.003
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: BSurfaceMesh.001
+      scale: {x: 100, y: 99.99999, z: 99.99999}
+    - name: ShoulderArmour
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 100, y: 100, z: 100}
-    - name: BSurfaceMesh.014
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 99.99999, y: 100, z: 100}
-    - name: mikrophone
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: headphoneHelmet
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: flag4
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Pounch1.003
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: logoarm2.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: carabine.002
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 99.99999}
-    - name: p10
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: xxx
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: antana
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: helmet
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: racio
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Pounch1.004
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: flag.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: carabine.003
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 99.99999, y: 100, z: 100}
-    - name: BSurfaceMesh.003
+    - name: steklonight
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
@@ -1880,262 +2108,22 @@ ModelImporter:
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 100, y: 100, z: 100}
-    - name: meshok
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: shevrone
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 99.99999, y: 100, z: 100}
-    - name: Pounch1.005
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 99.99999}
-    - name: logoarm.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: logohelmet.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Mask.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: nightvizione.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: BodyArmor
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: camera
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: magaz.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Pounch1.006
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: flag3.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: logoarm2.002
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: BSurfaceMesh.004
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: sumka3.003
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: Cap
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: eye_low.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: flag
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: m18.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Bag4.1
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 99.99999, y: 99.99999, z: 100}
-    - name: Cap.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: p9
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Cylinder
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: 22
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Pounch1
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: flag2
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: koburkoleno.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Headphone
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: carabine.004
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: p8
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 99.99999, y: 100, z: 100}
-    - name: flag6
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
     - name: sumka2
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 100, y: 100, z: 100}
-    - name: magaz.002
+    - name: sumka2.001
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 100, y: 100, z: 100}
-    - name: Gun2
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: Holster.001
+    - name: sumka3
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 100, y: 100, z: 100}
-    - name: p7
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: shnyr
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 99.99999}
-    - name: nightvizione
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: PounchMag.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Headphone.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: logoarm2.003
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: p6
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 99.99999, y: 100, z: 100}
-    - name: steklonight
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: logoarm2
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 99.99999, z: 100}
-    - name: magaz.004
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: Gun
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: p5
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: PounchMag
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: batareyka.001
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: logoarm
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: PounchMag.002
-      parentName: US-Soldier(Clone)
-      position: {x: -0, y: 0, z: 0}
-      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 100, y: 100, z: 100}
-    - name: pak1.001
+    - name: sumka3.001
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
@@ -2145,11 +2133,21 @@ ModelImporter:
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 100, y: 100, z: 100}
-    - name: p4
+    - name: sumka3.003
       parentName: US-Soldier(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-      scale: {x: 99.99999, y: 100, z: 100}
+      scale: {x: 100, y: 99.99999, z: 100}
+    - name: watch
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
+    - name: xxx
+      parentName: US-Soldier(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
+      scale: {x: 100, y: 100, z: 100}
     armTwist: 0.5
     foreArmTwist: 0.5
     upperLegTwist: 0.5
@@ -2168,14 +2166,9 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 306456
-  packageName: Soldier-AAA
-  packageVersion: 1.0
-  assetPath: Assets/US-soldier/Mesh/US-Soldier.fbx
-  uploadId: 727021

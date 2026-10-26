@@ -341,7 +341,9 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 moveDirection = cameraController.GetMoveDirection(input);
         playerMovement.MoveTo(moveDirection);
-        if (Time.time < fireFacingUntil)
+        // 재장전 중에는 이동 방향 대신 카메라의 수평 방향을 계속 바라본다.
+        bool isReloading = weapon != null && weapon.IsReloading;
+        if (Time.time < fireFacingUntil || isReloading)
             playerMovement.SetFacingDirection(cameraController.Forward, true);
         else if (cameraController.IsThirdPerson && !isAiming)
             playerMovement.SetFacingDirection(moveDirection, false);
@@ -398,7 +400,14 @@ public class PlayerController : MonoBehaviour
         }
         else weapon.StopWeaponAction();
         if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
+        {
             weapon.StartReload();
+            if (weapon.IsReloading)
+            {
+                // 입력 처리 순서상 이동 갱신 뒤에 재장전이 시작되므로 시작 프레임에도 방향을 맞춘다.
+                playerMovement.FaceImmediately(cameraController.Forward);
+            }
+        }
     }
 
     /// <summary>
