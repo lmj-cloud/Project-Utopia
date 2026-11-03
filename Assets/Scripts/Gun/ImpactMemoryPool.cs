@@ -1,11 +1,11 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// 충돌 효과 풀에서 사용할 효과 종류의 인덱스를 구분한다.
 /// </summary>
-public enum ImpactType { Normal = 0, Obstacle}
+public enum ImpactType { Normal = 0, Target}
 
 /// <summary>
 /// 충돌 표면에 맞는 파티클 프리팹 풀을 관리하고 Raycast 위치에 효과를 배치한다.
@@ -15,6 +15,8 @@ public class ImpactMemoryPool : MonoBehaviour
     [SerializeField] private GameObject[] impactPrefab;
     [SerializeField, Min(0f)] private float surfaceOffset = 0.02f;
     private MemoryPool[] memoryPool;
+    // Target별 전용 프리팹을 기존 MemoryPool로 재사용한다. 일반 표면 풀과 분리한다.
+    private readonly Dictionary<GameObject, MemoryPool> targetPools = new Dictionary<GameObject, MemoryPool>();
 
     /// <summary>
     /// 다른 실행 로직이 시작되기 전에 필요한 참조와 초기 상태를 준비한다.
@@ -41,10 +43,25 @@ public class ImpactMemoryPool : MonoBehaviour
     public void SpawnImpact(RaycastHit hit)
     {
         if (!isActiveAndEnabled || hit.collider == null) return;
-        if (hit.collider.CompareTag("ImpactNormal"))
+
+        if (hit.collider.CompareTag("ImpactNormal") || hit.collider.CompareTag("Wall"))
         {
             OnSpawnImpact(ImpactType.Normal, hit.point + hit.normal * Mathf.Max(0f, surfaceOffset), Quaternion.LookRotation(hit.normal));
         }
+        if (hit.collider.CompareTag("Target"))
+        {
+            OnSpawnImpact(ImpactType.Target, hit.point + hit.normal * Mathf.Max(0f, surfaceOffset), Quaternion.LookRotation(hit.normal));
+        }
+    }
+
+    /// <summary>무기가 제거될 때 이 컴포넌트가 소유한 Target 효과 풀을 정리한다.</summary>
+    private void OnDestroy()
+    {
+        foreach (MemoryPool pool in targetPools.Values)
+        {
+            pool.DestroyObjects();
+        }
+        targetPools.Clear();
     }
 
     /// <summary>

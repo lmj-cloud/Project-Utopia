@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 685aeb6fa89904f41b0137dd8dd308ba, type: 3}
   m_Name: MedicineData
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: "\uC57D"
-  description: 
-  icon: {fileID: 0}
+  itemName: "\uC815\uC2E0\uACFC \uC57D"
+  description: "\uC815\uC2E0\uC774 \uB9D1@\uC544\uC9C4\uB2E4!@"
+  icon: {fileID: 21300000, guid: 47d5585c6e222224f93bf782b03f7340, type: 3}
+  category: 1
+  canEquipToQuickSlot: 1
   usable: 0
   consumable: 1
   consumePerUse: 1

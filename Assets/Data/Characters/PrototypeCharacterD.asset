@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95ee6cdcdc2b54b488dbcd1804d622b0, type: 3}
+  m_Name: PrototypeCharacterD
+  m_EditorClassIdentifier: Assembly-CSharp::AffinityCharacterData
+  characterId: prototype-d
+  characterName: "\uD14C\uC2A4\uD2B8 \uC778\uBB3C D (\uC784\uC2DC)"
+  group: 1
+  portrait: {fileID: 0}
+  description: "UI \uB3D9\uC791 \uD655\uC778\uC6A9 \uC784\uC2DC \uC778\uBB3C D\uC785\uB2C8\uB2E4.
+    \uC2E4\uC81C \uC2A4\uD1A0\uB9AC NPC\uAC00 \uC544\uB2C8\uBA70 \uC774\uB984\xB7\uC18C\uC18D\xB7\uAD00\uACC4\uB294
+    \uD655\uC815 \uAE30\uD68D\uC774 \uC544\uB2D9\uB2C8\uB2E4.\n\uD638\uAC10\uB3C4\uB294
+    \uAD00\uACC4 \uC218\uCE58\uC774\uBA70 HP / ATK / DEF / AGI\uB294 \uC804\uD22C\uC5D0
+    \uC5F0\uACB0\uB418\uC9C0 \uC54A\uB294 \uD45C\uC2DC\uC6A9 \uB2A5\uB825\uCE58\uC785\uB2C8\uB2E4."
+  affinityMaximum: 100
+  initialAffinity: 55
+  statusMaximum: 100
+  health: 60
+  attack: 65
+  defense: 50
+  agility: 90

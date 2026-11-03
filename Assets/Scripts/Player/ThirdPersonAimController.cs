@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// 유효한 Humanoid와 소총 조준 상태에서 척추의 상하 각도를 보정하고 이전 프레임의 보정을 복원한다.
+/// 유효한 Humanoid에서 소총·권총 조준을 상체에 보정하고 이전 프레임의 보정을 복원한다.
 /// </summary>
+// 최종 상체 보정을 소총의 기본 순서 LateUpdate 사격 판정보다 먼저 끝낸다.
+[DefaultExecutionOrder(-10)]
 public class ThirdPersonAimController : MonoBehaviour
 {
     [Header("Player References")]
@@ -21,8 +23,9 @@ public class ThirdPersonAimController : MonoBehaviour
     [SerializeField, Min(0.01f)] private float aimBlendSpeed = 6f;
 
     [Header("Rifle Direction")]
-    [Tooltip("실제 총열의 +Z 방향. 총을 회전시키지 않고 상체 자세의 수평 오차만 계산한다.")]
+    [Tooltip("실제 총열과 같은 +Z 방향. 무기 소켓을 돌리지 않고 상체 조준 오차를 계산한다.")]
     [SerializeField] private Transform rifleDirection;
+    [SerializeField] private Transform pistolDirection;
     [SerializeField, Range(0f, 90f)] private float maxYawCorrection = 80f;
 
     [Header("Spine Rotation Weights")]
@@ -42,8 +45,14 @@ public class ThirdPersonAimController : MonoBehaviour
     private readonly Quaternion[] appliedRotations = new Quaternion[3];
     private readonly bool[] hasPitchOffset = new bool[3];
 
-    private bool CanApplyPitch => playerController != null && playerController.CanApplyRifleAim &&
-        (weapon == null || weapon == playerController.CurrentWeapon) &&
+    // 재장전은 조준 Pitch와 분리하고 실제 총구의 수평 방향만 현재 Player Root에 맞춘다.
+    private bool CanApplyReloadFacing => playerController != null && playerController.CanUseWeapons &&
+        playerController.CurrentWeapon != null && playerController.CurrentWeapon.IsReloading;
+
+    private bool CanApplyPitch => playerController != null &&
+        (playerController.CanApplyRifleAim || playerController.CanApplyPistolAim || CanApplyReloadFacing) &&
+        (playerController.CurrentWeapon != null && playerController.CurrentWeapon.WeaponName == WeaponName.Pistol ||
+            weapon == null || weapon == playerController.CurrentWeapon) &&
         cameraController != null && cameraController.isActiveAndEnabled && cameraController.IsThirdPerson &&
         animator != null && animator.isActiveAndEnabled && animator.runtimeAnimatorController != null;
 
@@ -112,8 +121,10 @@ public class ThirdPersonAimController : MonoBehaviour
         if (appliedFrame == Time.frameCount) return;
         appliedFrame = Time.frameCount;
         // 카메라의 pitch는 위를 보면 음수, 아래를 보면 양수다.
-        float targetPitch = Mathf.Clamp(cameraController.Pitch, -maxUpAngle, maxDownAngle);
-        if (playerController.RifleFiredThisFrame)
+        bool isReloading = CanApplyReloadFacing;
+        // 재장전 클립이 총을 들어 올리는 자연스러운 동작은 보존한다.
+        float targetPitch = isReloading ? 0f : Mathf.Clamp(cameraController.Pitch, -maxUpAngle, maxDownAngle);
+        if (playerController.RifleFiredThisFrame || playerController.PistolFiredThisFrame)
         {
             // 발사 확정 프레임은 블렌드 지연 없이, 이 프레임의 최종 IK Pass에 반영한다.
             aimWeight = 1f;
@@ -121,7 +132,7 @@ public class ThirdPersonAimController : MonoBehaviour
         }
         else
         {
-            bool requested = playerController.WantsRifleAimCorrection;
+            bool requested = isReloading || playerController.WantsRifleAimCorrection || playerController.WantsPistolAimCorrection;
             aimWeight = Mathf.MoveTowards(aimWeight, requested ? 1f : 0f, aimBlendSpeed * Time.deltaTime);
             if (requested) currentPitch = Mathf.MoveTowards(currentPitch, targetPitch, pitchSpeed * Time.deltaTime);
             else if (aimWeight <= 0f) currentPitch = 0f;
@@ -138,14 +149,24 @@ public class ThirdPersonAimController : MonoBehaviour
             return;
 
         // UpperChest가 없는 모델도 남은 뼈가 조준 각도를 나누어 담당한다.
-        float pitchToApply = currentPitch * aimWeight;
+        float pitchToApply = isReloading ? 0f : currentPitch * aimWeight;
+        if (!isReloading && playerController.CanApplyPistolAim && playerController.IsAiming && pistolDirection != null)
+        {
+            // 권총 준비 자세에 포함된 총열의 상하 각도까지 반영한다. 공유 Pitch 상태를 바꾸지 않아 소총 전환에 영향을 주지 않는다.
+            float barrelElevation = Mathf.Asin(Mathf.Clamp(pistolDirection.forward.y, -1f, 1f)) * Mathf.Rad2Deg;
+            pitchToApply = Mathf.Clamp(currentPitch + barrelElevation, -maxUpAngle, maxDownAngle) * aimWeight;
+        }
         Vector3 worldPitchAxis = playerController.transform.right;
         float yawToApply = 0f;
-        if (rifleDirection != null)
+        // 권총과 소총은 각자의 실제 총구를 기준으로 기존 상체 보정을 공유한다.
+        bool isPistol = playerController.CurrentWeapon != null && playerController.CurrentWeapon.WeaponName == WeaponName.Pistol;
+        Transform aimDirection = isPistol ? pistolDirection : rifleDirection;
+        if (aimDirection != null)
         {
             // Root를 제외한 상체 클립은 하체 자세에 따라 총열의 수평 방향이 달라진다.
-            Vector3 barrelForward = Vector3.ProjectOnPlane(rifleDirection.forward, Vector3.up);
-            Vector3 cameraForward = cameraController.Forward;
+            Vector3 barrelForward = Vector3.ProjectOnPlane(aimDirection.forward, Vector3.up);
+            // 조준은 카메라 기준, 재장전은 현재 몸 방향 기준이다. Root 자체는 회전시키지 않는다.
+            Vector3 cameraForward = isReloading ? playerController.transform.forward : cameraController.Forward;
             if (barrelForward.sqrMagnitude > 0.001f)
                 yawToApply = Mathf.Clamp(Vector3.SignedAngle(barrelForward, cameraForward, Vector3.up),
                     -maxYawCorrection, maxYawCorrection) * aimWeight;
@@ -154,6 +175,100 @@ public class ThirdPersonAimController : MonoBehaviour
         ApplyPitch(HumanBodyBones.Spine, spine, pitchToApply * spineShare / totalWeight, worldPitchAxis, 0, yawToApply * spineShare / totalWeight);
         ApplyPitch(HumanBodyBones.Chest, chest, pitchToApply * chestShare / totalWeight, worldPitchAxis, 1, yawToApply * chestShare / totalWeight);
         ApplyPitch(HumanBodyBones.UpperChest, upperChest, pitchToApply * upperChestShare / totalWeight, worldPitchAxis, 2, yawToApply * upperChestShare / totalWeight);
+    }
+
+    /// <summary>
+    /// Humanoid 평가 뒤 실제 총구에서 사격 목표로 향하는 잔여 오차를 상체에 나누어 적용한다.
+    /// </summary>
+    private void LateUpdate()
+    {
+        if (!CanApplyPitch || !playerController.IsAiming || CanApplyReloadFacing ||
+            aimWeight <= 0f || appliedFrame != Time.frameCount) return;
+
+        WeaponAssaultRifle currentWeapon = playerController.CurrentWeapon;
+        Transform aimDirection = currentWeapon != null && currentWeapon.WeaponName == WeaponName.Pistol
+            ? pistolDirection : rifleDirection;
+        if (aimDirection == null || currentWeapon == null ||
+            !currentWeapon.TryGetAimTarget(out Vector3 targetPoint)) return;
+
+        float spineShare = GetAvailableWeight(spine, spineWeight);
+        float chestShare = GetAvailableWeight(chest, chestWeight);
+        float upperChestShare = GetAvailableWeight(upperChest, upperChestWeight);
+        float totalWeight = spineShare + chestShare + upperChestShare;
+        if (totalWeight <= 0f) return;
+
+        // 카메라와 몸 사이의 자기 Collider 등 뒤쪽 목표로 상체를 뒤집지 않는다.
+        if (Vector3.Dot(targetPoint - playerController.transform.position, playerController.transform.forward) <= 0f)
+        {
+            ApplyPistolCameraAim();
+            return;
+        }
+
+        Vector3 muzzleToTarget = targetPoint - aimDirection.position;
+        float horizontalDistance = Vector3.ProjectOnPlane(muzzleToTarget, Vector3.up).magnitude;
+        float requiredPitch = Mathf.Atan2(-muzzleToTarget.y, horizontalDistance) * Mathf.Rad2Deg;
+        // 발밑처럼 기존 조준 범위를 넘는 목표는 원래 IK 자세를 유지한다. 정렬을 위해 허리를 과하게 꺾지 않는다.
+        if (requiredPitch < -maxUpAngle || requiredPitch > maxDownAngle)
+        {
+            ApplyPistolCameraAim();
+            return;
+        }
+        // 제한 각도의 마지막 10도에서는 잔여 보정을 서서히 줄여 경계에서 자세가 튀지 않게 한다.
+        float pitchMargin = Mathf.Min(requiredPitch + maxUpAngle, maxDownAngle - requiredPitch);
+        float correctionWeight = aimWeight * Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(pitchMargin / 10f));
+
+        ApplyAimCorrection(spine, 0, aimDirection, targetPoint, correctionWeight * spineShare / totalWeight);
+        ApplyAimCorrection(chest, 1, aimDirection, targetPoint, correctionWeight * chestShare / totalWeight);
+        ApplyAimCorrection(upperChest, 2, aimDirection, targetPoint, correctionWeight * upperChestShare / totalWeight);
+
+        // 총구도 뼈를 중심으로 이동하므로 마지막 잔여 오차는 실제 회전 중심을 기준으로 해결한다.
+        if (upperChest != null) ApplyAimCorrection(upperChest, 2, aimDirection, targetPoint, correctionWeight);
+        else if (chest != null) ApplyAimCorrection(chest, 1, aimDirection, targetPoint, correctionWeight);
+        else ApplyAimCorrection(spine, 0, aimDirection, targetPoint, correctionWeight);
+    }
+
+    /// <summary>상체 뼈에만 보정을 더하고 다음 프레임에 제거할 회전을 기록한다. 무기와 손 소켓은 그대로 둔다.</summary>
+    private void ApplyAimCorrection(Transform bone, int index, Transform aimDirection, Vector3 targetPoint, float weight)
+    {
+        if (bone == null || weight <= 0f) return;
+        Vector3 muzzleOffset = aimDirection.position - bone.position;
+        Vector3 targetOffset = targetPoint - bone.position;
+        Vector3 barrelForward = aimDirection.forward;
+        float alongBarrel = Vector3.Dot(muzzleOffset, barrelForward);
+        float discriminant = alongBarrel * alongBarrel + targetOffset.sqrMagnitude - muzzleOffset.sqrMagnitude;
+        // 목표가 팔·총구의 회전 반경 안에 있으면 해당 자세로는 도달할 수 없다. 억지로 몸을 꺾지 않는다.
+        if (discriminant < 0f) return;
+        float barrelDistance = Mathf.Sqrt(discriminant) - alongBarrel;
+        if (barrelDistance <= 0f) return;
+
+        // 회전 뒤에도 총열 선 위에 남을 점을 목표와 같은 반경에서 구한다.
+        // 단순 FromToRotation(총열, 목표-총구)와 달리 총구 위치가 함께 움직이는 근거리 시차를 포함한다.
+        Vector3 pointOnBarrel = muzzleOffset + barrelForward * barrelDistance;
+        if (pointOnBarrel.sqrMagnitude < 0.0001f || targetOffset.sqrMagnitude < 0.0001f) return;
+        Quaternion correction = Quaternion.FromToRotation(pointOnBarrel, targetOffset);
+        if (!hasPitchOffset[index]) animatedRotations[index] = bone.localRotation;
+        bone.rotation = Quaternion.Slerp(Quaternion.identity, correction, weight) * bone.rotation;
+        appliedRotations[index] = bone.localRotation;
+        hasPitchOffset[index] = true;
+    }
+
+    /// <summary>근거리 목표가 관절 범위를 넘으면 권총의 기존 카메라 방향 보정을 그대로 사용한다.</summary>
+    private void ApplyPistolCameraAim()
+    {
+        if (!playerController.CanApplyPistolAim || pistolDirection == null) return;
+        Transform targetBone = upperChest;
+        int index = 2;
+        if (targetBone == null) { targetBone = chest; index = 1; }
+        if (targetBone == null) { targetBone = spine; index = 0; }
+        if (targetBone == null) return;
+        float pitch = Mathf.Clamp(cameraController.Pitch, -maxUpAngle, maxDownAngle);
+        Quaternion viewRotation = Quaternion.LookRotation(cameraController.Forward, Vector3.up);
+        Vector3 targetForward = viewRotation * Quaternion.Euler(pitch, 0f, 0f) * Vector3.forward;
+        Quaternion correction = Quaternion.FromToRotation(pistolDirection.forward, targetForward);
+        if (!hasPitchOffset[index]) animatedRotations[index] = targetBone.localRotation;
+        targetBone.rotation = Quaternion.Slerp(Quaternion.identity, correction, aimWeight) * targetBone.rotation;
+        appliedRotations[index] = targetBone.localRotation;
+        hasPitchOffset[index] = true;
     }
 
     /// <summary>

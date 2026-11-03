@@ -45,6 +45,8 @@ public class DialogueUI : MonoBehaviour
     private Coroutine typingCoroutine;
     private string[] lines;
     private string[] speakerNames;
+    private DialogueSpeaker[] sequenceSpeakers;
+    public event Action<DialogueSpeaker> SpeakerChanged;
     private int lineIndex;
     private int openedFrame = -1;
     private int closedFrame = -1;
@@ -98,6 +100,7 @@ public class DialogueUI : MonoBehaviour
         if (!IsReady || IsOpen || dialogueLines == null) return false;
         List<string> validLines = new();
         List<string> validNames = new();
+        List<DialogueSpeaker> validSpeakers = new List<DialogueSpeaker>();
         // 원본 인덱스로 화자를 찾은 뒤 문장과 이름을 함께 거른다.
         for (int i = 0; i < dialogueLines.Length; i++)
         {
@@ -105,6 +108,7 @@ public class DialogueUI : MonoBehaviour
             DialogueSpeaker speaker = speakers != null && i < speakers.Length ? speakers[i] : defaultSpeaker;
             string displayName = speaker == DialogueSpeaker.Player ? playerName : npcName;
             validLines.Add(dialogueLines[i]);
+            validSpeakers.Add(speaker);
             validNames.Add(string.IsNullOrWhiteSpace(displayName)
                 ? speaker == DialogueSpeaker.Player ? "플레이어" : "NPC" : displayName.Trim());
         }
@@ -113,6 +117,7 @@ public class DialogueUI : MonoBehaviour
         ResetAdvanceState();
         lines = validLines.ToArray();
         speakerNames = validNames.ToArray();
+        sequenceSpeakers = validSpeakers.ToArray();
         lineIndex = 0;
         completedCallback = onCompleted;
         cancelledCallback = onCancelled;
@@ -288,6 +293,10 @@ public class DialogueUI : MonoBehaviour
         lineDisplayedAt = -1f;
         // 문장이 바뀔 때 같은 인덱스의 화자 이름도 바로 갱신한다.
         if (speakerNameText != null) speakerNameText.text = speakerNames[lineIndex];
+        // 타이핑 완성 여부와 관계없이 현재 문장의 실제 발언자를 알린다.
+        SpeakerChanged?.Invoke(sequenceSpeakers[lineIndex]);
+        // 화자 이벤트가 대화를 즉시 취소하면 정리된 대사 배열을 다시 읽지 않는다.
+        if (!isOpen || lines == null) return;
         dialogueText.text = lines[lineIndex];
         dialogueText.maxVisibleCharacters = 0;
         dialogueText.ForceMeshUpdate();
@@ -346,6 +355,7 @@ public class DialogueUI : MonoBehaviour
         closedFrame = Time.frameCount;
         lines = null;
         speakerNames = null;
+        sequenceSpeakers = null;
         if (speakerNameText != null) speakerNameText.text = string.Empty;
         if (dialogueText != null) dialogueText.text = string.Empty;
         if (dialoguePanel != null) dialoguePanel.SetActive(false);

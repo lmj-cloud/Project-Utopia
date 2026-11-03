@@ -18,6 +18,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private WeaponAssaultRifle weapon;
     [SerializeField] private PlayerEquipment equipment;
     public WeaponAssaultRifle CurrentWeapon => weapon;
+    [Header("Interaction Input")]
+    [SerializeField] private Key interactionKey = Key.F;
+    public Key InteractionKey => interactionKey;
 
     [Header("Interaction / UI")]
     [SerializeField] private PlayerInteraction playerInteraction;
@@ -26,6 +29,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private InventoryUI inventoryUI;
     [SerializeField] private StoryProgress storyProgress;
     [SerializeField] private GameplayUI gameplayUI;
+
+    [Header("Quick Slot Wheel")]
+    [SerializeField] private QuickSlotWheelUI quickSlotWheel;
+    [SerializeField] private Key quickSlotKey = Key.E;
+    private bool suppressQuickSlotMouse;
 
     [Header("Temporary Tutorial Display Input")]
     [SerializeField] private TutorialManager tutorial;
@@ -65,8 +73,56 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private bool allowMelee = true;
     [SerializeField] private bool allowEquipmentChanges = true;
     public bool CanUseWeapons => CanControlPlayer && allowWeapons;
-    public bool CanChangeEquipment => CanControlPlayer && allowEquipmentChanges;
-    public bool CanUseMelee => CanControlPlayer && allowMelee;
+    public bool CanChangeEquipment => CanControlPlayer && allowEquipmentChanges && mmaCombatOwner == null &&
+        (playerAnimator == null || !playerAnimator.IsHitReacting);
+    [Header("MMA 행동 권한 (다른 장비에는 적용하지 않음)")]
+    [SerializeField] private bool allowMmaOutsideCombat;
+    private Object mmaCombatOwner;
+    private PlayerEquipmentKind equipmentBeforeMma;
+    public bool IsMmaCombatActive { get { return mmaCombatOwner != null; } }
+    public bool CanUseMma { get { return CanControlPlayer && allowMelee && (mmaCombatOwner != null || allowMmaOutsideCombat); } }
+    public bool CanUseMelee => CanControlPlayer && allowMelee &&
+        (playerAnimator == null || !playerAnimator.IsHitReacting) &&
+        (equipment == null || (equipment.CurrentKind != PlayerEquipmentKind.Gloves && equipment.CurrentKind != PlayerEquipmentKind.BareHands) || mmaCombatOwner != null || allowMmaOutsideCombat);
+
+    /// <summary>안전지대의 MMA 권한만 바꾼다. 소총·권총·단검의 권한은 유지한다.</summary>
+    public void SetMmaActionsEnabled(bool value)
+    {
+        allowMmaOutsideCombat = value;
+        if (!CanUseMma && equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves && melee != null)
+        {
+            melee.CancelActions();
+        }
+    }
+
+    /// <summary>현재 장비를 기억하고 기존 행동을 취소한 뒤 소유자 전용 MMA 전투를 시작한다.</summary>
+    public bool TryBeginMmaCombat(Object owner)
+    {
+        if (owner == null || !CanControlPlayer || !allowMelee || equipment == null) return false;
+        if (mmaCombatOwner != null) return mmaCombatOwner == owner;
+        PlayerEquipmentKind previous = equipment.CurrentKind;
+        if (weapon != null) weapon.CancelWeaponActions();
+        if (melee != null) melee.CancelActions();
+        if (!equipment.RestoreEquipment(PlayerEquipmentKind.Gloves)) return false;
+        equipmentBeforeMma = previous;
+        mmaCombatOwner = owner;
+        if (combatActions != null) combatActions.ResetMmaCombo();
+        isAiming = false;
+        return true;
+    }
+
+    /// <summary>자기 전투만 종료하고 이전 장비를 복구한다. 다른 컷신의 입력 잠금은 해제하지 않는다.</summary>
+    public void EndMmaCombat(Object owner)
+    {
+        if (owner == null || mmaCombatOwner != owner) return;
+        if (melee != null) melee.CancelActions();
+        mmaCombatOwner = null;
+        if (combatActions != null) combatActions.ResetMmaCombo();
+        if (equipment != null && !equipment.RestoreEquipment(equipmentBeforeMma))
+        {
+            equipment.RestoreEquipment(PlayerEquipmentKind.BareHands);
+        }
+    }
     /// <summary>
     /// 총기 행동 허용 여부를 변경하고 금지 시 진행 중 무기 동작을 취소한다.
     /// </summary>
@@ -121,8 +177,13 @@ public class PlayerController : MonoBehaviour
     public bool CanApplyRifleAim => CanUseWeapons && equipment != null &&
         equipment.CurrentKind == PlayerEquipmentKind.AssaultRifle && weapon != null &&
         equipment.CurrentWeapon == weapon && weapon.isActiveAndEnabled && !weapon.IsReloading;
-    public bool WantsRifleAimCorrection => CanApplyRifleAim && (isAiming || Time.time < fireFacingUntil);
-    public bool RifleFiredThisFrame => CanApplyRifleAim && lastFiredFrame == Time.frameCount;
+    public bool CanApplyPistolAim => CanUseWeapons && equipment != null &&
+        equipment.CurrentKind == PlayerEquipmentKind.Pistol && weapon != null &&
+        equipment.CurrentWeapon == weapon && weapon.isActiveAndEnabled && !weapon.IsReloading;
+    public bool WantsPistolAimCorrection => CanApplyPistolAim && isAiming;
+    public bool PistolFiredThisFrame => CanApplyPistolAim && isAiming && lastFiredFrame == Time.frameCount;
+    public bool WantsRifleAimCorrection => CanApplyRifleAim && isAiming;
+    public bool RifleFiredThisFrame => CanApplyRifleAim && isAiming && lastFiredFrame == Time.frameCount;
     public bool CanControlPlayer => isActiveAndEnabled && canMove && controlLocks.Count == 0 &&
         playerStatus != null && !playerStatus.IsDead &&
         !(cameraController != null && cameraController.IsStoryFirstPerson) &&
@@ -181,7 +242,8 @@ public class PlayerController : MonoBehaviour
         if (!CanControlPlayer) return;
         fireFacingUntil = Time.time + Mathf.Max(0.25f, weapon.AttackInterval + 0.05f);
         lastFiredFrame = Time.frameCount;
-        playerMovement.FaceImmediately(cameraController.Forward);
+        // 비조준 발사는 기존 이동 방향을 유지하고, 우클릭 조준 중에만 카메라를 향한다.
+        if (isAiming) playerMovement.FaceImmediately(cameraController.Forward);
     }
 
     /// <summary>
@@ -189,6 +251,12 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        // 휠이 가진 잠금 때문에 일반 입력 검사에서 조기 반환되기 전에 해제·취소를 처리한다.
+        if (HandleQuickSlotInput())
+        {
+            BlockControl();
+            return;
+        }
         if (weapon != null && weapon.IsReloading)
         {
             fireFacingUntil = 0f;
@@ -240,7 +308,7 @@ public class PlayerController : MonoBehaviour
         }
 
         if (playerInteraction != null) playerInteraction.SetInteractionEnabled(true);
-        if (keyboard != null && keyboard.fKey.wasPressedThisFrame && playerInteraction != null)
+        if (keyboard != null && interactionKey != Key.None && keyboard[interactionKey].wasPressedThisFrame && playerInteraction != null)
         {
             playerInteraction.TryInteract(playerInventory, dialogueUI, storyProgress);
             // 같은 프레임에 시작한 대사/컷씬이 이동·발사보다 우선한다.
@@ -284,10 +352,13 @@ public class PlayerController : MonoBehaviour
             melee.SetBlocking(mma && keyboard != null && blockKey != Key.None && keyboard[blockKey].isPressed);
             if (Mouse.current != null)
             {
-                if (combatActions != null && combatActions.UsesDirectionalInput)
+                if (mma)
                 {
-                    if (Mouse.current.leftButton.wasPressedThisFrame) combatActions.TryDirectionalAttack(false);
-                    else if (Mouse.current.rightButton.wasPressedThisFrame) combatActions.TryDirectionalAttack(true);
+                    // 누르고 있는 상태가 아니라 새 클릭만 전달한다. 예약과 손 순서는 전투 행동이 관리한다.
+                    if (combatActions != null && combatActions.UsesDirectionalInput && Mouse.current.leftButton.wasPressedThisFrame)
+                    {
+                        combatActions.TryMmaComboAttack();
+                    }
                 }
                 else
                 {
@@ -298,7 +369,7 @@ public class PlayerController : MonoBehaviour
             if (mma && Pressed(keyboard, grabKey)) melee.TryGrab(false);
             if (Pressed(keyboard, assassinationKey))
             {
-                if (combatActions != null && combatActions.UsesDirectionalInput) combatActions.TryExecution(true);
+                if (mma && combatActions != null && combatActions.UsesDirectionalInput) combatActions.TryExecution(true);
                 else melee.TryGrab(true);
             }
             if (Pressed(keyboard, finisherKey) && combatActions != null && combatActions.UsesDirectionalInput)
@@ -310,6 +381,58 @@ public class PlayerController : MonoBehaviour
             if (melee != null) melee.SetBlocking(false);
             UpdateWeaponAction();
         }
+    }
+
+    /// <summary>
+    /// 휠 소유 잠금 이외의 UI·컷신·차량·사망 상태가 생기면 선택을 취소한다.
+    /// </summary>
+    public bool CanKeepQuickSlotOpen(QuickSlotWheelUI owner)
+    {
+        return owner != null && isActiveAndEnabled && canMove && IsAlive && !HasOtherControlLock(owner) &&
+            !(cameraController != null && cameraController.IsStoryFirstPerson) &&
+            !(dialogueUI != null && (dialogueUI.IsOpen || dialogueUI.WasClosedThisFrame)) &&
+            !(inventoryUI != null && (inventoryUI.IsOpen || inventoryUI.WasClosedThisFrame)) &&
+            !(gameplayUI != null && gameplayUI.IsDemoEndVisible) &&
+            !(itemUse != null && itemUse.IsUsing) && !(playerInventory != null && playerInventory.IsUseLocked);
+    }
+
+    /// <summary>
+    /// 키 누름 한 번당 휠 세션 하나만 처리한다. 닫힌 프레임과 확인 클릭은 총기 입력으로 넘기지 않는다.
+    /// </summary>
+    private bool HandleQuickSlotInput()
+    {
+        Keyboard keyboard = Keyboard.current;
+        Mouse mouse = Mouse.current;
+        if (quickSlotWheel != null && quickSlotWheel.IsOpen)
+        {
+            if (!CanKeepQuickSlotOpen(quickSlotWheel) || keyboard == null || mouse == null ||
+                quickSlotKey == Key.None || keyboard.escapeKey.wasPressedThisFrame)
+            {
+                quickSlotWheel.Cancel();
+            }
+            else if (keyboard.tabKey.wasPressedThisFrame)
+            {
+                quickSlotWheel.Cancel();
+                if (inventoryUI != null) inventoryUI.Open();
+            }
+            else
+            {
+                quickSlotWheel.UpdatePointer(mouse.position.ReadValue());
+                if (mouse.leftButton.wasPressedThisFrame || !keyboard[quickSlotKey].isPressed)
+                    quickSlotWheel.ConfirmAndClose(itemUse);
+            }
+            suppressQuickSlotMouse = mouse != null && mouse.leftButton.isPressed;
+            return true;
+        }
+        if (quickSlotWheel != null && quickSlotWheel.WasClosedThisFrame) return true;
+        if (suppressQuickSlotMouse)
+        {
+            suppressQuickSlotMouse = mouse != null && mouse.leftButton.isPressed;
+            if (suppressQuickSlotMouse) return true;
+        }
+        if (quickSlotWheel == null || !quickSlotWheel.isActiveAndEnabled || !CanControlPlayer ||
+            !CanKeepQuickSlotOpen(quickSlotWheel) || !Pressed(keyboard, quickSlotKey) || mouse == null) return false;
+        return quickSlotWheel.TryOpen(this, playerInventory);
     }
 
     /// <summary>
@@ -328,6 +451,12 @@ public class PlayerController : MonoBehaviour
     private void UpdateSpeed(Vector2 input)
     {
         playerMovement.TargetSpeed = playerStatus.WalkSpeed;
+        if (isAiming)
+        {
+            // 조준은 기존 걷기 속도를 사용한다. Shift의 스태미나 검사도 실행하지 않는다.
+            playerMovement.LimitHorizontalSpeed(playerStatus.WalkSpeed);
+            return;
+        }
         bool wantsToSprint = Keyboard.current != null && Keyboard.current.leftShiftKey.isPressed;
         if (wantsToSprint && !playerMovement.IsCrouching && input.sqrMagnitude > 0.01f &&
             playerStatus.TryUseStamina(playerStatus.RunStaminaCostPerSecond * Time.deltaTime))
@@ -341,10 +470,23 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 moveDirection = cameraController.GetMoveDirection(input);
         playerMovement.MoveTo(moveDirection);
-        // 재장전 중에는 이동 방향 대신 카메라의 수평 방향을 계속 바라본다.
-        bool isReloading = weapon != null && weapon.IsReloading;
-        if (Time.time < fireFacingUntil || isReloading)
-            playerMovement.SetFacingDirection(cameraController.Forward, true);
+        // 장비·재장전 여부와 무관하게 우클릭 조준 중일 때만 카메라 기준 방향을 사용한다.
+        // 비조준은 맨손과 같은 이동 방향 회전을 사용하며, 정지 중에는 현재 방향을 유지한다.
+        if (playerAnimator != null && playerAnimator.UsesMmaCombatLocomotion)
+        {
+            // 복싱은 뒤로 걷기와 옆 스텝을 위해 카메라 정면을 유지한다. 실제 회전은 이동 담당자가 적용한다.
+            Vector3 forward = cameraController.Forward;
+            forward.y = 0f;
+            if (forward.sqrMagnitude < 0.001f) forward = transform.forward;
+            playerMovement.SetFacingDirection(forward, true);
+            // 월드 이동을 이번 프레임의 몸 기준 방향으로 변환한다. 대각선 입력의 크기는 1로 제한한다.
+            Vector3 localMove = Quaternion.Inverse(Quaternion.LookRotation(forward)) * Vector3.ClampMagnitude(moveDirection, 1f);
+            float maxDelta = animationChangedSecond * Time.deltaTime;
+            animationInput.x = Mathf.MoveTowards(animationInput.x, localMove.x, maxDelta);
+            animationInput.y = Mathf.MoveTowards(animationInput.y, localMove.z, maxDelta);
+            playerAnimator.MoveHorizontal = animationInput.x;
+            playerAnimator.MoveVertical = animationInput.y;
+        }
         else if (cameraController.IsThirdPerson && !isAiming)
             playerMovement.SetFacingDirection(moveDirection, false);
         else
@@ -375,6 +517,9 @@ public class PlayerController : MonoBehaviour
             if (keyboard.sKey.isPressed) vertical -= 1f;
             if (keyboard.wKey.isPressed) vertical += 1f;
         }
+        // 복싱 이동은 UpdateMove에서 몸의 기준 방향으로 변환한 뒤 한 번만 보간한다.
+        if (playerAnimator != null && playerAnimator.UsesMmaCombatLocomotion)
+            return new Vector2(horizontal, vertical);
         float maxDelta = animationChangedSecond * Time.deltaTime;
         animationInput.x = Mathf.MoveTowards(animationInput.x, horizontal, maxDelta);
         animationInput.y = Mathf.MoveTowards(animationInput.y, vertical, maxDelta);
@@ -402,11 +547,8 @@ public class PlayerController : MonoBehaviour
         if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
         {
             weapon.StartReload();
-            if (weapon.IsReloading)
-            {
-                // 입력 처리 순서상 이동 갱신 뒤에 재장전이 시작되므로 시작 프레임에도 방향을 맞춘다.
-                playerMovement.FaceImmediately(cameraController.Forward);
-            }
+            // 재장전 시작만으로 Root를 카메라 방향으로 돌리지 않는다.
+            // UpdateMove가 현재 조준 여부에 맞는 기존 회전 정책을 계속 담당한다.
         }
     }
 
@@ -452,8 +594,9 @@ public class PlayerController : MonoBehaviour
             if (playerAnimator != null) playerAnimator.OnCrouching(playerMovement.IsCrouching);
         }
         bool inventoryOpen = (inventoryUI != null && inventoryUI.IsOpen) || (gameplayUI != null && gameplayUI.IsDemoEndVisible);
-        Cursor.visible = inventoryOpen;
-        Cursor.lockState = inventoryOpen ? CursorLockMode.None : CursorLockMode.Locked;
+        bool wheelOpen = quickSlotWheel != null && quickSlotWheel.IsOpen;
+        Cursor.visible = inventoryOpen || wheelOpen;
+        Cursor.lockState = inventoryOpen || wheelOpen ? CursorLockMode.None : CursorLockMode.Locked;
         if (playerAnimator != null && playerMovement != null && canMove && controlLocks.Count == 0)
         {
             playerAnimator.CurrentSpeed = CanControlPlayer ? playerMovement.HorizontalVelocity.magnitude : 0f;
@@ -467,6 +610,7 @@ public class PlayerController : MonoBehaviour
     public void SetMovementEnabled(bool enabled)
     {
         canMove = enabled;
+        if (!enabled && quickSlotWheel != null) quickSlotWheel.Cancel();
         if (!enabled) StopPlayerActions();
         if (!enabled && playerInteraction != null) playerInteraction.SetInteractionEnabled(false);
     }
@@ -478,6 +622,7 @@ public class PlayerController : MonoBehaviour
     {
         if (owner == null) return;
         controlLocks.Add(owner);
+        if (quickSlotWheel != null && quickSlotWheel.IsOpen && owner != quickSlotWheel) quickSlotWheel.Cancel();
         if (itemUse != null && itemUse.IsUsing && owner != itemUse) itemUse.CancelUse();
         StopPlayerActions();
         if (inventoryUI != null) inventoryUI.Close();
@@ -490,6 +635,18 @@ public class PlayerController : MonoBehaviour
     public void ReleaseControlLock(Object owner)
     {
         if (owner != null) controlLocks.Remove(owner);
+    }
+
+    /// <summary>
+    /// 차량처럼 자기 입력 잠금을 보유한 동작이 다른 소유자의 잠금과 충돌하는지 확인한다.
+    /// </summary>
+    public bool HasOtherControlLock(Object owner)
+    {
+        foreach (Object lockOwner in controlLocks)
+        {
+            if (lockOwner != owner) return true;
+        }
+        return false;
     }
 
     /// <summary>
@@ -511,6 +668,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void OnDisable()
     {
+        if (quickSlotWheel != null) quickSlotWheel.Cancel();
         if (equipment != null) equipment.OnWeaponChanged -= SetCurrentWeapon;
         if (weapon != null) weapon.OnFired -= OnWeaponFired;
         BlockControl();

@@ -17,18 +17,17 @@ public class PlayerEquipment : MonoBehaviour
     {
         // 입력 잠금 중에도 세션 복원은 가능하지만, 없는 모델이나 소유하지 않은 장비는 만들지 않는다.
         Initialize();
-        ItemData required;
         EquipmentSlot slot;
         switch (kind)
         {
-            case PlayerEquipmentKind.AssaultRifle: required = requiredRifleItem; slot = assaultRifle; break;
-            case PlayerEquipmentKind.Pistol: required = requiredPistolItem; slot = pistol; break;
-            case PlayerEquipmentKind.BareHands: required = null; slot = null; break;
-            case PlayerEquipmentKind.Gloves: required = requiredGlovesItem; slot = gloves; break;
-            case PlayerEquipmentKind.Dagger: required = requiredDaggerItem; slot = dagger; break;
+            case PlayerEquipmentKind.AssaultRifle: slot = assaultRifle; break;
+            case PlayerEquipmentKind.Pistol: slot = pistol; break;
+            case PlayerEquipmentKind.BareHands: slot = null; break;
+            case PlayerEquipmentKind.Gloves: slot = gloves; break;
+            case PlayerEquipmentKind.Dagger: slot = dagger; break;
             default: return false;
         }
-        if (required != null && (inventory == null || !inventory.HasItem(required)))
+        if (!HasOwnership(kind))
         {
             return false;
         }
@@ -126,9 +125,7 @@ public class PlayerEquipment : MonoBehaviour
     public bool TryEquip(PlayerEquipmentKind kind)
     {
         if (!isActiveAndEnabled || playerController == null || !playerController.CanChangeEquipment || kind == CurrentKind) return false;
-        ItemData required = kind == PlayerEquipmentKind.AssaultRifle ? requiredRifleItem : kind == PlayerEquipmentKind.Pistol ? requiredPistolItem :
-            kind == PlayerEquipmentKind.Gloves ? requiredGlovesItem : kind == PlayerEquipmentKind.Dagger ? requiredDaggerItem : null;
-        if (required != null && (inventory == null || !inventory.HasItem(required))) return false;
+        if (!HasOwnership(kind)) return false;
         EquipmentSlot slot = kind == PlayerEquipmentKind.AssaultRifle ? assaultRifle : kind == PlayerEquipmentKind.Pistol ? pistol :
             kind == PlayerEquipmentKind.Gloves ? gloves : kind == PlayerEquipmentKind.Dagger ? dagger : null;
         if (!IsSlotReady(kind, slot)) return false;
@@ -148,7 +145,7 @@ public class PlayerEquipment : MonoBehaviour
         if (initialKind == PlayerEquipmentKind.AssaultRifle && initialWeapon == WeaponName.Pistol) CurrentKind = PlayerEquipmentKind.Pistol;
         EquipmentSlot slot = CurrentKind == PlayerEquipmentKind.AssaultRifle ? assaultRifle : CurrentKind == PlayerEquipmentKind.Pistol ? pistol :
             CurrentKind == PlayerEquipmentKind.Gloves ? gloves : CurrentKind == PlayerEquipmentKind.Dagger ? dagger : null;
-        if (!IsSlotReady(CurrentKind, slot))
+        if (!HasOwnership(CurrentKind) || !IsSlotReady(CurrentKind, slot))
         {
             CurrentKind = PlayerEquipmentKind.BareHands;
             slot = null;
@@ -157,8 +154,43 @@ public class PlayerEquipment : MonoBehaviour
     }
 
     /// <summary>
-    /// 요청 장비 슬롯이 실제 사용 가능한 참조를 갖췄는지 확인한다.
+    /// 장비 종류에 연결된 필수 소유 아이템 데이터를 반환한다.
     /// </summary>
+    public ItemData GetRequiredItem(PlayerEquipmentKind kind)
+    {
+        switch (kind)
+        {
+            case PlayerEquipmentKind.AssaultRifle: return requiredRifleItem;
+            case PlayerEquipmentKind.Pistol: return requiredPistolItem;
+            case PlayerEquipmentKind.Gloves: return requiredGlovesItem;
+            case PlayerEquipmentKind.Dagger: return requiredDaggerItem;
+            default: return null;
+        }
+    }
+
+    /// <summary>
+    /// 소총과 권총은 필수 소유 데이터가 연결되어야 한다. 근접 장비의 기존 조건은 유지한다.
+    /// </summary>
+    public bool HasOwnership(PlayerEquipmentKind kind)
+    {
+        ItemData item = GetRequiredItem(kind);
+        if (kind == PlayerEquipmentKind.AssaultRifle || kind == PlayerEquipmentKind.Pistol)
+        {
+            return item != null && item.IsFixedWeapon && item.EquipmentKind == kind &&
+                inventory != null && inventory.HasItem(item);
+        }
+        return item == null || (inventory != null && inventory.HasItem(item));
+    }
+
+    private void OwnershipChanged()
+    {
+        if (initialized && !HasOwnership(CurrentKind))
+        {
+            CurrentKind = PlayerEquipmentKind.BareHands;
+            Select(null);
+        }
+    }
+
     public bool IsAssigned(PlayerEquipmentKind kind)
     {
         EquipmentSlot slot = kind == PlayerEquipmentKind.AssaultRifle ? assaultRifle : kind == PlayerEquipmentKind.Pistol ? pistol :
@@ -219,7 +251,7 @@ public class PlayerEquipment : MonoBehaviour
     {
         EquipmentSlot slot = kind == PlayerEquipmentKind.AssaultRifle ? assaultRifle : kind == PlayerEquipmentKind.Pistol ? pistol :
             kind == PlayerEquipmentKind.Gloves ? gloves : kind == PlayerEquipmentKind.Dagger ? dagger : null;
-        return kind == PlayerEquipmentKind.BareHands || (slot != null && slot.firstPersonDisplay != null);
+        return HasOwnership(kind) && (kind == PlayerEquipmentKind.BareHands || (slot != null && slot.firstPersonDisplay != null));
     }
     /// <summary>
     /// 다른 표시 소유자가 없을 때 해당 요청의 컷신 장비 표시를 예약한다.
@@ -287,6 +319,9 @@ public class PlayerEquipment : MonoBehaviour
     /// </summary>
     private void OnEnable()
     {
+        if (inventory == null) inventory = GetComponent<PlayerInventory>();
+        if (inventory != null) inventory.Changed += OwnershipChanged;
+        OwnershipChanged();
         if (initialized) SetEquipped(current, true);
     }
 
@@ -295,6 +330,7 @@ public class PlayerEquipment : MonoBehaviour
     /// </summary>
     private void OnDisable()
     {
+        if (inventory != null) inventory.Changed -= OwnershipChanged;
         if (storyDisplayOwner != null) EndStoryDisplay(storyDisplayOwner);
         if (melee != null) melee.CancelActions();
         SetEquipped(current, false);

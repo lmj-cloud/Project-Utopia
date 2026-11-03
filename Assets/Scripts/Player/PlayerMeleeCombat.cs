@@ -36,6 +36,22 @@ public class PlayerMeleeCombat : MonoBehaviour
         nextAttack = Time.time + attackInterval;
     }
 
+    /// <summary>완료된 MMA 펀치에만 짧은 회복 시간을 적용한다. 일반·단검 공격의 간격은 보존한다.</summary>
+    internal void ReleaseExternalMmaAction(PlayerCombatActions owner, int id, float recoverySeconds)
+    {
+        if (externalAction != owner || id != requestId) return;
+        externalAction = null;
+        nextAttack = Time.time + Mathf.Max(0f, recoverySeconds);
+    }
+
+    /// <summary>완료된 MMA 요청을 다음 콤보에 넘긴다. 일반 공격의 대기 시간 정책은 변경하지 않는다.</summary>
+    internal void ReleaseExternalActionForCombo(PlayerCombatActions owner, int id)
+    {
+        if (externalAction != owner || id != requestId) return;
+        externalAction = null;
+        nextAttack = Time.time;
+    }
+
     /// <summary>
     /// 유효한 외부 전투 요청인지 확인한 뒤 기존 공격 스태미나 비용을 소비한다.
     /// </summary>
@@ -109,6 +125,58 @@ public class PlayerMeleeCombat : MonoBehaviour
     public bool IsDodging => Time.time < dodgeUntil;
     public bool IsBlocking => blocking;
     public event Action<DemoAction, UnityEngine.Object> Succeeded;
+    [Header("MMA 타격 효과 (미연결 상태에서도 전투 판정은 유지)")]
+    [SerializeField] private AudioSource mmaAudioSource;
+    [SerializeField] private AudioClip mmaJabSwing;
+    [SerializeField] private AudioClip mmaCrossSwing;
+    [SerializeField] private AudioClip mmaHitSound;
+    [SerializeField] private AudioClip mmaBlockSound;
+    [SerializeField, Range(0f, 1f)] private float mmaSoundVolume = 0.65f;
+    [SerializeField] private GameObject mmaHitEffectPrefab;
+    [SerializeField, Min(0.01f)] private float mmaHitEffectScale = 0.6f;
+    private MemoryPool mmaHitEffectPool;
+    private int lastMmaSwingRequest = -1;
+
+    /// <summary>실제 시작한 펀치의 휘두르기 소리를 재생한다. AI도 자신의 AudioSource를 전달해 재사용한다.</summary>
+    public void PlayMmaSwing(bool rightHand, AudioSource source = null)
+    {
+        AudioClip clip = rightHand ? mmaCrossSwing : mmaJabSwing;
+        PlayMmaSound(clip, source);
+    }
+
+    private void PlayMmaSound(AudioClip clip, AudioSource source)
+    {
+        if (source == null) source = mmaAudioSource;
+        if (source == null || !source.isActiveAndEnabled || clip == null) return;
+        source.PlayOneShot(clip, mmaSoundVolume);
+    }
+
+    /// <summary>판정 완료 지점에서만 명중/방어음을 재생한다. 방어에는 일반 명중 파티클을 만들지 않는다.</summary>
+    public void PlayMmaContact(bool blocked, Vector3 point, Vector3 normal, AudioSource source = null)
+    {
+        PlayMmaSound(blocked ? mmaBlockSound : mmaHitSound, source);
+        if (blocked || mmaHitEffectPool == null || !isActiveAndEnabled) return;
+        GameObject effect = mmaHitEffectPool.ActivatePoolItem();
+        if (effect == null) return;
+        if (normal.sqrMagnitude < 0.001f) normal = Vector3.up;
+        effect.transform.SetPositionAndRotation(point, Quaternion.LookRotation(normal));
+        effect.transform.localScale = mmaHitEffectPrefab.transform.localScale * mmaHitEffectScale;
+        effect.GetComponent<Impact>().Setup(mmaHitEffectPool);
+    }
+
+    /// <summary>대련 종료와 비활성화에서 MMA 효과만 정리한다. 총기 AudioSource와 풀은 유지한다.</summary>
+    public void ClearMmaFeedback()
+    {
+        if (mmaAudioSource != null) mmaAudioSource.Stop();
+        if (mmaHitEffectPool != null) mmaHitEffectPool.DeactivateAllPoolItems();
+    }
+
+    /// <summary>씬의 MMA 전용 풀만 제거한다. 총기 충돌 효과 풀에는 관여하지 않는다.</summary>
+    private void OnDestroy()
+    {
+        if (mmaHitEffectPool != null) mmaHitEffectPool.DestroyObjects();
+    }
+
     private bool CanAct => isActiveAndEnabled && playerController != null && playerController.CanUseMelee &&
         status != null && !status.IsDead && equipment != null && equipment.IsMelee;
     /// <summary>
@@ -121,6 +189,9 @@ public class PlayerMeleeCombat : MonoBehaviour
         if (movement == null) movement = GetComponent<PlayerMovement>();
         if (animator == null) animator = GetComponent<PlayerAnimatorController>();
         if (equipment == null) equipment = GetComponent<PlayerEquipment>();
+        if (mmaHitEffectPrefab != null && mmaHitEffectPrefab.GetComponent<Impact>() != null &&
+            mmaHitEffectPrefab.GetComponent<ParticleSystem>() != null)
+            mmaHitEffectPool = new MemoryPool(mmaHitEffectPrefab);
     }
     /// <summary>
     /// 장비·대기 시간·스태미나를 검사하고 일반 또는 지정된 강공격을 요청한다.
@@ -220,8 +291,19 @@ public class PlayerMeleeCombat : MonoBehaviour
             {
                 SparringOpponent opponent = enemy.GetComponent<SparringOpponent>();
                 // MMA 상대가 실제 타격 위치를 전방에서 방어한 경우에는 피해·피격·성공 알림을 모두 생략한다.
-                if (opponent != null && opponent.CanBlockAttack(attackOrigin.position)) continue;
-                if (enemy.TryTakeDamage(amount, hitbox != null ? hitbox.Part : EnemyHitPart.Body)) Succeeded?.Invoke(action, enemy);
+                Vector3 point = collider.ClosestPoint(attackOrigin.position);
+                Vector3 normal = attackOrigin.position - point;
+                bool mma = equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves;
+                if (opponent != null && opponent.CanBlockAttack(attackOrigin.position))
+                {
+                    if (mma) PlayMmaContact(true, point, normal);
+                    continue;
+                }
+                if (enemy.TryTakeDamage(amount, hitbox != null ? hitbox.Part : EnemyHitPart.Body))
+                {
+                    if (mma) PlayMmaContact(false, point, normal);
+                    Succeeded?.Invoke(action, enemy);
+                }
             }
             else if (target != null && !target.IsDead && damaged.Add(target))
             {
@@ -254,6 +336,11 @@ public class PlayerMeleeCombat : MonoBehaviour
     {
         if (externalAction != owner || owner == null || !owner.IsRunning || id != requestId ||
             equipment == null || equipment.CurrentKind != PlayerEquipmentKind.Gloves) return;
+        if (lastMmaSwingRequest != id)
+        {
+            lastMmaSwingRequest = id;
+            PlayMmaSwing(owner.IsRightMmaPunch);
+        }
         NotifyMmaOpponents();
     }
 
@@ -435,5 +522,9 @@ public class PlayerMeleeCombat : MonoBehaviour
     /// <summary>
     /// 비활성화 시 이 컴포넌트가 남긴 진행 상태나 이벤트 연결을 정리한다.
     /// </summary>
-    private void OnDisable() => CancelActions();
+    private void OnDisable()
+    {
+        CancelActions();
+        ClearMmaFeedback();
+    }
 }

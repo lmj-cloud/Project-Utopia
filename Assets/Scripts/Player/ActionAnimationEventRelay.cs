@@ -52,6 +52,11 @@ public class ActionAnimationEventRelay : MonoBehaviour
         int index = animator.GetLayerIndex(combatBinding.layerName);
         if (index < 0) return false;
         AnimatorStateInfo current = animator.GetCurrentAnimatorStateInfo(index);
+        // 콤보 블렌드 초반의 Arm 이벤트는 다음 State에서 발생한다. 이전 State의 이벤트는 계속 거부한다.
+        if (!current.IsName(combatBinding.statePath) && animator.IsInTransition(index))
+        {
+            current = animator.GetNextAnimatorStateInfo(index);
+        }
         if (!current.IsName(combatBinding.statePath) || current.fullPathHash != evt.animatorStateInfo.fullPathHash ||
             Mathf.Abs(current.normalizedTime - evt.animatorStateInfo.normalizedTime) > 0.1f) return false;
         foreach (AnimationClip clip in combatBinding.requiredClips)

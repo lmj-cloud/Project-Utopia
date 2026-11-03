@@ -50,6 +50,7 @@ public class PlayerStatus : MonoBehaviour
 
     [Header("Health")]
     [SerializeField, Min(1f)] private float maxHealth = 100f;
+    [SerializeField, Min(1f)] private float currentHealth;
 
     [Header("Stamina")]
     [SerializeField, Min(1f)] private float maxStamina = 100f;
@@ -57,7 +58,6 @@ public class PlayerStatus : MonoBehaviour
     [SerializeField, Min(0f)] private float staminaRecoveryDelay = 0.75f;
     [SerializeField] private float runStaminaCostPerSecond = 20f;
 
-    private float currentHealth;
     private float currentStamina;
     private float lastStaminaUseTime;
 

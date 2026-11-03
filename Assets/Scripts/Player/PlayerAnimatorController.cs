@@ -26,7 +26,13 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     public bool TryPlayCombatAction(CombatAnimationProfile profile, CombatActionKind action, Object owner)
     {
-        if (profile == null || IsDead) return false;
+        return TryPlayCombatAction(profile, action, owner, 0f);
+    }
+
+    /// <summary>콤보 연결에만 짧은 블렌드를 적용하고 기존 단발 행동의 즉시 진입은 보존한다.</summary>
+    public bool TryPlayCombatAction(CombatAnimationProfile profile, CombatActionKind action, Object owner, float transitionSeconds)
+    {
+        if (profile == null || IsDead || IsHitReacting) return false;
         if (AnimationPoseLocked && (owner == null || playerController == null || !playerController.CanContinueOwnedCombat(owner))) return false;
         string reason;
         if (!profile.CanPlay(thirdPersonAnimator, action, out reason)) return false;
@@ -35,7 +41,15 @@ public class PlayerAnimatorController : MonoBehaviour
         // 전신 행동은 상체 발사/재장전과 동시에 자세를 덮어쓰지 않는다.
         if (thirdPersonWeaponLayer < thirdPersonAnimator.layerCount) thirdPersonAnimator.SetLayerWeight(thirdPersonWeaponLayer, 0f);
         activeUpperState = null;
-        thirdPersonAnimator.Play(Animator.StringToHash(binding.statePath), thirdPersonAnimator.GetLayerIndex(binding.layerName), 0f);
+        int layer = thirdPersonAnimator.GetLayerIndex(binding.layerName);
+        if (transitionSeconds > 0f)
+        {
+            thirdPersonAnimator.CrossFadeInFixedTime(binding.statePath, transitionSeconds, layer, 0f);
+        }
+        else
+        {
+            thirdPersonAnimator.Play(Animator.StringToHash(binding.statePath), layer, 0f);
+        }
         return true;
     }
 
@@ -49,6 +63,19 @@ public class PlayerAnimatorController : MonoBehaviour
         if (!combatRestorePending && !IsDead) RestoreLocomotion();
     }
     private bool combatRestorePending;
+    private int lastHitFrame = -1;
+    /// <summary>실제 피격 State가 끝나기 전에는 새로운 근접 공격으로 자세를 덮어쓰지 않는다.</summary>
+    public bool IsHitReacting
+    {
+        get
+        {
+            if (!HasThirdPersonMotion(hitState)) return false;
+            if (lastHitFrame == Time.frameCount) return true;
+            if (thirdPersonAnimator.IsInTransition(0) && thirdPersonAnimator.GetNextAnimatorStateInfo(0).IsName(hitState)) return true;
+            AnimatorStateInfo state = thirdPersonAnimator.GetCurrentAnimatorStateInfo(0);
+            return state.IsName(hitState) && state.normalizedTime < 1f;
+        }
+    }
     [Header("Animators")]
     [SerializeField] private Animator firstPersonAnimator;
     [SerializeField] private Animator thirdPersonAnimator;
@@ -197,6 +224,7 @@ public class PlayerAnimatorController : MonoBehaviour
     private bool isReloading;
     private bool isDefending;
     private string activeUpperState;
+    [SerializeField] private string pistolAimState = "UpperLayer.PistolAim";
     private int upperStartedFrame;
     private bool upperResetPending;
     private bool AnimationPoseLocked => playerController != null && playerController.HasAnimationControlLock;
@@ -251,6 +279,11 @@ public class PlayerAnimatorController : MonoBehaviour
         if (!AnimationPoseLocked && HasParameter(thirdPersonAnimator, weaponParameter, AnimatorControllerParameterType.Int))
             thirdPersonAnimator.SetInteger(weaponParameter, (int)value);
         Trigger(equipTrigger);
+        // MMA 이동 Motion이 준비된 경우에만 장비 변경 시 해당 하위 상태로 한 번 진입한다.
+        if (value == PlayerEquipmentKind.Gloves && !AnimationPoseLocked && !IsDead && HasCombatLocomotion())
+        {
+            RestoreLocomotion();
+        }
     }
 
     /// <summary>
@@ -316,9 +349,12 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     public void OnHit()
     {
-        if (AnimationPoseLocked || IsDead) return;
+        if (AnimationPoseLocked || IsDead || lastHitFrame == Time.frameCount) return;
         if (HasThirdPersonMotion(hitState))
         {
+            // Damaged 구독과 공격 취소 경로가 같은 피해를 알려도 한 번만 요청한다.
+            lastHitFrame = Time.frameCount;
+            combatRestorePending = false;
             ResetUpperLayer();
             TriggerParameter(thirdPersonAnimator, hitTrigger);
         }
@@ -444,6 +480,18 @@ public class PlayerAnimatorController : MonoBehaviour
     /// 설정된 복약 상태와 Layer의 재생을 요청한다.
     /// </summary>
     public void OnMedication() => Play(medicationState, medicationLayer, 0f);
+
+    [Header("MMA 전용 이동 (해당 테스트 씬에서만 활성화)")]
+    [SerializeField] private bool useMmaCombatLocomotion;
+    /// <summary>명시적으로 활성화한 씬의 MMA 전투에서만 복싱 이동을 사용한다.</summary>
+    public bool UsesMmaCombatLocomotion
+    {
+        get
+        {
+            return useMmaCombatLocomotion && playerController != null && playerController.IsMmaCombatActive &&
+                equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves;
+        }
+    }
 
     private float currentSpeed;
     private float moveHorizontal;
@@ -607,6 +655,8 @@ public class PlayerAnimatorController : MonoBehaviour
             if (!IsDead) RestoreLocomotion();
         }
         RestoreReloadPose();
+        // 기존 일반 이동 Tree는 0, MMA 전투의 복싱 Tree는 1로 선택한다.
+        SetFloat("MmaCombat", UsesMmaCombatLocomotion ? 1f : 0f);
         SetBool("IsDead", IsDead);
         if (equipment != null && HasParameter(thirdPersonAnimator, weaponParameter, AnimatorControllerParameterType.Int))
             thirdPersonAnimator.SetInteger(weaponParameter, (int)equipment.CurrentKind);
@@ -669,6 +719,11 @@ public class PlayerAnimatorController : MonoBehaviour
         }
         if (IsDead || fullBody) { ResetUpperLayer(); return; }
         if (upperResetPending) ResetUpperLayer();
+        // 권총 조준 이동은 기존 하체 이동 위에 실제 조준 Idle의 상체만 겹친다.
+        bool usePistolAim = equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Pistol &&
+            playerController != null && playerController.IsAiming;
+        if (activeUpperState == pistolAimState && !usePistolAim) ResetUpperLayer();
+        if (activeUpperState == null && usePistolAim) StartUpperLayer(pistolAimState);
         if (isDefending && equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves &&
             activeUpperState != guardHitState && activeUpperState != guardState) StartUpperLayer(guardState);
         if (activeUpperState == null) { thirdPersonAnimator.SetLayerWeight(thirdPersonWeaponLayer, 0f); return; }
@@ -676,7 +731,8 @@ public class PlayerAnimatorController : MonoBehaviour
         AnimatorStateInfo upper = thirdPersonAnimator.GetCurrentAnimatorStateInfo(thirdPersonWeaponLayer);
         bool reload = activeUpperState == rifleAnimations.thirdPersonReloadState || activeUpperState == pistolAnimations.thirdPersonReloadState;
         bool guard = activeUpperState == guardState;
-        if (upper.IsName(upperNeutralState) || (!reload && !guard && upper.normalizedTime >= 1f)) ResetUpperLayer();
+        bool aimPose = activeUpperState == pistolAimState;
+        if (upper.IsName(upperNeutralState) || (!reload && !guard && !aimPose && upper.normalizedTime >= 1f)) ResetUpperLayer();
         else if ((reload && !isReloading) || (guard && !isDefending)) ResetUpperLayer();
     }
     /// <summary>
@@ -692,7 +748,16 @@ public class PlayerAnimatorController : MonoBehaviour
         string path = "Base Layer." + group + "." + (crouch ? (aim ? "CrouchAimLocomotion" : "CrouchLocomotion") : aim ? "AimLocomotion" : "Locomotion");
         if (!HasThirdPersonMotion(path)) path = kind == PlayerEquipmentKind.AssaultRifle && aim ? "Base Layer.Rifle.AimLocomotion" :
             kind == PlayerEquipmentKind.AssaultRifle ? "Base Layer.Rifle.Locomotion" : "Base Layer.Default.Locomotion";
-        PlayState(thirdPersonAnimator, path, 0, 0f);
+        // MMA 공격의 마지막 자세에서 이동 자세로 짧게 연결한다. 공격 진입과 타격 이벤트 시점은 유지한다.
+        if (kind == PlayerEquipmentKind.Gloves && thirdPersonAnimator != null &&
+            thirdPersonAnimator.GetCurrentAnimatorStateInfo(0).IsTag("FullBodyAction") && HasThirdPersonMotion(path))
+        {
+            thirdPersonAnimator.CrossFadeInFixedTime(path, 0.08f, 0, 0f);
+        }
+        else
+        {
+            PlayState(thirdPersonAnimator, path, 0, 0f);
+        }
     }
 
     /// <summary>

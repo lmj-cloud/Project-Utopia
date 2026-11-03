@@ -99,9 +99,24 @@ public class ItemUseController : MonoBehaviour
     /// </summary>
     public bool TryUseSelectedItem()
     {
+        if (inventory == null) return false;
+        return TryUseEquippedItem(inventory.SelectedEquippedSlot);
+    }
+
+    /// <summary>
+    /// 원형 UI가 고른 슬롯을 직접 사용한다. 기존 예약과 Timeline 완료 후 소비 경로를 공유한다.
+    /// </summary>
+    public bool TryUseEquippedItem(int slotIndex)
+    {
         if (usingItem || !isActiveAndEnabled || playerController == null || !playerController.CanControlPlayer || inventory == null) return false;
-        InventoryEntry entry = inventory.SelectedEntry;
-        if (entry == null || entry.Item == null || !entry.Item.CanUse) return false;
+        InventoryEntry entry = inventory.GetEntry(true, slotIndex);
+        if (entry == null || entry.Item == null) return false;
+        // 등록 가능 여부와 실제 사용은 별개다. 사용 불가 설정은 실패 알림만 보내고 소비하지 않는다.
+        if (!entry.Item.CanUse)
+        {
+            onFailed.Invoke();
+            return false;
+        }
         ItemData item = entry.Item;
         ItemUseBinding binding = null;
         if (itemActions != null) foreach (ItemUseBinding candidate in itemActions)
@@ -112,7 +127,7 @@ public class ItemUseController : MonoBehaviour
         if (entry.Quantity < required || timeline == null || timeline.IsPlaying || !timeline.CanPlay() ||
             (medication && !string.IsNullOrWhiteSpace(requiredFlag) && (storyProgress == null || !storyProgress.HasFlag(requiredFlag))))
         { binding?.onFailed.Invoke(); onFailed.Invoke(); return false; }
-        int slot = inventory.SelectedEquippedSlot;
+        int slot = slotIndex;
         if (!inventory.BeginEquippedUse(this, slot, item, required)) return false;
         equippedUse = true; activeSlot = slot; activeItem = item; activeConsume = item.IsConsumable ? item.ConsumePerUse : 0;
         activeMedication = medication; activeBinding = binding; activeTimeline = timeline; activeSource = MedicineSource.Inventory;

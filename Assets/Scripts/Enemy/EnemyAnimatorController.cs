@@ -2,7 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// MMA 적의 전투 판단과 분리하여 Animator 파라미터와 실제 Clip 이벤트만 전달한다.
-/// 모션 재생을 명시적으로 허용하고 모든 Clip을 연결하기 전에는 빈 상태를 구동하지 않는다.
+/// 필수 Clip을 연결한 경우에만 재생하고, 방어 Clip이 없으면 논리 방어만 사용한다.
 /// </summary>
 public class EnemyAnimatorController : MonoBehaviour
 {
@@ -16,6 +16,14 @@ public class EnemyAnimatorController : MonoBehaviour
     [SerializeField] private AnimationClip punchRightMotion;
     [SerializeField] private AnimationClip guardMotion;
     [SerializeField] private AnimationClip hitMotion;
+
+    [Header("MMA 방향별 이동 (연결한 전용 Controller에서만 사용)")]
+    [SerializeField] private bool useDirectionalLocomotion;
+    [SerializeField] private UnityEngine.AI.NavMeshAgent locomotionAgent;
+    [SerializeField, Min(0.01f)] private float directionDampTime = 0.12f;
+    public bool UsesDirectionalLocomotion { get { return useDirectionalLocomotion; } }
+    private static readonly int MoveX = Animator.StringToHash("MoveX");
+    private static readonly int MoveY = Animator.StringToHash("MoveY");
 
     private static readonly int Speed = Animator.StringToHash("Speed");
     private static readonly int IsGuarding = Animator.StringToHash("IsGuarding");
@@ -69,11 +77,17 @@ public class EnemyAnimatorController : MonoBehaviour
             WarnOnce("전용 파라미터 7개의 이름과 자료형을 확인하세요.");
             return false;
         }
+        if (useDirectionalLocomotion && (!HasParameter(MoveX, AnimatorControllerParameterType.Float) ||
+            !HasParameter(MoveY, AnimatorControllerParameterType.Float)))
+        {
+            WarnOnce("복싱 이동 Controller의 MoveX·MoveY float 파라미터를 확인하세요.");
+            return false;
+        }
         if (!HasMotion("Idle", idleMotion, false) || !HasMotion("Walk", walkMotion, false) ||
             !HasMotion("PunchLeft", punchLeftMotion, true) || !HasMotion("PunchRight", punchRightMotion, true) ||
-            !HasMotion("GuardIdle", guardMotion, false) || !HasMotion("HitReaction", hitMotion, true))
+            !HasMotion("HitReaction", hitMotion, true))
         {
-            WarnOnce("실제 State Motion과 Clip 6개를 연결하고 단발 모션의 Loop를 해제하세요.");
+            WarnOnce("실제 Idle·Walk·좌우 Punch·Hit Clip을 연결하고 단발 모션의 Loop를 해제하세요.");
             return false;
         }
         return true;
@@ -105,6 +119,27 @@ public class EnemyAnimatorController : MonoBehaviour
         if (CanAnimate()) animator.SetFloat(Speed, Mathf.Max(0f, speed));
     }
 
+    /// <summary>NavMesh가 계산한 실제 월드 속도를 Kevin 루트 기준으로 변환해 복싱 Tree에 전달한다.</summary>
+    private void LateUpdate()
+    {
+        if (!useDirectionalLocomotion || !CanAnimate()) return;
+        Vector3 velocity = Vector3.zero;
+        float maximumSpeed = 1f;
+        if (locomotionAgent != null && locomotionAgent.isActiveAndEnabled && locomotionAgent.isOnNavMesh)
+        {
+            velocity = locomotionAgent.velocity;
+            maximumSpeed = Mathf.Max(0.01f, locomotionAgent.speed);
+        }
+        velocity.y = 0f;
+        Vector3 localVelocity = Vector3.zero;
+        if (locomotionAgent != null && velocity.sqrMagnitude > 0.0009f)
+            localVelocity = locomotionAgent.transform.InverseTransformDirection(velocity) / maximumSpeed;
+        localVelocity = Vector3.ClampMagnitude(localVelocity, 1f);
+        animator.SetFloat(Speed, velocity.magnitude);
+        animator.SetFloat(MoveX, localVelocity.x, directionDampTime, Time.deltaTime);
+        animator.SetFloat(MoveY, localVelocity.z, directionDampTime, Time.deltaTime);
+    }
+
     /// <summary>반대쪽 Trigger를 비우고 왼손 공격을 요청한다.</summary>
     public void PlayPunchLeft()
     {
@@ -126,7 +161,8 @@ public class EnemyAnimatorController : MonoBehaviour
     /// <summary>공격 중 방어 금지를 표현하고 방어 상태를 전달한다. 판단 자체는 AI가 한다.</summary>
     public void SetGuard(bool guarding)
     {
-        if (CanAnimate()) animator.SetBool(IsGuarding, guarding && !isAttacking);
+        // 방어 Clip이 없으면 논리 방어만 유지하고 빈 Guard State로 들어가지 않는다.
+        if (CanAnimate()) animator.SetBool(IsGuarding, guarding && !isAttacking && HasMotion("GuardIdle", guardMotion, false));
     }
 
     /// <summary>공격 준비부터 회복 종료까지의 상태를 전달한다.</summary>
@@ -158,11 +194,18 @@ public class EnemyAnimatorController : MonoBehaviour
         attackOwner = null;
         isArmed = false;
         isAttacking = false;
+        // 씬 종료 시 이미 꺼진 Animator에는 파라미터와 재생을 요청하지 않는다.
+        if (animator == null || !animator.isActiveAndEnabled || !animator.isInitialized) return;
         if (!CanAnimate(true)) return;
         animator.ResetTrigger(PunchLeft);
         animator.ResetTrigger(PunchRight);
         animator.ResetTrigger(Hit);
         animator.SetFloat(Speed, 0f);
+        if (useDirectionalLocomotion)
+        {
+            animator.SetFloat(MoveX, 0f);
+            animator.SetFloat(MoveY, 0f);
+        }
         animator.SetBool(IsGuarding, false);
         animator.SetBool(IsAttacking, false);
         animator.SetBool(IsTraining, false);

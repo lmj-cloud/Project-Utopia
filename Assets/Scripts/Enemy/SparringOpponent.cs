@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -16,6 +16,9 @@ public class SparringOpponent : MonoBehaviour
     [SerializeField] private Transform attackOrigin;
     [SerializeField] private LayerMask obstructionLayers = Physics.DefaultRaycastLayers;
     [SerializeField] private EnemyAnimatorController enemyAnimator;
+
+    [Header("MMA 효과음: 기존 플레이어 효과 설정을 재사용")]
+    [SerializeField] private AudioSource mmaAudioSource;
 
     [Header("기존 공격 설정")]
     [SerializeField, Min(0.1f)] private float attackDistance = 1.6f;
@@ -36,10 +39,21 @@ public class SparringOpponent : MonoBehaviour
     [SerializeField] private ActionTimingMode attackTiming = ActionTimingMode.Timer;
     [SerializeField, Min(0.1f)] private float animationEventTimeout = 3f;
 
+    [Header("스토리 MMA 전용 (일반 적의 사망에는 영향 없음)")]
+    [SerializeField] private bool storyMode;
+    [SerializeField, Range(0.01f, 1f)] private float storyThresholdRatio = 0.25f;
+    [SerializeField, Range(0.001f, 0.25f)] private float storyMinimumHealthRatio = 0.01f;
+    [SerializeField] private UnityEngine.Events.UnityEvent onStoryThresholdReached = new UnityEngine.Events.UnityEvent();
+    private int thresholdLifeVersion = -1;
+    public bool IsStoryMode { get { return storyMode; } }
+    public bool HasReachedStoryThreshold { get { return health != null && thresholdLifeVersion == health.LifeVersion; } }
+
     private float grabbedUntil;
     private float nextPathRequest;
     private Coroutine attack;
     private bool training;
+    private bool ownsAgentRotation;
+    private bool previousAgentRotation;
     private float nextAttack;
     private bool isAttacking;
     private float guardEndTime;
@@ -72,7 +86,7 @@ public class SparringOpponent : MonoBehaviour
         {
             return training && isActiveAndEnabled && executionOwner == null && Time.time >= grabbedUntil &&
                 health != null && !health.IsDead && player != null && playerController != null &&
-                playerController.CanControlPlayer && agent != null && agent.enabled && agent.isOnNavMesh;
+                playerController.CanUseMma && agent != null && agent.enabled && agent.isOnNavMesh;
         }
     }
 
@@ -106,7 +120,7 @@ public class SparringOpponent : MonoBehaviour
     {
         if (training) return;
         if (!isActiveAndEnabled || health == null || health.IsDead || player == null || playerController == null ||
-            attackOrigin == null || agent == null || !agent.enabled || !agent.isOnNavMesh)
+            !playerController.CanUseMma || attackOrigin == null || agent == null || !agent.enabled || !agent.isOnNavMesh)
         {
             if (!hasWarnedStart)
             {
@@ -124,9 +138,16 @@ public class SparringOpponent : MonoBehaviour
             }
             return;
         }
+        if (storyMode && !health.TryProtectFromDefeat(this, health.MaxHealth * Mathf.Clamp(storyMinimumHealthRatio, 0.001f, Mathf.Clamp01(storyThresholdRatio)))) return;
         hasWarnedStart = false;
         grabbedUntil = 0f;
         training = true;
+        if (enemyAnimator != null && enemyAnimator.UsesDirectionalLocomotion && !ownsAgentRotation)
+        {
+            previousAgentRotation = agent.updateRotation;
+            agent.updateRotation = false;
+            ownsAgentRotation = true;
+        }
         nextGuardDecisionTime = Time.time;
         if (enemyAnimator != null) enemyAnimator.SetTraining(true);
     }
@@ -134,7 +155,12 @@ public class SparringOpponent : MonoBehaviour
     /// <summary>훈련을 끝내고 이동·공격·방어와 남은 Animator 요청을 정리한다.</summary>
     public void EndTraining()
     {
+        if (player != null) player.ClearMmaFeedback();
+        if (mmaAudioSource != null) mmaAudioSource.Stop();
         training = false;
+        if (ownsAgentRotation && agent != null) agent.updateRotation = previousAgentRotation;
+        ownsAgentRotation = false;
+        if (health != null) health.ReleaseDefeatProtection(this);
         CancelAttack();
         EndGuard();
         StopMoving();
@@ -187,6 +213,7 @@ public class SparringOpponent : MonoBehaviour
             StopMoving();
             return;
         }
+        UpdateCombatFacing();
         if (IsGuarding && Time.time >= guardEndTime) EndGuard();
         if (isAttacking || IsGuarding)
         {
@@ -220,6 +247,17 @@ public class SparringOpponent : MonoBehaviour
         }
     }
 
+    /// <summary>방향별 복싱 이동에서만 진행 방향과 분리해 플레이어를 바라본다. 위치는 NavMesh가 처리한다.</summary>
+    private void UpdateCombatFacing()
+    {
+        if (!ownsAgentRotation || player == null || agent == null) return;
+        Vector3 direction = player.transform.position - transform.position;
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.001f) return;
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction),
+            agent.angularSpeed * Time.deltaTime);
+    }
+
     /// <summary>대기·거리·방어 조건을 검사한 뒤 좌우 손을 선택하고 공격 전체 구간을 예약한다.</summary>
     public bool TryBeginAttack()
     {
@@ -238,11 +276,14 @@ public class SparringOpponent : MonoBehaviour
         StopMoving();
         if (enemyAnimator != null)
         {
-            enemyAnimator.BindAttackRequest(this, id, right);
             enemyAnimator.SetGuard(false);
             enemyAnimator.SetAttacking(true);
-            if (right) enemyAnimator.PlayPunchRight();
-            else enemyAnimator.PlayPunchLeft();
+            if (attackTiming == ActionTimingMode.Timer)
+            {
+                enemyAnimator.BindAttackRequest(this, id, right);
+                if (right) enemyAnimator.PlayPunchRight();
+                else enemyAnimator.PlayPunchLeft();
+            }
         }
         attack = StartCoroutine(Attack(id, right));
         return true;
@@ -261,6 +302,18 @@ public class SparringOpponent : MonoBehaviour
         }
         else
         {
+            // 이벤트 판정도 기존 예고 시간을 지킨 뒤 실제 펀치를 시작한다.
+            yield return new WaitForSeconds(telegraphDuration);
+            if (!OwnsAttack(id, right)) yield break;
+            if (enemyAnimator == null || !enemyAnimator.CanPlayPunch(right))
+            {
+                CancelAttack();
+                yield break;
+            }
+            enemyAnimator.BindAttackRequest(this, id, right);
+            if (right) enemyAnimator.PlayPunchRight();
+            else enemyAnimator.PlayPunchLeft();
+            if (player != null) player.PlayMmaSwing(right, mmaAudioSource);
             float deadline = Time.unscaledTime + Mathf.Max(0.1f, animationEventTimeout);
             while (OwnsAttack(id, right) && !hasFinishedAnimation && Time.unscaledTime < deadline) yield return null;
             if (!OwnsAttack(id, right)) yield break;
@@ -312,6 +365,13 @@ public class SparringOpponent : MonoBehaviour
             if (!hit.transform.IsChildOf(transform) && !hit.transform.IsChildOf(player.transform)) return false;
         }
         CombatHitResult result = player.ReceiveAttackResult(damage, transform.position);
+        if (result == CombatHitResult.UnblockedHit || result == CombatHitResult.Blocked)
+        {
+            Collider targetCollider = player.GetComponent<Collider>();
+            Vector3 point = player.transform.position + Vector3.up;
+            if (targetCollider != null) point = targetCollider.ClosestPoint(attackOrigin.position);
+            player.PlayMmaContact(result == CombatHitResult.Blocked, point, attackOrigin.position - point, mmaAudioSource);
+        }
         AttackResolved?.Invoke(result);
         return result != CombatHitResult.Rejected;
     }
@@ -385,6 +445,13 @@ public class SparringOpponent : MonoBehaviour
         nextAttack = Time.time + recoveryDuration;
         if (health.IsDead) EndTraining();
         else if (enemyAnimator != null) enemyAnimator.PlayHit();
+        // 생명주기당 한 번만 알린다. 실제 컷신이나 플레이어 사망은 여기서 실행하지 않는다.
+        if (storyMode && training && !health.IsDead && !HasReachedStoryThreshold &&
+            health.CurrentHealth <= health.MaxHealth * Mathf.Clamp01(storyThresholdRatio))
+        {
+            thresholdLifeVersion = health.LifeVersion;
+            onStoryThresholdReached.Invoke();
+        }
     }
 
     /// <summary>기존 잡기 API를 유지하며 지정 시간 동안 공격·방어·이동을 중단한다.</summary>
@@ -429,6 +496,7 @@ public class SparringOpponent : MonoBehaviour
     /// <summary>자신이 등록한 체력 이벤트를 해제하고 남은 대련 동작을 종료한다.</summary>
     private void OnDisable()
     {
+        if (mmaAudioSource != null) mmaAudioSource.Stop();
         if (subscribedHealth != null) subscribedHealth.Damaged -= OnDamaged;
         subscribedHealth = null;
         EndTraining();

@@ -8,6 +8,11 @@ public class NPCDialogue : MonoBehaviour
 {
     [SerializeField] private DialogueUI dialogueUI;
 
+    [Header("First Dialogue Character Unlock")]
+    [SerializeField] private AffinityCharacterData affinityCharacter;
+    [SerializeField] private AffinityDataStore affinityDataStore;
+    [SerializeField, Min(0)] private int firstDialogueAffinityBonus = 5;
+
     [Header("Dialogue Sequence")]
     [SerializeField, TextArea(2, 5)] private string[] dialogueLines;
     [SerializeField] private string npcName = "";
@@ -15,6 +20,12 @@ public class NPCDialogue : MonoBehaviour
     [Header("Completion")]
     [SerializeField] private UnityEvent onDialogueCompleted = new();
     private bool dialogueInProgress;
+    [Header("Dialogue Animation")]
+    [SerializeField] private Animator dialogueAnimator;
+    [SerializeField] private NPCLookAtPlayer dialogueLookAt;
+    [SerializeField] private string idleState = "Base Layer.NPC_Idle";
+    [SerializeField] private string talkingState = "Base Layer.NPC_Talk";
+    private bool isTalking;
     [SerializeField] private GameFlowManager flow;
     [SerializeField] private TutorialManager tutorial;
     private GameFlowStage requestedStage;
@@ -55,18 +66,40 @@ public class NPCDialogue : MonoBehaviour
 
         if (!CanStartDialogue) return;
         if (flow != null) { requestedStage = flow.CurrentStage; flowRevision = flow.Revision; }
-        dialogueInProgress = dialogueUI.TryOpenSequence(
+        // 첫 문장 이벤트가 Open 안에서 발생하므로 소유 상태와 구독을 먼저 준비한다.
+        dialogueInProgress = true;
+        dialogueUI.SpeakerChanged += OnSpeakerChanged;
+        bool opened = dialogueUI.TryOpenSequence(
             dialogueLines, lineSpeakers, npcName,
             () => { if (this != null) CompleteDialogue(); },
-            () => { if (this != null) dialogueInProgress = false; });
+            () => { if (this != null) CancelDialogueAnimation(); });
+        if (!opened)
+        {
+            CancelDialogueAnimation();
+        }
+        else if (dialogueInProgress)
+        {
+            // 첫 문장 이벤트에서 즉시 취소될 수도 있으므로, 성공과 현재 소유 상태를 함께 검사한다.
+            StartDialogueLookAt();
+            UnlockDialogueCharacter();
+        }
     }
+    /// <summary>실제 대화 시작 성공 뒤 최초 해금에 성공한 인물에게만 호감도를 한 번 지급한다.</summary>
+    private void UnlockDialogueCharacter()
+    {
+        // 미등록 NPC도 기존 대화는 그대로 진행한다.
+        if (affinityCharacter == null || affinityDataStore == null) return;
+        if (!affinityDataStore.UnlockCharacter(affinityCharacter.CharacterId)) return;
+        affinityDataStore.AddAffinity(affinityCharacter.CharacterId, Mathf.Max(0, firstDialogueAffinityBonus));
+    }
+
     /// <summary>
     /// NPC 대화 성공을 확정하고 연결된 진행 플래그와 후속 이벤트를 알린다.
     /// </summary>
     private void CompleteDialogue()
     {
         if (!dialogueInProgress) return;
-        dialogueInProgress = false;
+        CancelDialogueAnimation();
         GameFlowStage stage = requestedStage;
         int revision = flowRevision;
         if (isActiveAndEnabled)
@@ -78,11 +111,63 @@ public class NPCDialogue : MonoBehaviour
     }
 
     /// <summary>
-    /// 비활성화 시 이 컴포넌트가 남긴 진행 상태나 이벤트 연결을 정리한다.
+    /// 현재 문장의 발언자가 바뀌면 NPC의 말하기 여부를 갱신한다.
+    /// </summary>
+    private void OnSpeakerChanged(DialogueSpeaker speaker)
+    {
+        if (!dialogueInProgress) return;
+        SetTalking(speaker == DialogueSpeaker.NPC);
+    }
+
+    /// <summary>
+    /// 대화 종료·취소 때 구독을 해제하고 이 NPC만 대기 자세로 복귀시킨다.
+    /// </summary>
+    private void CancelDialogueAnimation()
+    {
+        StopDialogueLookAt();
+        dialogueInProgress = false;
+        if (dialogueUI != null) dialogueUI.SpeakerChanged -= OnSpeakerChanged;
+        SetTalking(false);
+    }
+
+    /// <summary>대화 시작에 성공한 NPC의 시선 추적만 허용한다.</summary>
+    private void StartDialogueLookAt()
+    {
+        if (dialogueLookAt != null)
+        {
+            dialogueLookAt.BeginDialogueLookAt();
+        }
+    }
+
+    /// <summary>완료·취소·비활성화가 공유하는 정리 경로에서 추적을 해제한다.</summary>
+    private void StopDialogueLookAt()
+    {
+        if (dialogueLookAt != null)
+        {
+            dialogueLookAt.EndDialogueLookAt();
+        }
+    }
+
+    /// <summary>
+    /// 준비된 Animator 상태만 재생하여 모델 없는 NPC의 기존 대화도 유지한다.
+    /// </summary>
+    private void SetTalking(bool value)
+    {
+        if (dialogueAnimator == null || !dialogueAnimator.isActiveAndEnabled || dialogueAnimator.runtimeAnimatorController == null) return;
+        string state = value ? talkingState : idleState;
+        int hash = Animator.StringToHash(state);
+        if (!dialogueAnimator.HasState(0, hash)) return;
+        if (isTalking == value && dialogueAnimator.GetCurrentAnimatorStateInfo(0).fullPathHash == hash) return;
+        isTalking = value;
+        dialogueAnimator.CrossFadeInFixedTime(hash, 0.12f, 0);
+    }
+
+    /// <summary>
+    /// 비활성화 시 자신의 대화와 애니메이션 구독을 정리한다.
     /// </summary>
     private void OnDisable()
     {
         if (dialogueInProgress && dialogueUI != null) dialogueUI.CancelDialogue();
-        dialogueInProgress = false;
+        CancelDialogueAnimation();
     }
 }

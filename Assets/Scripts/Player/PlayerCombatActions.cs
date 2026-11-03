@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 실제 모션이 준비된 좌우 공격과 암살·마무리를 요청하고 대상 예약, 이벤트 소비, 취소와 잠금 정리를 담당한다.
@@ -34,9 +34,82 @@ public class PlayerCombatActions : MonoBehaviour
     private bool hasConsumedComplete;
     // 이벤트 누락으로 행동이 영구 잠금되지 않도록 정한 실제 시간 기준 종료 제한.
     private float deadline;
+    [Header("MMA 단일 입력 버퍼")]
+    [SerializeField, Range(0f, 1f)] private float comboBufferStart = 0.45f;
+    [SerializeField, Range(0f, 1f)] private float comboBufferEnd = 0.95f;
+    [SerializeField, Min(0f)] private float comboResetSeconds = 0.8f;
+    [SerializeField, Range(0f, 0.1f)] private float comboTransitionSeconds = 0.08f;
+    [SerializeField] private bool useRecoveryCombo;
+    [SerializeField, Range(0.05f, 0.5f)] private float comboInputBufferSeconds = 0.25f;
+    [SerializeField, Range(0.4f, 0.95f)] private float comboLinkNormalizedTime = 0.62f;
+    [SerializeField, Range(0f, 0.6f)] private float comboRecoverySeconds = 0.12f;
+    private float bufferedMmaUntil;
+    private bool hasBufferedMmaAttack;
+    private bool nextMmaPunchIsRight;
+    private float lastMmaCompletedAt = float.NegativeInfinity;
+    public bool HasBufferedMmaAttack { get { return hasBufferedMmaAttack; } }
+
+    /// <summary>새 좌클릭을 현재 공격 후반에 하나만 예약하거나, 준비된 다음 손 공격을 시작한다.</summary>
+    public bool TryMmaComboAttack()
+    {
+        if (equipment == null || equipment.CurrentKind != PlayerEquipmentKind.Gloves ||
+            controller == null || !controller.CanUseMma || !controller.CanUseMelee) return false;
+        if (isRunning)
+        {
+            float progress;
+            if (!IsMmaPunch() || !CanContinueAction || hasBufferedMmaAttack ||
+                !TryGetMmaProgress(out progress) || progress < comboBufferStart || progress > comboBufferEnd) return false;
+            hasBufferedMmaAttack = true;
+            bufferedMmaUntil = Time.unscaledTime + comboInputBufferSeconds;
+            return true;
+        }
+        if (Time.unscaledTime - lastMmaCompletedAt >= comboResetSeconds) nextMmaPunchIsRight = false;
+        return TryStartMmaPunch(false);
+    }
+
+    /// <summary>취소·장비 변경·새 전투에서는 예약 입력과 손 순서를 함께 초기화한다.</summary>
+    public void ResetMmaCombo()
+    {
+        hasBufferedMmaAttack = false;
+        bufferedMmaUntil = 0f;
+        nextMmaPunchIsRight = false;
+        lastMmaCompletedAt = float.NegativeInfinity;
+    }
+
+    private bool IsMmaPunch()
+    {
+        return target == null && startedEquipment == PlayerEquipmentKind.Gloves &&
+            (action == CombatActionKind.MmaLeftPunch || action == CombatActionKind.MmaRightPunch);
+    }
+
+    /// <summary>현재 요청에 연결된 State의 정규화 시간만 사용한다.</summary>
+    private bool TryGetMmaProgress(out float progress)
+    {
+        progress = 0f;
+        if (profile == null || animator == null || animator.CombatAnimator == null) return false;
+        CombatAnimationProfile.Binding binding = profile.GetBinding(action);
+        if (binding == null) return false;
+        Animator source = animator.CombatAnimator;
+        int layer = source.GetLayerIndex(binding.layerName);
+        if (layer < 0) return false;
+        AnimatorStateInfo state = source.GetCurrentAnimatorStateInfo(layer);
+        if (!state.IsName(binding.statePath) && source.IsInTransition(layer)) state = source.GetNextAnimatorStateInfo(layer);
+        if (!state.IsName(binding.statePath)) return false;
+        progress = state.normalizedTime;
+        return true;
+    }
+
+    private bool TryStartMmaPunch(bool blend)
+    {
+        float transition = 0f;
+        if (blend) transition = comboTransitionSeconds;
+        return TryDirectionalAttack(nextMmaPunchIsRight, transition);
+    }
+
     private PlayerStatus status;
     public bool UsesDirectionalInput { get { return isActiveAndEnabled && useDirectionalInput; } }
     public bool IsRunning { get { return isRunning; } }
+    public bool IsRightMmaPunch { get { return action == CombatActionKind.MmaRightPunch; } }
     public int RequestId { get { return requestId; } }
     public bool OwnsControlLock { get; private set; }
     public string LastFailure { get; private set; }
@@ -78,6 +151,11 @@ public class PlayerCombatActions : MonoBehaviour
     /// </summary>
     public bool TryDirectionalAttack(bool rightHand)
     {
+        return TryDirectionalAttack(rightHand, 0f);
+    }
+
+    private bool TryDirectionalAttack(bool rightHand, float transitionSeconds)
+    {
         if (equipment == null) return Fail("Equipment 연결이 없습니다.");
         CombatActionKind requested;
         if (equipment.CurrentKind == PlayerEquipmentKind.Gloves)
@@ -85,7 +163,10 @@ public class PlayerCombatActions : MonoBehaviour
         else if (equipment.CurrentKind == PlayerEquipmentKind.Dagger)
             requested = rightHand ? CombatActionKind.KnifeRightThrust : CombatActionKind.KnifeLeftThrust;
         else return Fail("좌우 공격은 Gloves 또는 Dagger 전용입니다.");
-        return BeginAction(requested, null, false);
+        bool started = BeginAction(requested, null, false, transitionSeconds);
+        // 명시적 좌우 공격 API에서도 실제 시작된 손을 기준으로 다음 순서를 맞춘다.
+        if (started && equipment.CurrentKind == PlayerEquipmentKind.Gloves) nextMmaPunchIsRight = !rightHand;
+        return started;
     }
 
     /// <summary>
@@ -115,7 +196,7 @@ public class PlayerCombatActions : MonoBehaviour
     /// <summary>
     /// 모션과 행동 조건을 검사한 뒤 토큰·대상을 예약하고 필요한 잠금과 재생 요청을 시작한다.
     /// </summary>
-    private bool BeginAction(CombatActionKind requested, EnemyExecutionTarget candidate, bool assassination)
+    private bool BeginAction(CombatActionKind requested, EnemyExecutionTarget candidate, bool assassination, float transitionSeconds = 0f)
     {
         if (isRunning || !UsesDirectionalInput || controller == null || !controller.CanUseMelee || melee == null ||
             !melee.CanBeginExternalAction || animator == null || relay == null || profile == null) return Fail("행동 준비 조건을 만족하지 않습니다.");
@@ -156,7 +237,7 @@ public class PlayerCombatActions : MonoBehaviour
             controller.AcquireMovementSimulationLock(this);
         }
         relay.BeginCombatRequest(this, requestId, binding, animator.CombatAnimator);
-        if (!animator.TryPlayCombatAction(profile, action, OwnsControlLock ? this : null) ||
+        if (!animator.TryPlayCombatAction(profile, action, OwnsControlLock ? this : null, transitionSeconds) ||
             (target != null && !target.PlayVictim(this, requestId, action)))
         {
             CancelAction();
@@ -214,7 +295,14 @@ public class PlayerCombatActions : MonoBehaviour
     {
         if (!CanContinueAction || id != requestId || hasConsumedComplete) return false;
         hasConsumedComplete = true;
-        EndAction();
+        bool mma = IsMmaPunch();
+        bool chain = mma && hasBufferedMmaAttack && hasConsumedHit && controller != null && controller.CanUseMma && controller.CanUseMelee &&
+            (!useRecoveryCombo || Time.unscaledTime <= bufferedMmaUntil);
+        hasBufferedMmaAttack = false;
+        if (mma) lastMmaCompletedAt = Time.unscaledTime;
+        EndAction(!chain, chain, mma && useRecoveryCombo);
+        // 이전 Relay와 예약을 먼저 종료한다. 다음 공격은 반드시 새 요청 번호와 스태미나 검사를 받는다.
+        if (chain && !TryStartMmaPunch(true) && animator != null) animator.EndCombatAction();
         return true;
     }
 
@@ -223,6 +311,7 @@ public class PlayerCombatActions : MonoBehaviour
     /// </summary>
     public void CancelAction()
     {
+        ResetMmaCombo();
         if (!isRunning) return;
         EndAction();
     }
@@ -232,6 +321,7 @@ public class PlayerCombatActions : MonoBehaviour
     /// </summary>
     private void CancelFromDamage()
     {
+        ResetMmaCombo();
         if (!isRunning) return;
         EndAction(false);
         if (animator != null) animator.OnHit();
@@ -240,7 +330,7 @@ public class PlayerCombatActions : MonoBehaviour
     /// <summary>
     /// 현재 요청의 Relay, 대상 예약과 자기 소유 잠금을 해제하고 필요한 자세 복구를 요청한다.
     /// </summary>
-    private void EndAction(bool restoreAnimation = true)
+    private void EndAction(bool restoreAnimation = true, bool chainMma = false, bool completedMma = false)
     {
         isRunning = false;
         if (relay != null) relay.EndCombatRequest(this, requestId);
@@ -252,7 +342,12 @@ public class PlayerCombatActions : MonoBehaviour
             controller.ReleaseControlLock(this);
         }
         OwnsControlLock = false;
-        if (melee != null) melee.ReleaseExternalAction(this, requestId);
+        if (melee != null)
+        {
+            if (chainMma) melee.ReleaseExternalActionForCombo(this, requestId);
+            else if (completedMma) melee.ReleaseExternalMmaAction(this, requestId, comboRecoverySeconds);
+            else melee.ReleaseExternalAction(this, requestId);
+        }
         if (restoreAnimation && animator != null) animator.EndCombatAction();
     }
 
@@ -262,6 +357,19 @@ public class PlayerCombatActions : MonoBehaviour
     private void Update()
     {
         if (isRunning && (!CanContinueAction || Time.unscaledTime >= deadline)) CancelAction();
+        if (useRecoveryCombo && isRunning && IsMmaPunch() && hasBufferedMmaAttack)
+        {
+            if (Time.unscaledTime > bufferedMmaUntil) hasBufferedMmaAttack = false;
+            else
+            {
+                float progress;
+                // 실제 타격을 소비한 뒤 회복 구간만 줄인다. 기존 완료 경로가 Relay와 요청을 먼저 정리한다.
+                if (hasConsumedHit && CanContinueAction && TryGetMmaProgress(out progress) && progress >= comboLinkNormalizedTime)
+                    ConsumeComplete(requestId);
+            }
+        }
+        if (!isRunning && (equipment == null || equipment.CurrentKind != PlayerEquipmentKind.Gloves ||
+            controller == null || !controller.CanUseMma || Time.unscaledTime - lastMmaCompletedAt >= comboResetSeconds)) ResetMmaCombo();
     }
 
     /// <summary>

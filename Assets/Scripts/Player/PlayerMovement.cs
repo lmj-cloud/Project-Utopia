@@ -3,6 +3,8 @@
 /// <summary>
 /// CharacterController를 통해 수평 이동, 회전, 중력, 점프, 앉기 및 회피 이동을 처리한다.
 /// </summary>
+// 입력 담당자가 조준 속도 제한을 전달한 뒤 이 프레임의 실제 이동을 계산한다.
+[DefaultExecutionOrder(10)]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("가속, 감속, 회전")]
@@ -130,6 +132,14 @@ public class PlayerMovement : MonoBehaviour
     {
         get => targetSpeed;
         set => targetSpeed = Mathf.Max(0f, value);
+    }
+
+    /// <summary>
+    /// 달리기 도중 조준을 시작해도 수평 속도가 제한을 넘지 않도록 현재 속도만 낮춘다. 수직 속도는 유지한다.
+    /// </summary>
+    public void LimitHorizontalSpeed(float maximumSpeed)
+    {
+        currentSpeed = Mathf.Min(currentSpeed, Mathf.Max(0f, maximumSpeed));
     }
 
     // 가속·감속으로 계산한 속도. 충돌 후 실제 속도와는 구분한다.

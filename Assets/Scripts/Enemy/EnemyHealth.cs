@@ -23,6 +23,27 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField] private UnityEvent onLegHit = new();
     [SerializeField] private UnityEvent onDied = new();
 
+    private Object survivalOwner;
+    private float survivalHealth;
+
+    /// <summary>스토리 대련 소유자에게만 양수 체력 하한을 예약한다. 일반 적은 기본 사망 처리를 유지한다.</summary>
+    public bool TryProtectFromDefeat(Object owner, float minimumHealth)
+    {
+        if (owner == null || isDead || (survivalOwner != null && survivalOwner != owner) ||
+            float.IsNaN(minimumHealth) || float.IsInfinity(minimumHealth) || minimumHealth <= 0f) return false;
+        survivalOwner = owner;
+        survivalHealth = Mathf.Min(currentHealth, Mathf.Clamp(minimumHealth, 0.001f, maxHealth));
+        return true;
+    }
+
+    /// <summary>자신이 예약한 패배 방지만 해제한다. 체력을 임의로 회복하지 않는다.</summary>
+    public void ReleaseDefeatProtection(Object owner)
+    {
+        if (owner == null || survivalOwner != owner) return;
+        survivalOwner = null;
+        survivalHealth = 0f;
+    }
+
     private bool notifyingDamage;
     private bool resetRequested;
     public float MaxHealth => maxHealth;
@@ -64,7 +85,10 @@ public class EnemyHealth : MonoBehaviour
         float amount = baseDamage * multiplier;
         if (amount <= 0f || float.IsNaN(amount) || float.IsInfinity(amount)) return false;
 
-        currentHealth = Mathf.Max(0f, currentHealth - amount);
+        float minimum = survivalOwner != null ? survivalHealth : 0f;
+        float nextHealth = Mathf.Max(minimum, currentHealth - amount);
+        if (nextHealth >= currentHealth) return false;
+        currentHealth = nextHealth;
         isDead = currentHealth <= 0f;
         DamageVersion++;
         notifyingDamage = true;

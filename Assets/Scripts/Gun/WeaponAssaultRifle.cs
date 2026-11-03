@@ -118,6 +118,27 @@ public class WeaponAssaultRifle : MonoBehaviour
     // 총알 경로 검사에서 자기 몸 등 제외할 Collider 목록.
     [SerializeField] private Collider[] ignoredShotColliders = new Collider[0];
 
+#if UNITY_EDITOR
+    [Header("Editor Shot Debug (Rifle Only)")]
+    [SerializeField] private bool drawShotDebug;
+    private bool hasShotDebug;
+    private Vector3 debugCameraOrigin;
+    private Vector3 debugCameraDirection;
+    private Vector3 debugTargetPoint;
+    private Vector3 debugMuzzleOrigin;
+    private Vector3 debugMuzzleDirection;
+    private Vector3 debugImpactPoint;
+    private const float shotDebugDuration = 3.0f;
+    private struct ShotDebugTrace
+    {
+        public Vector3 muzzleOrigin;
+        public Vector3 targetPoint;
+        public Vector3 impactPoint;
+        public float createdAt;
+    }
+    private readonly List<ShotDebugTrace> shotDebugTraces = new List<ShotDebugTrace>();
+#endif
+
     private float lastAttackTime = float.NegativeInfinity;
     private bool isReload = false;
     private int reloadRequestId;
@@ -125,15 +146,30 @@ public class WeaponAssaultRifle : MonoBehaviour
     private Coroutine attackRoutine;
     private Coroutine reloadRoutine;
     private bool isEquipped = true;
+    private bool hasPendingShot;
+    private Vector3 pendingShotTarget;
     private PlayerController playerController;
     private bool CanUse => isEquipped && isActiveAndEnabled &&
-        (playerController == null || playerController.CanUseWeapons);
+        (playerController == null || playerController.CanUseWeapons) && HasWeaponOwnership();
+
+    /// <summary>
+    /// 플레이어 총기의 직접 호출도 인벤토리 소유 조건을 따른다. 독립 NPC 총기는 기존 동작을 유지한다.
+    /// </summary>
+    private bool HasWeaponOwnership()
+    {
+        if (playerController == null) return true;
+        PlayerEquipment equipment = playerController.GetComponent<PlayerEquipment>();
+        if (equipment == null) return true;
+        PlayerEquipmentKind kind = WeaponName == WeaponName.Pistol ? PlayerEquipmentKind.Pistol : PlayerEquipmentKind.AssaultRifle;
+        return equipment.HasOwnership(kind);
+    }
 
     /// <summary>
     /// 무기의 장착 상태를 바꾸고 남은 발사·재장전과 표시를 정리한다.
     /// </summary>
     public void SetEquipped(bool value)
     {
+        if (value && !HasWeaponOwnership()) return;
         if (isEquipped == value) return;
         CancelWeaponActions();
         isEquipped = value;
@@ -149,6 +185,7 @@ public class WeaponAssaultRifle : MonoBehaviour
     /// </summary>
     public void CancelWeaponActions()
     {
+        hasPendingShot = false;
         StopWeaponAction();
         if (reloadRoutine != null) StopCoroutine(reloadRoutine);
         reloadRoutine = null;
@@ -311,8 +348,9 @@ public class WeaponAssaultRifle : MonoBehaviour
 
         Vector3 targetPoint = GetTargetPoint();
         OnFired?.Invoke(targetPoint);
-        // Resolve damage before optional animation/audio/casing effects can fail.
-        TwoStepRaycast(targetPoint);
+        // 소총·권총 모두 최종 상체 IK 이후 같은 프레임에 한 번 판정한다.
+        pendingShotTarget = targetPoint;
+        hasPendingShot = true;
 
         if (animator != null)
             animator.OnFire();
@@ -322,6 +360,22 @@ public class WeaponAssaultRifle : MonoBehaviour
         muzzleFlashRoutine = StartCoroutine(OnMuzzleFlashEffect());
         PlaySound(audioClipFire);
 
+
+    }
+
+    /// <summary>현재 총기의 최종 Animator·IK 자세에서 실제 총구 판정과 탄피 배출을 한 번 실행한다.</summary>
+    private void LateUpdate()
+    {
+        if (!hasPendingShot) return;
+        hasPendingShot = false;
+        if (!CanUse) return;
+        TwoStepRaycast(pendingShotTarget);
+        SpawnCasing();
+    }
+
+    /// <summary>현재 장비의 탄피 배출구에서 기존 풀을 사용해 탄피를 배출한다.</summary>
+    private void SpawnCasing()
+    {
         Transform spawnPoint = ActiveCasingSpawnPoint;
         if (casingMemoryPool != null && spawnPoint != null)
             casingMemoryPool.SpawnCasing(spawnPoint.position, spawnPoint.right);
@@ -402,11 +456,36 @@ public class WeaponAssaultRifle : MonoBehaviour
     private Vector3 GetTargetPoint()
     {
         Ray ray = mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-        Debug.DrawRay(ray.origin, ray.direction * weaponSetting.attackDistance, Color.red);
+#if UNITY_EDITOR
+        debugCameraOrigin = ray.origin;
+        debugCameraDirection = ray.direction;
+#endif
 
+        return GetCameraTargetPoint(ray);
+    }
+
+    /// <summary>
+    /// 실제 사격과 같은 카메라·충돌 정책으로 조준 목표를 읽는다. 피해나 디버그 기록은 생성하지 않는다.
+    /// </summary>
+    public bool TryGetAimTarget(out Vector3 targetPoint)
+    {
+        targetPoint = Vector3.zero;
+        if (mainCamera == null) return false;
+        // 발사가 예약된 프레임에는 Update에서 확정한 목표를 그대로 사용한다.
+        if (hasPendingShot)
+        {
+            targetPoint = pendingShotTarget;
+            return true;
+        }
+        targetPoint = GetCameraTargetPoint(mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f)));
+        return true;
+    }
+
+    /// <summary>카메라 광선의 첫 유효 충돌점 또는 기존 사거리 끝점을 반환한다.</summary>
+    private Vector3 GetCameraTargetPoint(Ray ray)
+    {
         if (TryGetShotHit(ray.origin, ray.direction, out RaycastHit hit))
             return hit.point;
-
         return ray.origin + ray.direction * weaponSetting.attackDistance;
     }
 
@@ -425,16 +504,69 @@ public class WeaponAssaultRifle : MonoBehaviour
             return;
 
         Vector3 attackDirection = delta.normalized;
+#if UNITY_EDITOR
+        // 실제 Physics 검사에 전달할 총구 좌표를 기록한다. 이후 IK로 바뀐 위치와 혼동하지 않는다.
+        hasShotDebug = true;
+        debugTargetPoint = targetPoint;
+        debugMuzzleOrigin = spawnPoint.position;
+        debugMuzzleDirection = attackDirection;
+        debugImpactPoint = spawnPoint.position + attackDirection * weaponSetting.attackDistance;
+#endif
         if (TryGetShotHit(spawnPoint.position, attackDirection, out RaycastHit hit))
         {
+#if UNITY_EDITOR
+            debugImpactPoint = hit.point;
+#endif
             ApplyHitDamage(hit.collider);
             if (impactMemoryPool != null)
                 impactMemoryPool.SpawnImpact(hit);
         }
+#if UNITY_EDITOR
+        if (drawShotDebug && WeaponName == WeaponName.AssaultRifle)
+        {
+            // 각 발사의 실제 검사 좌표와 충돌점을 고정한다. DrawLine 자체의 수명도 발사마다 독립적이다.
+            Debug.DrawLine(debugCameraOrigin, debugTargetPoint, Color.blue, shotDebugDuration);
+            Debug.DrawLine(debugMuzzleOrigin, debugImpactPoint, Color.green, shotDebugDuration);
+            RemoveExpiredShotDebug();
+            shotDebugTraces.Add(new ShotDebugTrace
+            {
+                muzzleOrigin = debugMuzzleOrigin,
+                targetPoint = debugTargetPoint,
+                impactPoint = debugImpactPoint,
+                createdAt = Time.time
+            });
+        }
+#endif
 
-        Debug.DrawRay(spawnPoint.position,
-            attackDirection * weaponSetting.attackDistance, Color.blue);
     }
+
+#if UNITY_EDITOR
+    /// <summary>각 발사의 총구·목표·충돌 표식을 선과 같은 3초 동안만 표시한다.</summary>
+    private void OnDrawGizmos()
+    {
+        if (!Application.isPlaying || !drawShotDebug || !hasShotDebug || WeaponName != WeaponName.AssaultRifle) return;
+        RemoveExpiredShotDebug();
+        foreach (ShotDebugTrace trace in shotDebugTraces)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(trace.muzzleOrigin, 0.015f);
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(trace.targetPoint, 0.04f);
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawWireSphere(trace.impactPoint, 0.03f);
+        }
+    }
+
+    /// <summary>뒤에 발사한 선의 수명을 건드리지 않고 만료된 표식만 제거한다.</summary>
+    private void RemoveExpiredShotDebug()
+    {
+        for (int i = shotDebugTraces.Count - 1; i >= 0; i--)
+        {
+            if (Time.time - shotDebugTraces[i].createdAt >= shotDebugDuration)
+                shotDebugTraces.RemoveAt(i);
+        }
+    }
+#endif
 
     /// <summary>
     /// 발사 경로에서 제외 Collider를 걸러 가장 가까운 유효 충돌을 찾는다.

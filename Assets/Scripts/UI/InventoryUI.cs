@@ -15,6 +15,7 @@ public class InventoryUI : MonoBehaviour
 
     [Header("List UI")]
     [SerializeField] private GameObject inventoryPanel;
+    [SerializeField] private GameObject playerInterface;
     [SerializeField] private Transform slotParent;
     [SerializeField] private InventorySlotUI slotPrefab;
 
@@ -58,6 +59,7 @@ public class InventoryUI : MonoBehaviour
         [System.NonSerialized] public bool active;
         [System.NonSerialized] public float alpha;
         [System.NonSerialized] public bool interactable, blocksRaycasts;
+        [System.NonSerialized] public int layoutChildCount = -1;
     }
     [Header("Categories: 장비 / 소모품 / 정복 / 스토리 물품 / 호감도")]
     [SerializeField] private CategoryPage[] pages = new CategoryPage[5];
@@ -97,6 +99,8 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private PlayerEquipment equipment;
     [SerializeField] private RawImage playerPreview;
     [SerializeField] private RenderTexture previewTexture;
+    [SerializeField] private RawImage primaryWeaponIcon;
+    [SerializeField] private RawImage secondaryWeaponIcon;
     [SerializeField] private TMP_Text primaryWeaponText;
     [SerializeField] private TMP_Text pistolWeaponText;
     [SerializeField] private TMP_Text meleeWeaponText;
@@ -105,7 +109,12 @@ public class InventoryUI : MonoBehaviour
     /// </summary>
     private enum DetailState { Closed, Opening, Open, Closing }
     private DetailState detailState;
+    private int detailSelectionFrame = -1;
+    private EventSystem detailEventSystem;
+    private PointerEventData detailPointer;
+    private readonly List<RaycastResult> detailRaycastResults = new();
     private Coroutine categoryRoutine;
+    private Canvas.WillRenderCanvases categoryPresentation;
     private Coroutine detailRoutine;
     private int currentCategory;
     private int requestedCategory;
@@ -118,6 +127,18 @@ public class InventoryUI : MonoBehaviour
 
     public int CurrentCategory => currentCategory;
     public bool InteractionAllowed => Application.isPlaying && IsOpen && !changingCategory && detailState != DetailState.Closing;
+    /// <summary>기존 인벤토리의 유효한 퀵슬롯 등록 상태만 조회한다. 별도 선택 데이터를 저장하지 않는다.</summary>
+    public bool IsQuickSlotAssigned(ItemData item)
+    {
+        if (inventory == null || item == null || inventory.GetTotalQuantity(item) <= 0) return false;
+        for (int i = 0; i < PlayerInventory.EquippedSlotCount; i++)
+        {
+            InventoryEntry entry = inventory.GetEntry(true, i);
+            if (entry != null && entry.Item == item && entry.Quantity > 0) return true;
+        }
+        return false;
+    }
+
     /// <summary>
     /// 해당 종류와 인덱스의 슬롯이 현재 선택된 슬롯인지 확인한다.
     /// </summary>
@@ -132,7 +153,11 @@ public class InventoryUI : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        if (inventoryPanel != null) inventoryPanel.SetActive(false);
+        if (inventoryPanel != null)
+        {
+            inventoryPanel.SetActive(false);
+            if (playerInterface != null) playerInterface.SetActive(true);
+        }
         if (detailImage != null) detailImage.raycastTarget = false;
         if (itemNameText != null) itemNameText.raycastTarget = false;
         if (descriptionText != null) descriptionText.raycastTarget = false;
@@ -140,9 +165,9 @@ public class InventoryUI : MonoBehaviour
         if (quantityText != null) quantityText.raycastTarget = false;
         if (dragIcon != null) { dragIcon.raycastTarget = false; dragIcon.gameObject.SetActive(false); }
         CapturePresentation();
-        if (playerPreview != null && previewTexture != null) playerPreview.texture = previewTexture;
         if (playerPreview != null) playerPreview.raycastTarget = false;
         if (detailAnimator != null) detailAnimator.enabled = false;
+        SetDetailInput(false);
         ClearDetails();
     }
     /// <summary>
@@ -191,6 +216,7 @@ public class InventoryUI : MonoBehaviour
     /// </summary>
     private void OnDisable()
     {
+        ClearCategoryPresentation();
         if (inventory != null) inventory.Changed -= Refresh;
         if (equipment != null) equipment.OnWeaponChanged -= EquipmentChanged;
         if (Application.isPlaying) Close();
@@ -236,6 +262,8 @@ public class InventoryUI : MonoBehaviour
             capturedTabLayout = true;
         }
         Refresh();
+        // 열기 준비가 끝난 뒤 HUD만 숨긴다. 인벤토리와 데이터는 별도 오브젝트에서 계속 동작한다.
+        if (IsOpen && playerInterface != null) playerInterface.SetActive(false);
     }
 
     /// <summary>
@@ -250,6 +278,8 @@ public class InventoryUI : MonoBehaviour
         ResetPresentation();
         if (inventoryPanel != null) inventoryPanel.SetActive(false);
         RestorePresentation();
+        // Tab·Esc·직접 호출 모두 같은 종료 경로에서 HUD를 복구한다.
+        if (inventoryPanel != null && !IsOpen && playerInterface != null) playerInterface.SetActive(true);
     }
 
     /// <summary>
@@ -260,7 +290,7 @@ public class InventoryUI : MonoBehaviour
         if (!Application.isPlaying || !IsOpen || inventory == null || slotPrefab == null) return;
         CancelSlotDrag();
         if (!warnedCategory) foreach (InventoryEntry entry in inventory.Entries)
-            if (entry != null && entry.Item != null && entry.Quantity > 0 && entry.Item.Category == ItemCategory.Unclassified)
+            if (entry != null && entry.Item != null && entry.Quantity > 0 && entry.Item.Category == ItemCategory.Unclassified && !entry.Item.IsFixedWeapon)
             { Debug.LogWarning("InventoryUI: 미분류 ItemData는 보관 수량을 유지하지만 페이지에는 표시하지 않습니다. Category를 지정하세요.", this); warnedCategory = true; break; }
         foreach (CategoryPage page in pages ?? System.Array.Empty<CategoryPage>())
         {
@@ -352,6 +382,8 @@ public class InventoryUI : MonoBehaviour
     /// </summary>
     public void ShowSlotDetails(InventorySlotUI slot, ItemData item, int quantity)
     {
+        // 장비 페이지의 등록 슬롯은 상세 표시 없이 기존 슬롯 입력만 처리한다.
+        if (currentCategory == 0) return;
         if (!InteractionAllowed || dragSource != null || item == null || quantity <= 0) return;
         ShowDetails(item, quantity);
         shownSlot = slot;
@@ -381,7 +413,11 @@ public class InventoryUI : MonoBehaviour
     /// </summary>
     public void ShowDetails(ItemData item, int quantity)
     {
+        // 슬롯 클릭 외의 직접 호출도 장비 페이지에서는 Detail을 열지 못하게 한다.
+        if (currentCategory == 0) return;
         if (!InteractionAllowed || item == null || quantity <= 0) return;
+        // EventSystem의 슬롯 클릭 처리와 같은 프레임에는 외부 클릭으로 다시 닫지 않는다.
+        detailSelectionFrame = Time.frameCount;
         shownSlot = null;
         shownItem = item;
         SetDetailText(item, inventory != null ? (int)System.Math.Min(inventory.GetTotalQuantity(item), int.MaxValue) : quantity);
@@ -454,38 +490,87 @@ public class InventoryUI : MonoBehaviour
         CloseDetails();
         yield return null;
         while (detailState == DetailState.Closing && revision == displayRevision) yield return null;
-        bool fastRoute = Mathf.Abs(requestedCategory - currentCategory) > 1;
         while (revision == displayRevision && currentCategory != requestedCategory)
         {
-            int next = currentCategory + (requestedCategory > currentCategory ? 1 : -1);
+            // 중간 인덱스를 거치지 않는다. 전환 중 추가 클릭은 마지막 목표 하나만 대기시킨다.
+            int next = requestedCategory;
             if (!ValidRoute(currentCategory, next)) break;
             CategoryPage old = pages[currentCategory], incoming = pages[next];
-            incoming.panel.gameObject.SetActive(true);
+            SetTransitionPages(currentCategory, next);
             int direction = next > currentCategory ? 1 : -1;
             Vector3 worldWidth = old.panel.TransformVector(Vector3.right * old.panel.rect.width);
             if (pageViewport != null) worldWidth = pageViewport.TransformVector(Vector3.right * pageViewport.rect.width);
             float oldWidth = ((RectTransform)old.panel.parent).InverseTransformVector(worldWidth).magnitude;
             float nextWidth = ((RectTransform)incoming.panel.parent).InverseTransformVector(worldWidth).magnitude;
-            fastRoute |= Mathf.Abs(requestedCategory - currentCategory) > 1;
-            float duration = fastRoute ? distantSegmentDuration : adjacentDuration;
+            // 기존 인접 전환 시간을 모든 거리에서 사용한다. 이전 필드는 잘못된 시간 값의 대체값으로 보존한다.
+            float duration = adjacentDuration > 0f ? adjacentDuration : distantSegmentDuration;
             float elapsed = 0f;
-            while (revision == displayRevision)
+            float progress = 0f;
+            // Detail의 LateUpdate 배치 복원을 유지한 뒤, 전환 위치만 렌더 직전에 적용한다.
+            // 새 효과가 아니라 기존 좌우 이동·Fade의 적용 순서를 보장하는 콜백이다.
+            categoryPresentation = () =>
             {
-                float t = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, duration));
-                old.panel.anchoredPosition = old.origin + Vector2.left * (direction * oldWidth * t);
-                incoming.panel.anchoredPosition = incoming.origin + Vector2.right * (direction * nextWidth * (1f - t));
-                old.group.alpha = 1f - t; incoming.group.alpha = t;
-                if (t >= 1f) break;
-                yield return null;
-                elapsed += Time.unscaledDeltaTime;
+                old.panel.anchoredPosition = old.origin + Vector2.left * (direction * oldWidth * progress);
+                incoming.panel.anchoredPosition = incoming.origin + Vector2.right * (direction * nextWidth * (1f - progress));
+                old.group.alpha = 1f - progress;
+                incoming.group.alpha = progress;
+            };
+            categoryPresentation();
+            Canvas.preWillRenderCanvases += categoryPresentation;
+            try
+            {
+                while (revision == displayRevision)
+                {
+                    progress = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, duration));
+                    if (progress >= 1f) break;
+                    yield return null;
+                    elapsed += Time.unscaledDeltaTime;
+                }
+            }
+            finally
+            {
+                ClearCategoryPresentation();
             }
             if (revision != displayRevision) yield break;
             old.group.alpha = 0f; old.panel.anchoredPosition = old.origin;
             incoming.group.alpha = 1f; incoming.panel.anchoredPosition = incoming.origin;
-            currentCategory = next; UpdateTabs();
+            currentCategory = next;
+            SetTransitionPages(currentCategory, currentCategory);
+            UpdateTabs();
         }
         changingCategory = false; categoryRoutine = null;
         SetPageInput(true);
+    }
+
+    /// <summary>
+    /// 완료·취소·비활성화 때 전환 전용 렌더 콜백을 해제해 다음 UI 표시로 남기지 않는다.
+    /// </summary>
+    private void ClearCategoryPresentation()
+    {
+        if (categoryPresentation == null) return;
+        Canvas.preWillRenderCanvases -= categoryPresentation;
+        categoryPresentation = null;
+    }
+
+    /// <summary>
+    /// 현재 전환에 필요한 두 페이지만 활성화하고 나머지 패널은 표시와 입력을 모두 중지한다.
+    /// </summary>
+    private void SetTransitionPages(int from, int to)
+    {
+        for (int i = 0; pages != null && i < pages.Length; i++)
+        {
+            CategoryPage page = pages[i];
+            if (page == null || page.panel == null || page.group == null) continue;
+            bool isVisible = i == from || i == to;
+            if (!isVisible)
+            {
+                page.group.alpha = 0f;
+                page.group.interactable = false;
+                page.group.blocksRaycasts = false;
+                page.panel.anchoredPosition = page.origin;
+            }
+            if (page.panel.gameObject.activeSelf != isVisible) page.panel.gameObject.SetActive(isVisible);
+        }
     }
     /// <summary>
     /// 지정 페이지에서 슬롯 입력을 받을 수 있는지 설정한다.
@@ -522,6 +607,7 @@ public class InventoryUI : MonoBehaviour
         detailRevision++;
         if (detailRoutine != null) StopCoroutine(detailRoutine);
         detailState = open ? DetailState.Opening : DetailState.Closing;
+        SetDetailInput(false);
         detailRoutine = StartCoroutine(PlayDetail(open, detailRevision));
     }
     /// <summary>
@@ -561,13 +647,12 @@ public class InventoryUI : MonoBehaviour
             AnimatorStateInfo info = detailAnimator.GetCurrentAnimatorStateInfo(0);
             AnimatorClipInfo[] clips = detailAnimator.GetCurrentAnimatorClipInfo(0);
             if (info.fullPathHash != hash || clips.Length == 0 || clips[0].clip != clip) { FailDetail(); yield break; }
-            // Animator가 맡지 않는 끊긴 리스트 경로만 같은 normalizedTime으로 보완한다.
-            detailProgress = Mathf.Lerp(from, open ? 1f : 0f, Mathf.Clamp01((info.normalizedTime - start) / Mathf.Max(0.0001f, 1f - start)));
-            ApplyDetailLayout();
+            // 위치 갱신은 Animator 평가가 끝난 LateUpdate에서 한 번만 처리한다.
             if (!detailAnimator.IsInTransition(0) && info.normalizedTime >= 1f)
             {
                 detailProgress = open ? 1f : 0f; ApplyDetailLayout();
                 detailState = open ? DetailState.Open : DetailState.Closed;
+                SetDetailInput(open);
                 detailRoutine = null; detailAnimator.enabled = false;
                 if (!open) { RestoreAnimatedLayout(); ClearDetails(); }
                 yield break;
@@ -583,12 +668,189 @@ public class InventoryUI : MonoBehaviour
     private void ApplyDetailLayout()
     {
         foreach (DetailLayout layout in detailLayouts ?? System.Array.Empty<DetailLayout>())
-            if (layout != null && layout.target != null && !animatedLayout.ContainsKey(layout.target))
+            if (layout != null && layout.target != null && !animatedLayout.ContainsKey(layout.target) && !IsDetailContent(layout.target))
             {
-                layout.target.anchoredPosition = layout.position + layout.positionOffset * detailProgress;
-                layout.target.sizeDelta = layout.size + layout.sizeDeltaOffset * detailProgress;
+                // 현재 Open/Close 클립의 양 끝 접선이 0인 보간과 같은 곡선을 사용한다.
+                float progress = Mathf.SmoothStep(0f, 1f, detailProgress);
+                Vector2 position = layout.position + layout.positionOffset * progress;
+                Vector2 size = layout.size + layout.sizeDeltaOffset * progress;
+                if (layout.target.anchoredPosition != position) layout.target.anchoredPosition = position;
+                if (layout.target.sizeDelta != size) layout.target.sizeDelta = size;
             }
     }
+    /// <summary>
+    /// Detail 애니메이션이 바꾼 실제 Viewport 너비에 맞춰 고정 크기 슬롯의 열 수를 갱신한다.
+    /// </summary>
+    private void LateUpdate()
+    {
+        if (!IsOpen) return;
+        if (detailAnimator != null && detailAnimator.enabled && detailAnimator.isInitialized &&
+            (detailState == DetailState.Opening || detailState == DetailState.Closing))
+        {
+            bool isOpening = detailState == DetailState.Opening;
+            AnimatorStateInfo state = detailAnimator.GetCurrentAnimatorStateInfo(0);
+            int expectedState = Animator.StringToHash(isOpening ? detailOpenState : detailCloseState);
+            if (state.fullPathHash == expectedState)
+                detailProgress = isOpening ? Mathf.Clamp01(state.normalizedTime) : 1f - Mathf.Clamp01(state.normalizedTime);
+        }
+        ApplyDetailLayout();
+        UpdateResponsiveGrids();
+        HandleDetailOutsideClick();
+    }
+
+    /// <summary>Alpha 애니메이션과 별개로, 완전히 열린 Detail의 버튼 입력만 허용한다.</summary>
+    private void SetDetailInput(bool allowed)
+    {
+        if (detailGroup == null) return;
+        detailGroup.interactable = allowed;
+        detailGroup.blocksRaycasts = allowed;
+    }
+
+    /// <summary>
+    /// EventSystem 처리 후 빈 공간의 새 왼쪽 클릭만 기존 닫기 Coroutine으로 전달한다.
+    /// 슬롯·탭·버튼 입력은 가로채지 않으므로 선택 변경과 더블클릭 등록이 그대로 동작한다.
+    /// </summary>
+    private void HandleDetailOutsideClick()
+    {
+        if ((detailState != DetailState.Open && detailState != DetailState.Opening) ||
+            changingCategory || dragSource != null || detailSelectionFrame == Time.frameCount) return;
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        EventSystem events = EventSystem.current;
+        if (mouse == null || !mouse.leftButton.wasPressedThisFrame || events == null || detailPanel == null) return;
+        RectTransform detailRect = detailPanel.transform as RectTransform;
+        if (detailRect == null) return;
+        Canvas canvas = detailRect.GetComponentInParent<Canvas>();
+        Camera eventCamera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
+        Vector2 position = mouse.position.ReadValue();
+        if (RectTransformUtility.RectangleContainsScreenPoint(detailRect, position, eventCamera)) return;
+        if (categoryTabs != null && RectTransformUtility.RectangleContainsScreenPoint(categoryTabs, position, eventCamera)) return;
+
+        if (detailPointer == null || detailEventSystem != events)
+        {
+            detailEventSystem = events;
+            detailPointer = new PointerEventData(events);
+        }
+        detailPointer.Reset();
+        detailPointer.position = position;
+        detailRaycastResults.Clear();
+        events.RaycastAll(detailPointer, detailRaycastResults);
+        // 실제 입력을 받는 최상위 대상만 검사해 뒤에 가려진 UI로 오판하지 않는다.
+        if (detailRaycastResults.Count > 0)
+        {
+            GameObject target = detailRaycastResults[0].gameObject;
+            if (target != null && (target.GetComponentInParent<InventorySlotUI>() != null ||
+                target.GetComponentInParent<Selectable>() != null ||
+                ExecuteEvents.GetEventHandler<IPointerClickHandler>(target) != null ||
+                ExecuteEvents.GetEventHandler<IPointerDownHandler>(target) != null)) return;
+        }
+        CloseDetails();
+    }
+
+    private void UpdateResponsiveGrids()
+    {
+        foreach (CategoryPage page in pages ?? System.Array.Empty<CategoryPage>())
+        {
+            if (page == null || page.content == null || page.scroll == null ||
+                !page.content.gameObject.activeInHierarchy) continue;
+            RectTransform content = page.content as RectTransform;
+            RectTransform viewport = page.scroll.viewport;
+            GridLayoutGroup grid = page.content.GetComponent<GridLayoutGroup>();
+            if (content == null || viewport == null || grid == null || page.scroll.content != content) continue;
+
+            int childCount = CountGridChildren(content);
+            float width = GetGridWidth(page.scroll, viewport, grid, childCount);
+            if (width <= 0f || grid.cellSize.x + grid.spacing.x <= 0f) continue;
+            int columns = GetGridColumns(grid, width);
+
+            // 가운데 정렬은 열이 줄 때마다 남는 여백을 재분배해 첫 열까지 좌우 왕복시킨다.
+            // Grid 자체의 좌상단 정렬로 첫 열을 고정하고 필요한 줄바꿈은 그대로 허용한다.
+            if (grid.childAlignment != TextAnchor.UpperLeft) grid.childAlignment = TextAnchor.UpperLeft;
+            if (Mathf.Abs(content.rect.width - width) > 0.01f)
+                content.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+            if (grid.constraint != GridLayoutGroup.Constraint.FixedColumnCount)
+                grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            if (grid.constraintCount != columns) grid.constraintCount = columns;
+
+            page.layoutChildCount = childCount;
+            ContentSizeFitter fitter = content.GetComponent<ContentSizeFitter>();
+            if (fitter == null || !fitter.isActiveAndEnabled || fitter.verticalFit == ContentSizeFitter.FitMode.Unconstrained)
+            {
+                float height = Mathf.Max(viewport.rect.height, GetGridHeight(grid, columns, childCount));
+                if (Mathf.Abs(content.rect.height - height) > 0.01f)
+                {
+                    content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+                    // 행 수 감소로 범위를 벗어날 때만 즉시 정리해 Elastic의 뒤늦은 복귀를 막는다.
+                    Vector2 position = content.anchoredPosition;
+                    float maxY = Mathf.Max(0f, height - viewport.rect.height);
+                    float clampedY = Mathf.Clamp(position.y, 0f, maxY);
+                    if (dragSource == null && !Mathf.Approximately(position.y, clampedY))
+                    {
+                        position.y = clampedY;
+                        content.anchoredPosition = position;
+                        page.scroll.StopMovement();
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// ScrollRect가 Canvas 레이아웃 단계에서 결정할 최종 폭을 먼저 계산한다.
+    /// 이전 프레임의 스크롤바 유무를 읽어 17px가 뒤늦게 반영되는 현상을 방지한다.
+    /// </summary>
+    private float GetGridWidth(ScrollRect scroll, RectTransform viewport, GridLayoutGroup grid, int childCount)
+    {
+        RectTransform scrollRect = scroll.transform as RectTransform;
+        RectTransform scrollbar = scroll.verticalScrollbar != null ? scroll.verticalScrollbar.transform as RectTransform : null;
+        bool canExpand = !scroll.horizontal && scroll.vertical &&
+            scroll.verticalScrollbarVisibility == ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport &&
+            scrollRect != null && viewport.parent == scroll.transform && scrollbar != null &&
+            scrollbar.parent == scroll.transform && scroll.horizontalScrollbar == null;
+        if (!canExpand) return viewport.rect.width;
+
+        float width = scrollRect.rect.width;
+        int columns = GetGridColumns(grid, width);
+        if (GetGridHeight(grid, columns, childCount) > viewport.rect.height + 0.01f)
+            width -= scrollbar.rect.width + scroll.verticalScrollbarSpacing;
+        return Mathf.Max(0f, width);
+    }
+
+    private int GetGridColumns(GridLayoutGroup grid, float width)
+    {
+        float step = grid.cellSize.x + grid.spacing.x;
+        if (step <= 0f) return 1;
+        float usableWidth = width - grid.padding.left - grid.padding.right;
+        return Mathf.Max(1, Mathf.FloorToInt((usableWidth + grid.spacing.x) / step));
+    }
+
+    private float GetGridHeight(GridLayoutGroup grid, int columns, int childCount)
+    {
+        int rows = Mathf.CeilToInt(childCount / (float)columns);
+        return grid.padding.vertical + rows * grid.cellSize.y + Mathf.Max(0, rows - 1) * grid.spacing.y;
+    }
+
+    private int CountGridChildren(RectTransform content)
+    {
+        int count = 0;
+        for (int i = 0; i < content.childCount; i++)
+        {
+            Transform child = content.GetChild(i);
+            if (!child.gameObject.activeInHierarchy) continue;
+            if (child.TryGetComponent(out LayoutElement element) && element.ignoreLayout) continue;
+            count++;
+        }
+        return count;
+    }
+
+    private bool IsDetailContent(RectTransform target)
+    {
+        foreach (CategoryPage page in pages ?? System.Array.Empty<CategoryPage>())
+        {
+            if (page != null && page.content == target) return true;
+        }
+        return false;
+    }
+
     /// <summary>
     /// 애니메이션이 변경한 RectTransform 배치를 보관한 값으로 되돌린다.
     /// </summary>
@@ -645,6 +907,7 @@ public class InventoryUI : MonoBehaviour
     /// </summary>
     private void ResetPresentation()
     {
+        ClearCategoryPresentation();
         displayRevision++; detailRevision++;
         if (categoryRoutine != null) StopCoroutine(categoryRoutine);
         if (detailRoutine != null) StopCoroutine(detailRoutine);
@@ -653,7 +916,7 @@ public class InventoryUI : MonoBehaviour
         ResetDetailVisuals(); ClearDetails();
         for (int i = 0; pages != null && i < pages.Length; i++)
             if (pages[i] != null && pages[i].panel != null && pages[i].group != null)
-            { pages[i].panel.gameObject.SetActive(true); pages[i].panel.anchoredPosition = pages[i].origin; pages[i].group.alpha = i == 0 ? 1f : 0f; }
+            { pages[i].panel.gameObject.SetActive(i == 0); pages[i].panel.anchoredPosition = pages[i].origin; pages[i].group.alpha = i == 0 ? 1f : 0f; }
         SetPageInput(true); UpdateTabs();
     }
     /// <summary>
@@ -666,11 +929,22 @@ public class InventoryUI : MonoBehaviour
         foreach (InventorySlotUI slot in equippedSlots ?? System.Array.Empty<InventorySlotUI>()) if (slot != null) slot.RefreshHighlight();
     }
     /// <summary>
+    /// 더블클릭한 보관 슬롯을 빈 퀵슬롯에 등록한다. 드래그 및 사용 예약 중에는 변경하지 않는다.
+    /// </summary>
+    public bool EquipStorageSlot(InventorySlotUI slot)
+    {
+        if (!InteractionAllowed || dragSource != null || inventory == null || slot == null || slot.IsEquipped) return false;
+        InventoryEntry entry = inventory.GetEntry(false, slot.SlotIndex);
+        if (entry == null || entry.Item != slot.Item || entry.Quantity != slot.Quantity) return false;
+        return inventory.TryAssignFirstEmpty(slot.SlotIndex);
+    }
+
+    /// <summary>
     /// 선택 아이템을 지정 퀵슬롯에 등록하도록 인벤토리에 요청한다.
     /// </summary>
     public void AssignSelectedToQuickSlot(int index)
     {
-        if (!InteractionAllowed || inventory == null || shownItem == null || !shownItem.CanUse) return;
+        if (!InteractionAllowed || inventory == null || shownItem == null || !shownItem.CanEquipToQuickSlot) return;
         for (int i = 0; i < inventory.Entries.Count; i++)
         {
             InventoryEntry entry = inventory.GetEntry(false, i);
@@ -688,6 +962,8 @@ public class InventoryUI : MonoBehaviour
     /// </summary>
     private void RefreshEquipment()
     {
+        RefreshWeaponIcon(primaryWeaponIcon, PlayerEquipmentKind.AssaultRifle);
+        RefreshWeaponIcon(secondaryWeaponIcon, PlayerEquipmentKind.Pistol);
         WeaponText(primaryWeaponText, PlayerEquipmentKind.AssaultRifle, "주무기");
         WeaponText(pistolWeaponText, PlayerEquipmentKind.Pistol, "권총");
         WeaponText(meleeWeaponText, PlayerEquipmentKind.Dagger, "근접 무기");
@@ -698,8 +974,26 @@ public class InventoryUI : MonoBehaviour
     private void WeaponText(TMP_Text text, PlayerEquipmentKind kind, string label)
     {
         if (text == null) return;
+        if (kind == PlayerEquipmentKind.AssaultRifle || kind == PlayerEquipmentKind.Pistol)
+        {
+            ItemData item = equipment != null ? equipment.GetRequiredItem(kind) : null;
+            bool hasWeapon = equipment != null && equipment.HasOwnership(kind);
+            text.text = hasWeapon ? item.ItemName + (equipment.CurrentKind == kind ? " · 장착됨" : " · 보유") : label + " · 미보유";
+            return;
+        }
         text.text = label + (equipment == null || !equipment.IsAssigned(kind) ? " · 준비되지 않음" : equipment.CurrentKind == kind ? " · 장착됨" : " · 배정됨");
     }
+    /// <summary>
+    /// 소유 중인 총기의 아이콘을 기존 장비 슬롯에 표시한다.
+    /// </summary>
+    private void RefreshWeaponIcon(RawImage icon, PlayerEquipmentKind kind)
+    {
+        if (icon == null) return;
+        bool hasWeapon = equipment != null && equipment.HasOwnership(kind);
+        // Texture는 Inspector 설정을 그대로 사용하고 소유 여부에 따른 표시만 변경한다.
+        icon.enabled = hasWeapon;
+    }
+
     /// <summary>
     /// 연결된 상세 이름·설명 등 텍스트를 비운다.
     /// </summary>

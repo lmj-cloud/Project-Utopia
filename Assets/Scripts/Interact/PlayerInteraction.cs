@@ -14,11 +14,24 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField, Min(0.1f)] private float npcInteractionDistance = 3f;
     [SerializeField] private LayerMask npcLayers = ~0;
 
+    [SerializeField] private Transform selectionView;
+    [SerializeField, Range(1f, 180f)] private float maxViewAngle = 65f;
     private HighlightableObject currentTarget;
     private NPCDialogue currentNpcTarget;
     private bool interactionEnabled = true;
+    private int interactionBlockedFrame = -1;
 
     public HighlightableObject CurrentTarget => currentTarget;
+    public Transform SelectedTarget
+    {
+        get
+        {
+            if (!interactionEnabled || interactionBlockedFrame == Time.frameCount) return null;
+            if (currentNpcTarget != null) return currentNpcTarget.transform;
+            if (currentTarget != null) return currentTarget.transform;
+            return null;
+        }
+    }
 
     /// <summary>
     /// 매 프레임 현재 상태와 입력을 확인하여 이 컴포넌트의 동작을 갱신한다.
@@ -35,7 +48,7 @@ public class PlayerInteraction : MonoBehaviour
     /// </summary>
     public void TryInteract(PlayerInventory inventory, DialogueUI dialogueUI, StoryProgress story)
     {
-        if (!isActiveAndEnabled || !interactionEnabled) return;
+        if (!isActiveAndEnabled || !interactionEnabled || interactionBlockedFrame == Time.frameCount) return;
         if (dialogueUI != null && (dialogueUI.IsOpen || dialogueUI.WasClosedThisFrame)) return;
 
         // Update 호출 순서에 관계없이 현재 위치에서 대상을 다시 확인한다.
@@ -47,6 +60,14 @@ public class PlayerInteraction : MonoBehaviour
         }
         if (currentTarget == null) return;
 
+        // 차량도 기존 거리·우선순위 선정 결과를 그대로 사용한다.
+        VehicleController vehicle = currentTarget.GetComponent<VehicleController>();
+        if (vehicle != null)
+        {
+            vehicle.TryEnter(GetComponent<PlayerController>());
+            RefreshTargets();
+            return;
+        }
         InteractableObject interactable = currentTarget.GetComponent<InteractableObject>();
         if (interactable != null) interactable.TryInteract(inventory, dialogueUI, story);
         RefreshTargets();
@@ -66,10 +87,21 @@ public class PlayerInteraction : MonoBehaviour
     }
 
     /// <summary>
-    /// 현재 위치에서 NPC와 하이라이트 대상을 다시 탐색하여 선택 상태를 맞춘다.
+    /// 하차에 사용한 입력이 같은 프레임에 재탑승이나 다른 상호작용으로 다시 소비되지 않게 한다.
+    /// </summary>
+    public void SuppressInteractionForCurrentFrame()
+    {
+        interactionBlockedFrame = Time.frameCount;
+        ChangeTarget(null);
+        currentNpcTarget = null;
+    }
+
+    /// <summary>
+    /// 현재 위치에서 기존 거리·우선순위 규칙으로 상호작용 대상을 다시 선택한다.
     /// </summary>
     private void RefreshTargets()
     {
+        if (interactionBlockedFrame == Time.frameCount) return;
         HighlightableObject objectTarget = FindTarget();
         NPCDialogue npcTarget = FindNpcTarget();
         if (objectTarget != null && npcTarget != null)
@@ -123,17 +155,35 @@ public class PlayerInteraction : MonoBehaviour
 
         HighlightableObject nearestTarget = null;
         float nearestDistanceSquared = float.MaxValue;
+        float nearestViewAngle = float.MaxValue;
         foreach (Collider nearbyCollider in nearbyColliders)
         {
             HighlightableObject candidate = nearbyCollider.GetComponentInParent<HighlightableObject>();
             if (candidate == null || !candidate.isActiveAndEnabled) continue;
+            float viewAngle = 0f;
+            if (selectionView != null)
+            {
+                Vector3 direction = nearbyCollider.bounds.center - selectionView.position;
+                viewAngle = Vector3.Angle(selectionView.forward, direction);
+                if (viewAngle > maxViewAngle) continue;
+            }
             InteractableObject interactable = candidate.GetComponent<InteractableObject>();
-            if (interactable == null || !interactable.CanInteract) continue;
+            VehicleController vehicle = candidate.GetComponent<VehicleController>();
+            if (vehicle != null)
+            {
+                if (!vehicle.CanEnter) continue;
+            }
+            else if (interactable == null || !interactable.CanInteract) continue;
             float distanceSquared = (candidate.transform.position - transform.position).sqrMagnitude;
-            if (distanceSquared < nearestDistanceSquared ||
-                (Mathf.Approximately(distanceSquared, nearestDistanceSquared) && candidate == currentTarget))
+            bool isBetter = distanceSquared < nearestDistanceSquared;
+            if (selectionView != null)
+                isBetter = viewAngle < nearestViewAngle ||
+                    (Mathf.Approximately(viewAngle, nearestViewAngle) && distanceSquared < nearestDistanceSquared);
+            if (isBetter || (Mathf.Approximately(viewAngle, nearestViewAngle) &&
+                Mathf.Approximately(distanceSquared, nearestDistanceSquared) && candidate == currentTarget))
             {
                 nearestDistanceSquared = distanceSquared;
+                nearestViewAngle = viewAngle;
                 nearestTarget = candidate;
             }
         }

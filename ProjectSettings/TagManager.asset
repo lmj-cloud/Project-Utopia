@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 3
   tags:
   - ImpactNormal
+  - Target
+  - Wall
   layers:
   - Default
   - TransparentFX
@@ -17,10 +19,10 @@ TagManager:
   - BodyCol
   - LegCol
   - NPC
-  - Wall
-  - Floor
-  - 
-  - 
+  - Obstacles
+  - EquipmentPlayerModel
+  - EquipmentRifle
+  - EquipmentGun
   - 
   - 
   - 

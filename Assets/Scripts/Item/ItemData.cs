@@ -18,6 +18,17 @@ public class ItemData : ScriptableObject
     [SerializeField] private ItemCategory category = ItemCategory.Unclassified;
     public ItemCategory Category => category;
 
+    [Header("Fixed Equipment")]
+    [SerializeField] private bool isFixedWeapon;
+    [SerializeField] private PlayerEquipmentKind equipmentKind;
+    public bool IsFixedWeapon => isFixedWeapon;
+    public PlayerEquipmentKind EquipmentKind => equipmentKind;
+
+    [Header("Quick Slot")]
+    [Tooltip("카테고리와 무관한 퀵슬롯 등록 허용 여부. 실제 사용에는 Usable도 필요합니다.")]
+    [SerializeField] private bool canEquipToQuickSlot;
+    public bool CanEquipToQuickSlot => canEquipToQuickSlot;
+
     [Header("Use")]
     [SerializeField] private bool usable;
     [SerializeField] private bool consumable = true;

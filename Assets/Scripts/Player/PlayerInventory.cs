@@ -51,6 +51,9 @@ public class PlayerInventory : MonoBehaviour
     // 사용 시작 시 예약한 실제 보관 스택 참조.
     private InventoryEntry reservedEntry;
     private int reservedSlot = -1;
+    private ItemUseController itemUseController;
+    // 월드 복약처럼 퀵슬롯 예약을 쓰지 않는 사용 중에도 슬롯 변경은 막는다.
+    private bool IsSlotChangeLocked => IsUseLocked || (itemUseController != null && itemUseController.IsUsing);
     public event Action Changed;
     public event Action<ItemData, int> ItemAdded;
     public IReadOnlyList<InventoryEntry> Entries => entries;
@@ -63,7 +66,11 @@ public class PlayerInventory : MonoBehaviour
     /// <summary>
     /// 다른 실행 로직이 시작되기 전에 필요한 참조와 초기 상태를 준비한다.
     /// </summary>
-    private void Awake() { EnsureSlots(); CorrectSelection(); }
+    private void Awake()
+    {
+        itemUseController = GetComponent<ItemUseController>();
+        EnsureSlots(); ValidateQuickSlotAssignments(true); CorrectSelection();
+    }
     /// <summary>
     /// 보관·퀵슬롯 배열 크기를 보정하고 이전 직렬화 장착 스택을 유실 없이 이전한다.
     /// </summary>
@@ -83,10 +90,50 @@ public class PlayerInventory : MonoBehaviour
             int empty = entries.FindIndex(e => !HasStack(e));
             if (empty < 0) { empty = entries.Count; entries.Add(null); }
             entries[empty] = legacy;
-            if (quickItems[i] == null && legacy.Item.CanUse) quickItems[i] = legacy.Item;
+            if (quickItems[i] == null && legacy.Item.CanEquipToQuickSlot && !IsQuickItemAssigned(legacy.Item)) quickItems[i] = legacy.Item;
             equippedEntries[i] = null;
         }
+        ValidateQuickSlotAssignments(false);
     }
+
+    /// <summary>
+    /// 기존 직렬화·저장 정보의 등록만 검증한다. 잘못된 등록도 실제 보관 수량은 삭제하지 않는다.
+    /// </summary>
+    private void ValidateQuickSlotAssignments(bool requireOwnership)
+    {
+        // 사용 중에는 예약된 슬롯을 바꾸지 않는다. 완료 시에도 설정을 다시 검사한다.
+        if (IsSlotChangeLocked) return;
+        for (int i = 0; i < EquippedSlotCount; i++)
+        {
+            ItemData item = quickItems[i];
+            if (item == null) continue;
+            bool isValid = item.CanEquipToQuickSlot;
+            for (int j = 0; j < i; j++)
+            {
+                if (quickItems[j] == item) isValid = false;
+            }
+            if (requireOwnership)
+            {
+                bool hasOwnedStack = false;
+                foreach (InventoryEntry entry in entries)
+                {
+                    if (HasStack(entry) && entry.Item == item) { hasOwnedStack = true; break; }
+                }
+                isValid &= hasOwnedStack;
+            }
+            if (!isValid) quickItems[i] = null;
+        }
+    }
+
+    private bool IsQuickItemAssigned(ItemData item)
+    {
+        for (int i = 0; i < EquippedSlotCount; i++)
+        {
+            if (quickItems[i] == item) return true;
+        }
+        return false;
+    }
+
     /// <summary>
     /// 보관 스택 또는 퀵슬롯에 등록된 아이템의 현재 총량을 반환한다.
     /// </summary>
@@ -95,7 +142,7 @@ public class PlayerInventory : MonoBehaviour
         EnsureSlots();
         if (equipped)
         {
-            if (index < 0 || index >= EquippedSlotCount || quickItems[index] == null) return null;
+            if (index < 0 || index >= EquippedSlotCount || quickItems[index] == null || !quickItems[index].CanEquipToQuickSlot) return null;
             ItemData item = quickItems[index];
             long total = GetTotalQuantity(item);
             return total > 0 ? new InventoryEntry(item, (int)Math.Min(int.MaxValue, total)) : null;
@@ -126,6 +173,8 @@ public class PlayerInventory : MonoBehaviour
     public bool TryAdd(ItemData item, int quantity = 1)
     {
         if (item == null || quantity <= 0) return false;
+        // 고정 장비는 종류별 한 개만 보유하며 수량을 쌓지 않는다.
+        if (item.IsFixedWeapon && (quantity != 1 || HasFixedWeapon(item.EquipmentKind))) return false;
         EnsureSlots();
         for (int i = 0; i < entries.Count; i++)
             if (HasStack(entries[i]) && entries[i].Item == item)
@@ -143,10 +192,23 @@ public class PlayerInventory : MonoBehaviour
     /// </summary>
     public bool HasItem(ItemData item, int quantity = 1) => quantity > 0 && GetTotalQuantity(item) >= quantity;
     /// <summary>
+    /// 무기 소유 여부는 별도 bool 대신 실제 보관 데이터에서 확인한다.
+    /// </summary>
+    public bool HasFixedWeapon(PlayerEquipmentKind kind)
+    {
+        foreach (InventoryEntry entry in entries)
+        {
+            if (HasStack(entry) && entry.Item.IsFixedWeapon && entry.Item.EquipmentKind == kind) return true;
+        }
+        return false;
+    }
+
+    /// <summary>
     /// 사용 예약과 수량 조건을 확인한 뒤 실제 보관 스택에서 요청 수량을 제거한다.
     /// </summary>
     public bool TryRemove(ItemData item, int quantity = 1)
     {
+        if (item != null && item.IsFixedWeapon) return false;
         if (IsUseLocked || !HasItem(item, quantity)) return false;
         int remaining = quantity;
         for (int i = 0; i < entries.Count && remaining > 0; i++)
@@ -170,23 +232,27 @@ public class PlayerInventory : MonoBehaviour
     /// <summary>
     /// 슬롯 종류에 해당 아이템을 배치할 수 있는지 확인한다.
     /// </summary>
-    private static bool CanPlace(bool equipped, InventoryEntry entry) => !equipped || !HasStack(entry) || entry.Item.CanUse;
+    private static bool CanPlace(bool equipped, InventoryEntry entry) => !equipped || !HasStack(entry) || entry.Item.CanEquipToQuickSlot;
     /// <summary>
     /// 드래그 시작 시 아이템·수량이 그대로인지 확인한 뒤 스택 이동·병합 또는 퀵슬롯 등록을 처리한다.
     /// </summary>
     public bool TryMove(bool fromEquipped, int from, bool toEquipped, int to, ItemData expectedItem, int expectedQuantity)
     {
         EnsureSlots();
-        if (IsUseLocked || !ValidSlot(fromEquipped, from) || !ValidSlot(toEquipped, to) || (fromEquipped == toEquipped && from == to)) return false;
+        if (IsSlotChangeLocked || !ValidSlot(fromEquipped, from) || !ValidSlot(toEquipped, to) || (fromEquipped == toEquipped && from == to)) return false;
         InventoryEntry source = GetEntry(fromEquipped, from), destination = GetEntry(toEquipped, to);
         if (!HasStack(source) || source.Item != expectedItem || source.Quantity != expectedQuantity || !CanPlace(toEquipped, source)) return false;
         if (fromEquipped || toEquipped)
         {
             if (fromEquipped && toEquipped)
-            { ItemData item = quickItems[from]; quickItems[from] = quickItems[to]; quickItems[to] = item; }
+            {
+                if (!CanPlace(true, destination)) return false;
+                ItemData item = quickItems[from]; quickItems[from] = quickItems[to]; quickItems[to] = item;
+            }
             else if (toEquipped)
             {
-                for (int i = 0; i < EquippedSlotCount; i++) if (quickItems[i] == source.Item) quickItems[i] = null;
+                // 보관칸에서 이미 등록된 아이템을 다시 끌어도 다른 슬롯으로 복제·이전하지 않는다.
+                if (IsQuickItemAssigned(source.Item)) return false;
                 quickItems[to] = source.Item;
             }
             else
@@ -212,16 +278,38 @@ public class PlayerInventory : MonoBehaviour
         CorrectSelection(); Changed?.Invoke(); return true;
     }
     /// <summary>
-    /// 퀵슬롯 등록 아이템이 사용 가능하고 실제 보유량이 남아 있는지 확인한다.
+    /// 보관 아이템을 첫 빈 퀵슬롯에 등록한다. 중복 등록이나 기존 슬롯 덮어쓰기는 하지 않는다.
     /// </summary>
-    private bool Selectable(int i) => quickItems[i] != null && quickItems[i].CanUse && GetTotalQuantity(quickItems[i]) > 0;
+    public bool TryAssignFirstEmpty(int storageIndex)
+    {
+        EnsureSlots();
+        InventoryEntry entry = GetEntry(false, storageIndex);
+        if (IsSlotChangeLocked || !HasStack(entry) || !entry.Item.CanEquipToQuickSlot) return false;
+        for (int i = 0; i < EquippedSlotCount; i++)
+        {
+            if (quickItems[i] == entry.Item) return false;
+        }
+        for (int i = 0; i < EquippedSlotCount; i++)
+        {
+            if (quickItems[i] == null)
+            {
+                return TryMove(false, storageIndex, true, i, entry.Item, entry.Quantity);
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 등록 가능한 아이템과 실제 보유량을 검사한다. 사용 가능 여부는 ItemUseController에서 검사한다.
+    /// </summary>
+    private bool Selectable(int i) => quickItems[i] != null && quickItems[i].CanEquipToQuickSlot && GetTotalQuantity(quickItems[i]) > 0;
     /// <summary>
     /// 아이템 수량을 버리지 않고 해당 퀵슬롯의 등록만 해제한다.
     /// </summary>
     public bool UnassignQuickSlot(int index)
     {
         EnsureSlots();
-        if (IsUseLocked || index < 0 || index >= EquippedSlotCount || quickItems[index] == null) return false;
+        if (IsSlotChangeLocked || index < 0 || index >= EquippedSlotCount || quickItems[index] == null) return false;
         quickItems[index] = null; CorrectSelection(); Changed?.Invoke(); return true;
     }
     /// <summary>
@@ -254,7 +342,7 @@ public class PlayerInventory : MonoBehaviour
     public bool BeginEquippedUse(UnityEngine.Object owner, int slot, ItemData item, int quantity)
     {
         InventoryEntry entry = GetEntry(true, slot);
-        if (owner == null || IsUseLocked || !HasStack(entry) || entry.Item != item || !item.CanUse || quantity <= 0 || entry.Quantity < quantity) return false;
+        if (owner == null || IsSlotChangeLocked || !HasStack(entry) || entry.Item != item || !item.CanEquipToQuickSlot || !item.CanUse || quantity <= 0 || entry.Quantity < quantity) return false;
         useOwner = owner; reservedEntry = entry; reservedSlot = slot; Changed?.Invoke(); return true;
     }
     /// <summary>
@@ -263,6 +351,7 @@ public class PlayerInventory : MonoBehaviour
     public bool CompleteEquippedUse(UnityEngine.Object owner, int slot, ItemData item, int consume)
     {
         if (owner == null || useOwner != owner || slot != reservedSlot || reservedEntry == null ||
+            item == null || !item.CanEquipToQuickSlot || !item.CanUse ||
             reservedEntry.Item != item || quickItems[slot] != item || consume < 0 || GetTotalQuantity(item) < consume) return false;
         int remaining = consume;
         for (int i = 0; i < entries.Count && remaining > 0; i++)
@@ -284,6 +373,7 @@ public class PlayerInventory : MonoBehaviour
     /// </summary>
     public void ClearInventory()
     {
+        if (IsSlotChangeLocked) return;
         entries.Clear(); equippedEntries = new InventoryEntry[EquippedSlotCount]; quickItems = new ItemData[EquippedSlotCount]; selectedEquippedSlot = -1;
         useOwner = null; reservedEntry = null; reservedSlot = -1; EnsureSlots(); Changed?.Invoke();
     }
@@ -308,6 +398,7 @@ public class PlayerInventory : MonoBehaviour
     /// </summary>
     public void RestoreInventory(List<InventoryEntry> snapshot)
     {
+        if (IsSlotChangeLocked) return;
         entries.Clear(); equippedEntries = new InventoryEntry[EquippedSlotCount]; quickItems = new ItemData[EquippedSlotCount]; selectedEquippedSlot = -1;
         useOwner = null; reservedEntry = null; reservedSlot = -1; EnsureSlots();
         if (snapshot != null) foreach (InventoryEntry e in snapshot)
@@ -317,12 +408,13 @@ public class PlayerInventory : MonoBehaviour
             if (e.snapshotAssignment != null)
             { if (e.snapshotSlot >= 0 && e.snapshotSlot < EquippedSlotCount) quickItems[e.snapshotSlot] = e.snapshotAssignment; continue; }
             if (!HasStack(e)) continue;
+            if (e.Item.IsFixedWeapon && HasFixedWeapon(e.Item.EquipmentKind)) continue;
             int index = e.snapshotSlot;
             if (index < 0) index = entries.FindIndex(x => !HasStack(x)); // legacy snapshots
             if (!e.snapshotEquipped && index >= entries.Count) while (entries.Count <= index) entries.Add(null);
             if (!ValidSlot(e.snapshotEquipped, index)) continue;
-            SetEntry(e.snapshotEquipped, index, new InventoryEntry(e.Item, e.Quantity));
+            SetEntry(e.snapshotEquipped, index, new InventoryEntry(e.Item, e.Item.IsFixedWeapon ? 1 : e.Quantity));
         }
-        EnsureSlots(); CorrectSelection(); Changed?.Invoke();
+        EnsureSlots(); ValidateQuickSlotAssignments(true); CorrectSelection(); Changed?.Invoke();
     }
 }
