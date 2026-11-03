@@ -1,0 +1,25 @@
+S03 리소스 참조 목록 (파일명 기반 후보, 청취/렌더 검증 전)
+
+경기장
+Assets/3D Boxing Arena Pack
+- LFS 33개 복원 완료. 모델 FBX 8개 포함.
+- 모델/프리팹을 새 씬 인스턴스로 참조한다.
+- Materials/Boxing_Props_mt_01.mat 및 Boxing_Props_mt_02.mat에는
+  기존 실제 변경이 있으므로 수정하거나 기준 재질로 확정하지 않는다.
+- URP 적용에 새 재질이 필요하면 Workspace/Sequences/S03/Materials에
+  별도 재질을 생성하고 복원된 텍스처를 참조한다.
+
+문 움직임 후보
+Assets/Gamemaster Audio - Pro Sound Collection/Doors/door_creak_short_01.wav
+- RIFF/WAVE 확인. 문 열림 전체 동작음인지 청취 필요.
+
+군중 환경음 후보
+Assets/Gamemaster Audio - Pro Sound Collection/Backgrounds/background_crowd_people_chatter_loop_01.wav
+- RIFF/WAVE 확인. 군중 웅성거림이며 경기장 환호로 확정하지 않는다.
+- 루프 접합부, 공간감, 레벨을 청취한다.
+
+관중 환호 및 경기장 전용 분위기음
+- 명확한 후보 미확인. 임의 대체 또는 추가 대량 복원 없음.
+
+오디오 원본을 이동/복제하거나 import 설정을 변경하지 않는다.
+새 편집 음원/녹음만 S03/Audio에 저장한다.

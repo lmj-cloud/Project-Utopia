@@ -1,0 +1,37 @@
+S03 독립 제작 초기 계획
+현재 구현 및 생성/테스트 방법은 같은 폴더의 START-HERE.txt를 우선 참조한다.
+아래 내용은 작업 공간 생성 단계의 설계 메모이며 현재 검증 결과를 뜻하지 않는다.
+
+목표
+문 상호작용 또는 시험 키 -> 문 움직임/효과음 -> 백색 전환 ->
+경기장 도착 -> 군중 환경음 -> 조작 복귀.
+기존 S03Prototype은 참고만 하고 씬/스크립트/Timeline을 수정하지 않는다.
+
+다음 Unity Editor 작업
+1. S03_Workbench.unity를 이 폴더의 Scenes 아래 새로 만든다.
+2. 단일 Main Camera/AudioListener와 별도 간단한 테스트 환경을 구성한다.
+3. S03_DirectionRoot에 기존 DirectionSequence/Screen/Audio/Cue를 연결한다.
+4. Screen Space Overlay Image는 Stretch, alpha 0, Raycast Target false.
+5. Director는 Play On Awake false, Wrap None, Unscaled Game Time으로 설정.
+6. S03_Entrance.playable을 Timelines에 새로 만든다. S03Prototype 원본은
+   직접 편집하거나 테스트 씬 오브젝트 바인딩을 공유하지 않는다.
+7. DirectionSequence의 기본 0.5초 백색 페이드/0.8초 복귀/환경음 시작은
+   이미 코드에 있다. Timeline에서 같은 fade/audio를 중복 실행하지 않는다.
+8. 문/군중 후보를 청취 후 sequence.transitionSound/crowdLoop에 연결한다.
+9. onTransitionCovered에 테스트 리그의 경기장 위치 이동을 연결한다.
+   실제 PlayerController 이동과 다른 씬 로딩은 아직 연결하지 않는다.
+10. 검증한 연출 객체만 S03/Prefabs에 새 프리팹으로 저장한다.
+
+기존 DirectionSequence는 문 움직임이나 플레이어 위치 이동을 직접 구현하지
+않는다. 필요한 동작은 S03/Scripts의 새 테스트 전용 컴포넌트와 이벤트로
+추가하며 공통 Direction 코드와 기존 게임 코드를 수정하지 않는다.
+
+검증 기준
+- F8 연타 시 1회 실행. 종료 후 재실행 가능.
+- 정상 완료/Cancel/오브젝트 비활성화/Timeline 타임아웃 구분.
+- 화면 alpha, 카메라 priority와 enabled 상태가 원래대로 복구.
+- 문/군중 소리 적합성, 루프 접합부, 볼륨과 중복 재생 확인.
+- Timeline preview가 게임 플레이어를 이동시키지 않도록 설계.
+- Console 컴파일/런타임 오류 없음, 단일 AudioListener 유지.
+- 종료 후 원본 에셋/기존 씬/Packages/ProjectSettings Git diff 확인.
+- 실제 Player 입력 잠금 복구는 향후 통합 씬에서 별도로 검증.

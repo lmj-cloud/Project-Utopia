@@ -1,0 +1,70 @@
+S03 검증 기록 — 2026-10-28
+
+시네마틱 개선 검증 (이 항목이 아래 초기 기록보다 최신)
+- 기존 Scene/Prefab/Timeline/Signal GUID를 보존하는 UpgradeExisting 실행 통과.
+- 씬 수 1개 유지. 공유 Direction/S03Prototype/PlayerController 수정 없음.
+- 3초 Cubic Bezier Dolly + SmoothStep 정면 시선/FOV -5도 + URP 발광 전환.
+- 출력 카메라 포즈에서 시작함을 검증. 기존 45도 고정 샷을 사용하지 않음.
+- 도중 백색 opacity 및 Bloom/Exposure가 점진적으로 증가함을 검사.
+- 위치 이동 시 opacity >= 0.999 검사 및 약 3.00초 전환 확인.
+- 완전 백색에서 같은 씬의 경기장 위치로 이동, 1.8초 DirectionScreen reveal.
+- 기존 3초 Timeline Signal pan, 군중 AudioSource 재생/fade, 3인칭 복귀 통과.
+- 경기장 도착점에서 상/전/후/좌/우 raycast로 실내 경계 검사 통과.
+- 백색 증가 중 취소, 도착 후 reveal 중 취소, 목적지 누락 예외 주입,
+  전체 타임아웃, Bridge 컴포넌트 비활성화의 다섯 복구 경로 통과.
+- 복구 검사: 조작 잠금 해제, 카메라 복귀, overlay 해제, exposure=0,
+  문 조명=0, 빌린 DirectionScreen 참조 복원, 도착 전/후 조명 일관성.
+- 예외 주입 시 의도적인 오류 로그가 발생한다. 정상 완료 경로의 오류와 구분.
+- 새 프로필은 S03_CinematicProfile.asset. Play에서는 복제 인스턴스를 사용한다.
+- URP HDR/PostProcessData/카메라 post-processing/Volume layer 0 확인.
+- 원본 Crowd Area/Complete Roof/양측 Crowd_Chair 메시를 S03 재질로 재사용.
+- 관중석 그릇형 메시가 이동 통로를 가리지 않도록 뒤쪽 세트로 배치.
+- 외벽, 천장, 기둥, 단차 갤러리, 통로, 스폿/보조광 및 실내 표식 보완.
+
+미적/청취 검토 범위
+- 카메라 RenderTexture 캡처를 검토하여 차폐 및 조명을 보완했다.
+  이 캡처는 카메라 렌더이며 Screen Space Overlay UI의 합성 캡처와 다르다.
+- Game 화면에서 실제 E키 접근/마우스 조작감, 전환의 체감, 음량/루프의
+  청취 적합성은 사람이 최종 확인해야 한다.
+- 가정집 환경음은 여전히 미할당이며, 군중 웅성거림은 환호음이 아니다.
+- 전체 테스트 리그 비활성화/프로세스 강제 종료, 실제 게임 씬 로딩 및 다른
+  게임 시스템과의 중첩 잠금 통합은 이번 자동 검사 범위에 포함하지 않는다.
+
+이하 초기 독립 테스트 생성 당시의 기록
+
+생성
+- Unity 6000.3.21f1 / 기존 설치 패키지 기준 컴파일 및 AssetDatabase 생성 통과.
+- Scene: Scenes/S03_Workbench_20261028_062122_325.unity
+- Prefab: Prefabs/S03_TestRig_20261028_062122_325.prefab
+- Timeline: Timelines/S03_ArenaArrival_20261028_062122_325.playable
+- Signal 2개, 전용 Material 7개 생성. 수작업 씬/프리팹 YAML 작성 없음.
+- 기존 Material을 저장하지 않고 새 재질에만 외부 텍스처를 참조.
+
+실제 Unity Play 모드 자동 검증
+- S03WorkbenchValidation.RunCompletionBatch: PASS, 실행 중 26,125 프레임 진행.
+- RunCancellationBatch: PASS, 실행 중 8,176 프레임 진행.
+- 배치 모드는 벽시계 초당 프레임 수가 매우 높으므로 위 값은 성능 수치가 아님.
+- 테스트는 새 씬을 Single로 열고 Play에서 문 앞에 시험 플레이어를 이동시킨 뒤
+  기존 S03DoorInteraction.TryOpen을 호출한다. WASD/E 키 입력 주입은 하지 않는다.
+- 문 raycast/상호작용 성공 및 두 번째 시작 요청 거부 확인.
+- 조작 잠금 획득 확인, 완료 뒤 이전 잠금 상태 복귀 확인.
+- 경기장 도착 위치, 집/경기장 조명 활성 상태 전환 확인.
+- 백색 덮임 가드 통과 및 완료 후 overlay alpha 0 확인.
+- Timeline Signal을 통한 경기장 카메라 최종 위치 확인.
+- Cinemachine blend 이후 활성 카메라 CM_ThirdPerson 복귀 확인.
+- 실제 군중 AudioSource의 clip/isPlaying/volume > 0.1 확인.
+- 문 열림 초기에 취소 시 조작/화면/조명 복구 및 뒤늦은 문 완료 이벤트의
+  경기장 전환 억제 확인.
+
+아직 별도 사람이 확인할 항목
+- Game 화면의 구도, 부드러운 카메라 이동, 백색 전환 프레임과 URP 재질 미관.
+- 문 효과음/군중 웅성거림의 실제 청취, 음량, 루프 접합부와 장면 적합성.
+- 실제 WASD/마우스/E 입력 조작감. 테스트 인체는 캡슐이며 애니메이션 없음.
+- Time.timeScale=0, 전체 리그 비활성화, Director loop 경로.
+- 가정집 환경음은 미할당. 임시 군중 웅성거림은 스포츠 관중 환호가 아님.
+- 기존 게임 PlayerController의 중첩 lock-token, 대화/인벤토리와의 동시 동작.
+- 다른 씬을 비동기로 LoadScene하는 Production 통합은 아직 구현하지 않음.
+
+이번 단계가 완료되었다는 의미
+Unity가 실제 생성하고 Play에서 정상 완료/취소 동작을 검증한 독립 S03 테스트.
+최종 아트, 사운드 믹스, 기존 게임 씬 통합이 완료되었다는 의미는 아님.

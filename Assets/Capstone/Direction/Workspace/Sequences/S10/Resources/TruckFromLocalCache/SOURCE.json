@@ -1,0 +1,20 @@
+[
+  {
+    "Source": "Assets/Single_detailed_truck/3dobjects/truck.fbx",
+    "Copy": "Assets\\Capstone\\Direction\\Workspace\\Sequences\\S10\\Resources\\TruckFromLocalCache\\truck.fbx",
+    "SHA256": "c5eea8327d74553bc7e9f2d98be1756569304dc09b022bd5721bdaa97cd3a3b4",
+    "Bytes": 12235824
+  },
+  {
+    "Source": "Assets/Single_detailed_truck/Textures/truck_color_01.bmp",
+    "Copy": "Assets\\Capstone\\Direction\\Workspace\\Sequences\\S10\\Resources\\TruckFromLocalCache\\truck_color_01.bmp",
+    "SHA256": "40b0d89ed1d823211328a1d27eaf79780af0069b46245230c0e8bac18b0bcec4",
+    "Bytes": 12582966
+  },
+  {
+    "Source": "Assets/Single_detailed_truck/Textures/wheels.bmp",
+    "Copy": "Assets\\Capstone\\Direction\\Workspace\\Sequences\\S10\\Resources\\TruckFromLocalCache\\wheels.bmp",
+    "SHA256": "deec7f783976f4758b257e56a1d437f94707b99de377769f46d57592a4626360",
+    "Bytes": 3145782
+  }
+]
