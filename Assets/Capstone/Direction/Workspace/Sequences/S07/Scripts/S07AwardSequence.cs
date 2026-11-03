@@ -46,7 +46,8 @@ namespace Capstone.Direction.Workspace.S07
         public float HeadYaw { get; private set; }
         public float HeadRoll { get; private set; }
         public bool InjectFaultOnSwap { get; set; } // Diagnostic hook, false in saved prefab.
-        bool owned, finishRequested;
+        bool owned, finishRequested, directorReady;
+        int startedFrame;
         float runStart, previousTick, warStart, savedTimeScale, savedFixedStep;
         Vector3 savedActor, savedHead, savedLeft, savedRight, savedTorso;
         Quaternion savedActorRotation, savedHeadRotation, savedRightRotation, savedTorsoRotation;
@@ -57,7 +58,7 @@ namespace Capstone.Direction.Workspace.S07
         AudioSnapshot[] audioSnapshots;
         AudioSource[] Sources => new[] { awardAudio, warAudio, roomAudio, metalAudio, tinnitusAudio, breathAudio };
 
-        void Start() { if (autoStartStandalone) StartStandalone(); else Message("Ready: E to inject 2nd-place test state"); }
+        System.Collections.IEnumerator Start() { yield return null; if (autoStartStandalone) StartStandalone(); else Message("Ready: E to inject 2nd-place test state"); }
         public void StartStandalone() => AcceptAward(new S06AwardState { placing = 2, firstTraumaExperienced = true });
         public bool AcceptAward(S06AwardState state)
         {
@@ -79,7 +80,7 @@ namespace Capstone.Direction.Workspace.S07
             savedVolumeWeight = traumaVolume.weight;
             var sources = Sources; audioSnapshots = new AudioSnapshot[sources.Length];
             for(int i=0;i<sources.Length;i++) { audioSnapshots[i]=new AudioSnapshot { source=sources[i], volume=sources[i].volume, playing=sources[i].isPlaying, sample=sources[i].timeSamples }; sources[i].Stop(); }
-            owned = true; finishRequested=false; Swapped=false; SwapAlpha=0; WarSeconds=0; Playhead=0;
+            owned = true; finishRequested=false; directorReady=false; startedFrame=Time.frameCount; Swapped=false; SwapAlpha=0; WarSeconds=0; Playhead=0;
             runStart=previousTick=Time.realtimeSinceStartup;
             controlLock.Acquire(); hands.SetActive(true); thirdPersonBody.SetActive(false);
             medal.SetActive(true); tags.SetActive(false); pistol.SetActive(false);
@@ -96,6 +97,13 @@ namespace Capstone.Direction.Workspace.S07
             {
                 float now=Time.realtimeSinceStartup;
                 if(now-runStart>watchdogSeconds) { Debug.LogWarning("S07 realtime watchdog cancelled sequence.",this); Cancel(); return; }
+                // Play() may precede the Director's first graph evaluation. The existing
+                // realtime watchdog still bounds this wait; later interruptions still cancel.
+                if(!directorReady)
+                {
+                    if(Time.frameCount<=startedFrame||sequence.director.state!=PlayState.Playing||sequence.director.time<=0)return;
+                    directorReady=true;
+                }
                 // Read the actual playing Timeline. Scrub/Evaluate intentionally suppresses Signal notifications.
                 Playhead=(float)sequence.director.time;
                 ApplyPoseAndCover();

@@ -30,7 +30,8 @@ namespace Capstone.Direction.Workspace.S13
         public float Playhead {get;private set;}
         public int CompletionCount {get;private set;}
         public bool InjectFault {get;set;}
-        bool owned,finishRequested,covered,openSignalled;
+        bool owned,finishRequested,covered,openSignalled,directorReady;
+        int startedFrame;
         float began,lightBefore,weightBefore,scaleBefore,stepBefore;
         Vector3 cameraPosition;
         Quaternion cameraRotation,doorRotation;
@@ -55,6 +56,11 @@ namespace Capstone.Direction.Workspace.S13
             try
             {
                 if(Time.realtimeSinceStartup-began>watchdogSeconds){Debug.LogWarning("S13_WATCHDOG",this);Cancel();return;}
+                if(!directorReady)
+                {
+                    if(Time.frameCount<=startedFrame||sequence.director.state!=PlayState.Playing||sequence.director.time<=0)return;
+                    directorReady=true;
+                }
                 Playhead=(float)sequence.director.time;Apply(Playhead);
                 if(finishRequested)sequence.director.Stop();
                 else if(sequence.director.state!=PlayState.Playing){Debug.LogWarning("S13_DIRECTOR_INTERRUPTED",this);Cancel();}
@@ -68,7 +74,7 @@ namespace Capstone.Direction.Workspace.S13
             overlayBefore=screen.overlay.color;lightBefore=exitLight.intensity;weightBefore=endingVolume.weight;scaleBefore=Time.timeScale;stepBefore=Time.fixedDeltaTime;
             sounds=new SoundState[3];var sources=Sources;
             for(int i=0;i<3;i++)sounds[i]=new SoundState{playing=sources[i].isPlaying,volume=sources[i].volume,sample=sources[i].timeSamples};
-            owned=true;finishRequested=covered=openSignalled=false;began=Time.realtimeSinceStartup;Playhead=0;controlLock.Acquire();
+            owned=true;finishRequested=covered=openSignalled=directorReady=false;startedFrame=Time.frameCount;began=Time.realtimeSinceStartup;Playhead=0;controlLock.Acquire();
             sequence.cinematicCamera.transform.SetPositionAndRotation(outputCamera.transform.position,outputCamera.transform.rotation);
             // Blend from the actual gameplay pose, rather than a pre-positioned camera.
             startPosition=outputCamera.transform.position;startRotation=outputCamera.transform.rotation;

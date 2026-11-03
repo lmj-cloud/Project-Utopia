@@ -56,7 +56,8 @@ namespace Capstone.Direction.Workspace.S10
         public bool InjectImpactFault {get;set;}
         public S10DriveState InputState {get;private set;}
         public AudioSource[] Sources=>new[]{engine,road,cabin,truckAudio,horn,brake,crash,glass,tinnitus};
-        bool owned,finishRequested,covered;
+        bool owned,finishRequested,covered,directorReady;
+        int startedFrame;
         float startTime,savedScale,savedStep,savedKey,savedFlash,savedWeight,savedCutoff;
         Vector3 carP,truckP,roadP,cameraP;
         Quaternion carR,truckR,cameraR;
@@ -65,7 +66,7 @@ namespace Capstone.Direction.Workspace.S10
         Vector3[] fragmentP; Quaternion[] fragmentR; bool[] fragmentActive;
         struct SoundState {public float volume;public int sample;public bool playing;}
         SoundState[] soundStates;
-        void Start(){if(autoStartStandalone)StartStandalone();}
+        System.Collections.IEnumerator Start(){yield return null;if(autoStartStandalone)StartStandalone();}
         public void StartStandalone()=>BeginFromS09(new S10DriveState());
         public bool BeginFromS09(S10DriveState state)
         {
@@ -87,7 +88,7 @@ namespace Capstone.Direction.Workspace.S10
             for(int i=0;i<fragments.Length;i++){fragmentP[i]=fragments[i].localPosition;fragmentR[i]=fragments[i].localRotation;fragmentActive[i]=fragments[i].gameObject.activeSelf;}
             var sounds=Sources;soundStates=new SoundState[sounds.Length];
             for(int i=0;i<sounds.Length;i++){soundStates[i]=new SoundState{volume=sounds[i].volume,sample=sounds[i].timeSamples,playing=sounds[i].isPlaying};sounds[i].Stop();}
-            owned=true;finishRequested=covered=false;ImpactCount=0;Playhead=0;startTime=Time.realtimeSinceStartup;
+            owned=true;finishRequested=covered=directorReady=false;startedFrame=Time.frameCount;ImpactCount=0;Playhead=0;startTime=Time.realtimeSinceStartup;
             controlLock.Acquire();cinematicPose.SetPositionAndRotation(outputCamera.transform.position,outputCamera.transform.rotation);
             engine.Play();road.Play();cabin.Play();SetPhase("Driving");onStarted.Invoke();
         }
@@ -98,6 +99,11 @@ namespace Capstone.Direction.Workspace.S10
             try
             {
                 if(Time.realtimeSinceStartup-startTime>watchdogSeconds){Debug.LogWarning("S10 realtime watchdog; restoring.",this);Cancel();return;}
+                if(!directorReady)
+                {
+                    if(Time.frameCount<=startedFrame||sequence.director.state!=PlayState.Playing||sequence.director.time<=0)return;
+                    directorReady=true;
+                }
                 Playhead=(float)sequence.director.time;ApplyFrame();
                 if(sequence.director.state!=PlayState.Playing&&!finishRequested){Debug.LogWarning($"S10_DIRECTOR_INTERRUPTED time={sequence.director.time:F3} duration={sequence.director.duration:F3} assetDuration={sequence.director.playableAsset.duration:F3} state={sequence.director.state} phase={Phase}",this);Cancel();return;}
                 if(finishRequested)sequence.director.Stop();
