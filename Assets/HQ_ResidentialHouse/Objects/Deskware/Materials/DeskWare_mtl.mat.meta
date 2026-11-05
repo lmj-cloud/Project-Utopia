@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 05b3b9f589782ff47a38156f3567fcfa
+timeCreated: 1466262360
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Deskware/Materials/DeskWare_mtl.mat
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ebea0857d85afaa4f9ce6a4b70aeef57
+timeCreated: 1449567103
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/DoorRooms_locked.anim
+  uploadId: 717776

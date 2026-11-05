@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5fdca4633f9ce7647af87745ddf42a6b
+timeCreated: 1467913472
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/CookerStove.prefab
+  uploadId: 717776

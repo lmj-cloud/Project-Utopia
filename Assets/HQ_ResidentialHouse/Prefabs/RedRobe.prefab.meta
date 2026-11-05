@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1dbcafd1f70124f4bb000827d3ecfdf9
+timeCreated: 1470759423
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/RedRobe.prefab
+  uploadId: 717776

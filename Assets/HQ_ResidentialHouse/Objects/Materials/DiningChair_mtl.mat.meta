@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9c40e3f1ecc8f4944be1900681eba15f
+timeCreated: 1464108192
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/DiningChair_mtl.mat
+  uploadId: 717776

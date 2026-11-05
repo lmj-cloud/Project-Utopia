@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e98f150545a15e44e910b11bae3efc10
+timeCreated: 1469436510
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/PlantA.prefab
+  uploadId: 717776

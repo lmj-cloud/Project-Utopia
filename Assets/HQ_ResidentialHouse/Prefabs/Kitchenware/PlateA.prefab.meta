@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d09c750b95c6e9744b9252637bd8d3ce
+timeCreated: 1470569639
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Kitchenware/PlateA.prefab
+  uploadId: 717776

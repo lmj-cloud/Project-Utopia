@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: cc6bbfc000189ad4997efbf2f4a25cad
+timeCreated: 1443105772
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/DemoScene/Sky_night.mat
+  uploadId: 717776

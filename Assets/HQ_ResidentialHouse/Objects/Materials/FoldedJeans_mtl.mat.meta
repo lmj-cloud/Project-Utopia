@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9c09a0e791ef85842976b54251063808
+timeCreated: 1470674719
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/FoldedJeans_mtl.mat
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: baf7948b521ad524cbd302fd9e6197ff
+timeCreated: 1445604111
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/CarpetRound_orange.prefab
+  uploadId: 717776

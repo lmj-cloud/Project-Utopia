@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 70025ce7c08f85e44bb69052a77cb661
+timeCreated: 1470222770
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Whiteboard/Whiteboard.prefab
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 38fb9861c2058fe47a222142af76cfeb
+timeCreated: 1468302487
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/DemoScene/DemoScene_Showcase.unity
+  uploadId: 717776

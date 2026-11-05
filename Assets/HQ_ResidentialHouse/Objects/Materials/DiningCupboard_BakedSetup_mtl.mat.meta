@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6923362d3d6f05043b69b6109e49be5f
+timeCreated: 1464768818
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/DiningCupboard_BakedSetup_mtl.mat
+  uploadId: 717776

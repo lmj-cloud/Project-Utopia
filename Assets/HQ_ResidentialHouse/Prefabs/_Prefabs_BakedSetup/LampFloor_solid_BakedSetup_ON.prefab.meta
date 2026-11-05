@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2fe811e528760144087e7c282092341e
+timeCreated: 1471247233
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/_Prefabs_BakedSetup/LampFloor_solid_BakedSetup_ON.prefab
+  uploadId: 717776

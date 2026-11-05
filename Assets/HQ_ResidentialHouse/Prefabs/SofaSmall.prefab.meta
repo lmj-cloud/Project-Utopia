@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 73c2f30a601ca4a43a96fd613604d5b3
+timeCreated: 1464611965
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/SofaSmall.prefab
+  uploadId: 717776

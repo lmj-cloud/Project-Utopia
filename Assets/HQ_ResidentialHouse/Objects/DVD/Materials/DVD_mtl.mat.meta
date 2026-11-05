@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 26709ad4209173f4d950ad4cf8702a51
+timeCreated: 1470054186
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/DVD/Materials/DVD_mtl.mat
+  uploadId: 717776

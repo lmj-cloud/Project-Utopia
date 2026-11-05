@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6cd9b7c8e7abef74898e427b5947f409
+timeCreated: 1470851775
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/KidsToys/KidsBoxA.prefab
+  uploadId: 717776

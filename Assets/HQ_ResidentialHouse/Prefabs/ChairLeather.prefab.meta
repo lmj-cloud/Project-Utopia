@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4e11fe422326e1e4fa6cc1dcd18b9c8a
+timeCreated: 1465927002
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/ChairLeather.prefab
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 00e06925811602546a813e2632778450
+timeCreated: 1471282474
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/LampsCeiling_d.mat
+  uploadId: 717776

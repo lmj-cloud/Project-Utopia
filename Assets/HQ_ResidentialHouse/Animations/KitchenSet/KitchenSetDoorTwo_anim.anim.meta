@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: de70e9a911909e6458399cec7194dd2a
+timeCreated: 1467733999
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/KitchenSet/KitchenSetDoorTwo_anim.anim
+  uploadId: 717776

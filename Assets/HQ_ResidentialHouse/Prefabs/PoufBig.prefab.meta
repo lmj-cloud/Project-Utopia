@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: da09458d9f42e1a47a0a0480ec17b5ca
+timeCreated: 1467390347
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/PoufBig.prefab
+  uploadId: 717776

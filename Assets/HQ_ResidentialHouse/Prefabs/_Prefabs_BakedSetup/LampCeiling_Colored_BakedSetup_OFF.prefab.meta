@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 719ad5e89ebaaf7459e89b9c35e4ef1d
+timeCreated: 1471277671
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/_Prefabs_BakedSetup/LampCeiling_Colored_BakedSetup_OFF.prefab
+  uploadId: 717776

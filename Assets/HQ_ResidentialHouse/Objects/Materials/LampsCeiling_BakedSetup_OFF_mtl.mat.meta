@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 067ce22893096d941ae649b343d55ef6
+timeCreated: 1443978730
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/LampsCeiling_BakedSetup_OFF_mtl.mat
+  uploadId: 717776

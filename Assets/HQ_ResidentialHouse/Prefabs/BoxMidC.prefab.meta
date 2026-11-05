@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b4f67a1d8b459f24ea156df95b7ff873
+timeCreated: 1470588249
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/BoxMidC.prefab
+  uploadId: 717776

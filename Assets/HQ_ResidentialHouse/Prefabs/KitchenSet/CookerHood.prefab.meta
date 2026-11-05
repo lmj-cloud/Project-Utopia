@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bafbecc9792c66d43a8ae85b411b5cbe
+timeCreated: 1467735781
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/KitchenSet/CookerHood.prefab
+  uploadId: 717776

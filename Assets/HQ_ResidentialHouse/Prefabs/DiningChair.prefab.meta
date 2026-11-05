@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9cbe7a5d5641278499e1f9cd5fb931c8
+timeCreated: 1471187033
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/DiningChair.prefab
+  uploadId: 717776

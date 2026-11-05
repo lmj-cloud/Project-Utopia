@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 73e75010f447d2e4baa6db18e837a5ec
+timeCreated: 1443006707
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/Fireplace_d.mat
+  uploadId: 717776

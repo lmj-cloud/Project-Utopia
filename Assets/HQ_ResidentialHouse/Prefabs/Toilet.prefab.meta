@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 089de592d2336c64d98bf03c668e3602
+timeCreated: 1445330696
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Toilet.prefab
+  uploadId: 717776

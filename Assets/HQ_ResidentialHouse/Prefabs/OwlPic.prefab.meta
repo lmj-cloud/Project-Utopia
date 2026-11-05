@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 970797d0ccab47546bd3a4cf411b61c5
+timeCreated: 1470158515
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/OwlPic.prefab
+  uploadId: 717776

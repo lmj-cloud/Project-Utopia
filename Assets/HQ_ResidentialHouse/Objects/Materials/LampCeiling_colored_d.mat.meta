@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 14c3bd54af9ef8e4e8131c62887c3ef9
+timeCreated: 1471421950
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/LampCeiling_colored_d.mat
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6424d82e573b7dd46be9fb313435dec3
+timeCreated: 1466262990
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Deskware/NotebookStack_big.prefab
+  uploadId: 717776

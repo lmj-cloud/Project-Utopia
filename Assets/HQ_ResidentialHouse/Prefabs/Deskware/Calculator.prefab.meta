@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: daf57af8293b0d94abc7d17cb2432e6d
+timeCreated: 1466263010
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Deskware/Calculator.prefab
+  uploadId: 717776

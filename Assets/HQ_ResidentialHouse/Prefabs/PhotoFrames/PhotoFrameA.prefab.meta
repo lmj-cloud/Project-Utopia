@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a7f9cdcdb0ed64645a9a5b67196043d7
+timeCreated: 1469958022
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/PhotoFrames/PhotoFrameA.prefab
+  uploadId: 717776

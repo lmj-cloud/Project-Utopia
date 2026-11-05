@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f5b154dac76bae949a07fff24c062e74
+timeCreated: 1468244168
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Toaster.prefab
+  uploadId: 717776

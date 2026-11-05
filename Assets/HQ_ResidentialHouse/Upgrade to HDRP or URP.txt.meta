@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d6d1956a43eac874a8674997abcdb621
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Upgrade to HDRP or URP.txt
+  uploadId: 717776

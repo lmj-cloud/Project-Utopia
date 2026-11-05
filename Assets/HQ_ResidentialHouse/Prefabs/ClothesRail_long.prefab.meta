@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 91e1f74eb3061a245bc24e69e77d325b
+timeCreated: 1443776999
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/ClothesRail_long.prefab
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6e5fb54682ae16e4aba8e43018c5b846
+timeCreated: 1443805478
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/Lamps_mtl.mat
+  uploadId: 717776

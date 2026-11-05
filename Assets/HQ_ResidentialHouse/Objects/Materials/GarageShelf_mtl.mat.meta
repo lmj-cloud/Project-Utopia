@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 499cc5a93b38d914f802ef5b49ac74f1
+timeCreated: 1470848587
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/GarageShelf_mtl.mat
+  uploadId: 717776

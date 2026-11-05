@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 90356e8d79d49734ead62f25c9e02e4b
+timeCreated: 1469518791
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Kitchenware/Materials/Kitchenware_mtl.mat
+  uploadId: 717776

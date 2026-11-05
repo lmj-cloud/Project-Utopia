@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 176f60f25c752cf4b9a0b68df870da5b
+timeCreated: 1471248578
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/_Prefabs_BakedSetup/LampFluor_BakedSetup_ON.prefab
+  uploadId: 717776

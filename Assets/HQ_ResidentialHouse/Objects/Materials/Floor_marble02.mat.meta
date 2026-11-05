@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a39b6df989445444db85caca5bdb4faa
+timeCreated: 1443524586
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/Floor_marble02.mat
+  uploadId: 717776

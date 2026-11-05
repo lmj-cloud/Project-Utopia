@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ecee9213f0b9bda47ba210ab61d2dffd
+timeCreated: 1445330700
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Toilet_closed.prefab
+  uploadId: 717776

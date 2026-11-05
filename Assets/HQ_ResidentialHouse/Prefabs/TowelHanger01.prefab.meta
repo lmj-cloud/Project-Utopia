@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e8d5b3538525a2e4f85811721d9f0a22
+timeCreated: 1445591956
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/TowelHanger01.prefab
+  uploadId: 717776

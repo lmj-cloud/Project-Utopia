@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 58176a42b17d9294f88fa9065293c8dc
+timeCreated: 1443006707
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/Concrete_d.mat
+  uploadId: 717776

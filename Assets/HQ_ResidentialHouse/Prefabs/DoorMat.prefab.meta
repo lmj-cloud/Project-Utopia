@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a0663be6382ff3548a70e4940fe7f785
+timeCreated: 1470647991
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/DoorMat.prefab
+  uploadId: 717776

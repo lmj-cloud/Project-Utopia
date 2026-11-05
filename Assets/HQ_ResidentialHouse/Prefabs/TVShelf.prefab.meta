@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d85e16071e28d5b4089b4b92b5987b93
+timeCreated: 1464864421
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/TVShelf.prefab
+  uploadId: 717776

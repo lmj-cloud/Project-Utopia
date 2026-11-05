@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9ea82d8b71ac5174788210c060d41b97
+timeCreated: 1470587973
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/BoxA_mtl.mat
+  uploadId: 717776

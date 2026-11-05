@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 51f30c8d86fc27a4f90e4ab4548a7793
+timeCreated: 1469457239
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/PlantB.prefab
+  uploadId: 717776

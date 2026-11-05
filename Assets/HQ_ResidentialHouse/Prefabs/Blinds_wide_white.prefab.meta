@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b38ea4032f08a7042a378d19c5cf4e90
+timeCreated: 1469203983
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Blinds_wide_white.prefab
+  uploadId: 717776

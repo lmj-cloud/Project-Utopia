@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 923a33a294537cd4fa919065965fc173
+timeCreated: 1443957511
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/LampWall.prefab
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1a45a0c1f88a33b4ead03f6289621777
+timeCreated: 1449557572
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/DoorRooms_open.anim
+  uploadId: 717776

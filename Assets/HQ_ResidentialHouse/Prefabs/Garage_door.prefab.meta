@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5f5564c7388b7f4408d10831be3e7459
+timeCreated: 1443771403
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Garage_door.prefab
+  uploadId: 717776

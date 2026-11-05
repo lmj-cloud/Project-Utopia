@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0d9030b562392d148b869ca686bf5a90
+timeCreated: 1471248043
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/_Prefabs_BakedSetup/LampDesk_BakedSetup_ON.prefab
+  uploadId: 717776

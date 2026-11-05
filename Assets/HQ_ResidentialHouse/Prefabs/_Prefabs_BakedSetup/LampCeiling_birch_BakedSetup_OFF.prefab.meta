@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: cdc8b03b43a36664dbe67c163450ff06
+timeCreated: 1471277934
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/_Prefabs_BakedSetup/LampCeiling_birch_BakedSetup_OFF.prefab
+  uploadId: 717776

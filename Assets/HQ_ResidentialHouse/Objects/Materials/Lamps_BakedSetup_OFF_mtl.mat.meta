@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 19caeebb81dffbc458a7ef403984d9ae
+timeCreated: 1443805478
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/Lamps_BakedSetup_OFF_mtl.mat
+  uploadId: 717776

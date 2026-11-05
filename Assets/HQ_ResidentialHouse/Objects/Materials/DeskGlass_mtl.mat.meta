@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fb71a2a7e5c58a14fbb6b07cb5f566fe
+timeCreated: 1465495002
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/DeskGlass_mtl.mat
+  uploadId: 717776

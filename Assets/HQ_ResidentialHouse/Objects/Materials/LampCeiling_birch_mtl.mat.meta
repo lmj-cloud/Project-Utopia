@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 945081f94f90a30418f6f9c726049708
+timeCreated: 1445706570
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/LampCeiling_birch_mtl.mat
+  uploadId: 717776

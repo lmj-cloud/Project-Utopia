@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 94ac01e1465ee9a428582ed943d4cc1c
+timeCreated: 1467961644
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/WoodDeck_d.mat
+  uploadId: 717776

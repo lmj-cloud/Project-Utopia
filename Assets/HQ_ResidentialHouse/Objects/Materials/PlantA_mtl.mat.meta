@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 008651d391dac7e45b157bb3ed79803a
+timeCreated: 1469436031
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/PlantA_mtl.mat
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 67c6c4e6076248c44b2f6bc43c4c622b
+timeCreated: 1443546970
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/LightSwitch.prefab
+  uploadId: 717776

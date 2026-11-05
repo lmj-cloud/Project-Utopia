@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fa22196249df16e419f1109f8cb0f7a1
+timeCreated: 1468591826
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/LaptopOpen.prefab
+  uploadId: 717776

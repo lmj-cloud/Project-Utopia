@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c13443594150c684c9aa63227c56267f
+timeCreated: 1443622167
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/DemoScene/Grass.mat
+  uploadId: 717776

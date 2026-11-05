@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6dac06d8bf7f7c444af6f7239be9b8aa
+timeCreated: 1464592216
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/Dresser_anim/DrawerA.anim
+  uploadId: 717776

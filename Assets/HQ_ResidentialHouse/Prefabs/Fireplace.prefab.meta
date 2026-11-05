@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 10a1d0b1898758146ba968a571deb062
+timeCreated: 1443705388
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Fireplace.prefab
+  uploadId: 717776

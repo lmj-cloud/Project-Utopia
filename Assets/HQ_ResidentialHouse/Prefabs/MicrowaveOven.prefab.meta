@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2990ba4c2e2267948b35d50f5d11d43a
+timeCreated: 1467914227
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/MicrowaveOven.prefab
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bfa67dd9ddaaca041ac6565ffe0f7e1c
+timeCreated: 1470138227
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/PictureSet/Materials/PicturesSet_mtl.mat
+  uploadId: 717776

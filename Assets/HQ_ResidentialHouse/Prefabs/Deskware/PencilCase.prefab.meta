@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c0091c6e27f1b3c4abd40dc7f7e2beeb
+timeCreated: 1466262974
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Deskware/PencilCase.prefab
+  uploadId: 717776

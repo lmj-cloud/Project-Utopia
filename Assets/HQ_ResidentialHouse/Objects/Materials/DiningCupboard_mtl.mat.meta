@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 025386a9d3158cc48b0dd48b5994a42d
+timeCreated: 1464768818
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/DiningCupboard_mtl.mat
+  uploadId: 717776

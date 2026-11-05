@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6b1fdda1c8a4ed544a2e9c777d0fb969
+timeCreated: 1465379898
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/BedAndTable_anim.anim
+  uploadId: 717776

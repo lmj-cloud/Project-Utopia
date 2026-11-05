@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ac4eba742da72d64ba6d80e1c45e72e3
+timeCreated: 1443006707
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/Windows_mtl.mat
+  uploadId: 717776

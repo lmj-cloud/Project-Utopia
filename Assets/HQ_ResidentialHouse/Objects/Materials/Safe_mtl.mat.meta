@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 94bbfba465b8f574b824fc674ccb333d
+timeCreated: 1466236268
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/Safe_mtl.mat
+  uploadId: 717776
