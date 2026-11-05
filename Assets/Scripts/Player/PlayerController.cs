@@ -13,6 +13,32 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Camera")]
     [SerializeField] private PlayerCameraController cameraController;
+    [Header("MMA 전투 방향")]
+    [SerializeField, Min(1f)] private float mmaFacingTurnSpeed = 1440f;
+    [SerializeField, Range(0f, 15f)] private float mmaAttackFacingTolerance = 4f;
+    private bool mmaCombatStance;
+    public bool IsMmaCombatStance
+    {
+        get { return mmaCombatStance && CanUseMma && CanUseMelee && equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves; }
+    }
+    public Vector3 MmaCameraForward
+    {
+        get
+        {
+            Vector3 direction = cameraController != null ? cameraController.Forward : transform.forward;
+            direction.y = 0f;
+            if (direction.sqrMagnitude < 0.0001f) direction = transform.forward;
+            return direction.normalized;
+        }
+    }
+
+    /// <summary>공격 전 정렬도 이동 담당자에게 요청한다. 정렬이 끝나기 전에는 공격 예약·재생을 시작하지 않는다.</summary>
+    public bool PrepareMmaAttackFacing(Vector3 direction)
+    {
+        if (!CanUseMma || !CanUseMelee || playerMovement == null) return false;
+        playerMovement.SetCombatFacingDirection(direction, mmaFacingTurnSpeed);
+        return Vector3.Angle(transform.forward, direction) <= mmaAttackFacingTolerance;
+    }
 
     [Header("Weapon")]
     [SerializeField] private WeaponAssaultRifle weapon;
@@ -187,7 +213,7 @@ public class PlayerController : MonoBehaviour
     public bool CanControlPlayer => isActiveAndEnabled && canMove && controlLocks.Count == 0 &&
         playerStatus != null && !playerStatus.IsDead &&
         !(cameraController != null && cameraController.IsStoryFirstPerson) &&
-        !(dialogueUI != null && (dialogueUI.IsOpen || dialogueUI.WasClosedThisFrame)) &&
+        !(dialogueUI != null && (dialogueUI.BlocksGameplay || dialogueUI.WasBlockingClosedThisFrame)) &&
         !(inventoryUI != null && (inventoryUI.IsOpen || inventoryUI.WasClosedThisFrame));
 
     /// <summary>
@@ -251,6 +277,10 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        mmaCombatStance = false;
+        // 잠금 중에도 해제는 전달한다. 공격 실행은 아래의 기존 MMA 권한 검사를 통과해야 한다.
+        if (combatActions != null)
+            combatActions.SetMmaAttackHeld(Mouse.current != null && Mouse.current.leftButton.isPressed);
         // 휠이 가진 잠금 때문에 일반 입력 검사에서 조기 반환되기 전에 해제·취소를 처리한다.
         if (HandleQuickSlotInput())
         {
@@ -276,16 +306,16 @@ public class PlayerController : MonoBehaviour
         // Timeline에서 띄운 대사도 진행할 수 있도록, 대사 입력을 먼저 처리한다.
         if (dialogueUI != null && dialogueUI.IsOpen)
         {
-            BlockControl();
             dialogueUI.SetAdvanceInput(
                 keyboard != null && keyboard.enterKey.wasPressedThisFrame,
                 keyboard != null && keyboard.enterKey.isPressed,
                 keyboard != null && keyboard.enterKey.wasReleasedThisFrame);
-            return;
+            // 코치·동행 대사도 같은 UI로 진행하되 기존 게임플레이 입력은 유지한다.
+            if (dialogueUI.BlocksGameplay) { BlockControl(); return; }
         }
 
         if (!canMove || controlLocks.Count > 0 || (cameraController != null && cameraController.IsStoryFirstPerson) ||
-            (dialogueUI != null && dialogueUI.WasClosedThisFrame) ||
+            (dialogueUI != null && dialogueUI.WasBlockingClosedThisFrame) ||
             (inventoryUI != null && inventoryUI.WasClosedThisFrame))
         {
             BlockControl();
@@ -354,10 +384,11 @@ public class PlayerController : MonoBehaviour
             {
                 if (mma)
                 {
-                    // 누르고 있는 상태가 아니라 새 클릭만 전달한다. 예약과 손 순서는 전투 행동이 관리한다.
-                    if (combatActions != null && combatActions.UsesDirectionalInput && Mouse.current.leftButton.wasPressedThisFrame)
+                    // 클릭과 누르기 반복 모두 같은 1칸 버퍼와 요청 번호를 사용한다.
+                    if (combatActions != null && combatActions.UsesDirectionalInput)
                     {
-                        combatActions.TryMmaComboAttack();
+                        if (Mouse.current.leftButton.wasPressedThisFrame) combatActions.TryMmaComboAttack();
+                        combatActions.TryMmaHeldAttack();
                     }
                 }
                 else
@@ -390,7 +421,7 @@ public class PlayerController : MonoBehaviour
     {
         return owner != null && isActiveAndEnabled && canMove && IsAlive && !HasOtherControlLock(owner) &&
             !(cameraController != null && cameraController.IsStoryFirstPerson) &&
-            !(dialogueUI != null && (dialogueUI.IsOpen || dialogueUI.WasClosedThisFrame)) &&
+            !(dialogueUI != null && (dialogueUI.BlocksGameplay || dialogueUI.WasBlockingClosedThisFrame)) &&
             !(inventoryUI != null && (inventoryUI.IsOpen || inventoryUI.WasClosedThisFrame)) &&
             !(gameplayUI != null && gameplayUI.IsDemoEndVisible) &&
             !(itemUse != null && itemUse.IsUsing) && !(playerInventory != null && playerInventory.IsUseLocked);
@@ -440,6 +471,8 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void UpdateCameraInput()
     {
+        mmaCombatStance = equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves &&
+            CanUseMma && CanUseMelee && Mouse.current != null && Mouse.current.rightButton.isPressed;
         isAiming = (equipment == null || !equipment.IsMelee) && weapon != null && CanUseWeapons &&
             Mouse.current != null && Mouse.current.rightButton.isPressed;
         if (Mouse.current != null) cameraController.Look(Mouse.current.delta.ReadValue());
@@ -451,7 +484,7 @@ public class PlayerController : MonoBehaviour
     private void UpdateSpeed(Vector2 input)
     {
         playerMovement.TargetSpeed = playerStatus.WalkSpeed;
-        if (isAiming)
+        if (isAiming || IsMmaCombatStance)
         {
             // 조준은 기존 걷기 속도를 사용한다. Shift의 스태미나 검사도 실행하지 않는다.
             playerMovement.LimitHorizontalSpeed(playerStatus.WalkSpeed);
@@ -472,25 +505,29 @@ public class PlayerController : MonoBehaviour
         playerMovement.MoveTo(moveDirection);
         // 장비·재장전 여부와 무관하게 우클릭 조준 중일 때만 카메라 기준 방향을 사용한다.
         // 비조준은 맨손과 같은 이동 방향 회전을 사용하며, 정지 중에는 현재 방향을 유지한다.
+        if (combatActions != null && combatActions.HasMmaAttackFacing && CanUseMma)
+        {
+            // 한 공격의 정렬 방향은 모션이 끝날 때까지 유지한다. 카메라 자체는 계속 자유롭게 움직인다.
+            playerMovement.SetCombatFacingDirection(combatActions.MmaAttackFacingDirection, mmaFacingTurnSpeed);
+        }
+        else if (IsMmaCombatStance)
+            playerMovement.SetCombatFacingDirection(MmaCameraForward, mmaFacingTurnSpeed);
+        else if (cameraController.IsThirdPerson && !isAiming)
+            playerMovement.SetFacingDirection(moveDirection, false);
+        else
+            playerMovement.SetFacingDirection(cameraController.Forward, true);
+
         if (playerAnimator != null && playerAnimator.UsesMmaCombatLocomotion)
         {
-            // 복싱은 뒤로 걷기와 옆 스텝을 위해 카메라 정면을 유지한다. 실제 회전은 이동 담당자가 적용한다.
-            Vector3 forward = cameraController.Forward;
-            forward.y = 0f;
-            if (forward.sqrMagnitude < 0.001f) forward = transform.forward;
-            playerMovement.SetFacingDirection(forward, true);
-            // 월드 이동을 이번 프레임의 몸 기준 방향으로 변환한다. 대각선 입력의 크기는 1로 제한한다.
-            Vector3 localMove = Quaternion.Inverse(Quaternion.LookRotation(forward)) * Vector3.ClampMagnitude(moveDirection, 1f);
+            // 요청 방향 대신 실제 수평 속도를 현재 몸의 로컬 축으로 변환한다.
+            Vector3 localMove = Quaternion.Inverse(transform.rotation) * playerMovement.HorizontalVelocity;
+            localMove = Vector3.ClampMagnitude(localMove / Mathf.Max(0.01f, playerStatus.WalkSpeed), 1f);
             float maxDelta = animationChangedSecond * Time.deltaTime;
             animationInput.x = Mathf.MoveTowards(animationInput.x, localMove.x, maxDelta);
             animationInput.y = Mathf.MoveTowards(animationInput.y, localMove.z, maxDelta);
             playerAnimator.MoveHorizontal = animationInput.x;
             playerAnimator.MoveVertical = animationInput.y;
         }
-        else if (cameraController.IsThirdPerson && !isAiming)
-            playerMovement.SetFacingDirection(moveDirection, false);
-        else
-            playerMovement.SetFacingDirection(cameraController.Forward, true);
     }
 
     /// <summary>

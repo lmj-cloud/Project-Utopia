@@ -16,8 +16,10 @@ MonoBehaviour:
   description: "\uC815\uC2E0\uC774 \uB9D1@\uC544\uC9C4\uB2E4!@"
   icon: {fileID: 21300000, guid: 47d5585c6e222224f93bf782b03f7340, type: 3}
   category: 1
+  isFixedWeapon: 0
+  equipmentKind: 0
   canEquipToQuickSlot: 1
-  usable: 0
+  usable: 1
   consumable: 1
   consumePerUse: 1
-  medicationItem: 0
+  medicationItem: 1

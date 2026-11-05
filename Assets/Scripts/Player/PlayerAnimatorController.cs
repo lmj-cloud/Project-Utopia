@@ -1,4 +1,5 @@
 ﻿using Unity.VisualScripting;
+using UnityEngine.Playables;
 using UnityEngine;
 
 /// <summary>
@@ -227,6 +228,12 @@ public class PlayerAnimatorController : MonoBehaviour
     [SerializeField] private string pistolAimState = "UpperLayer.PistolAim";
     private int upperStartedFrame;
     private bool upperResetPending;
+    private PlayerMeleeCombat scriptedVictimCombat;
+    private UnityEngine.Playables.PlayableGraph scriptedDefeatGraph;
+    private UnityEngine.Animations.AnimationClipPlayable scriptedDefeatPlayable;
+    private AnimationClip scriptedDefeatClip;
+    public bool IsScriptedDefeatPlaying { get { return scriptedDefeatGraph.IsValid(); } }
+    public double ScriptedDefeatTime { get { return scriptedDefeatGraph.IsValid() ? scriptedDefeatPlayable.GetTime() : 0; } }
     private bool AnimationPoseLocked => playerController != null && playerController.HasAnimationControlLock;
     private bool IsDead => status != null && status.IsDead;
     private PlayerController playerController;
@@ -279,8 +286,10 @@ public class PlayerAnimatorController : MonoBehaviour
         if (!AnimationPoseLocked && HasParameter(thirdPersonAnimator, weaponParameter, AnimatorControllerParameterType.Int))
             thirdPersonAnimator.SetInteger(weaponParameter, (int)value);
         Trigger(equipTrigger);
-        // MMA 이동 Motion이 준비된 경우에만 장비 변경 시 해당 하위 상태로 한 번 진입한다.
-        if (value == PlayerEquipmentKind.Gloves && !AnimationPoseLocked && !IsDead && HasCombatLocomotion())
+        // 실제 Motion이 연결된 근접 장비만 장착 시 해당 이동 자세로 진입한다.
+        // 비어 있는 기존 단검 구성에는 영향을 주지 않는다.
+        if ((value == PlayerEquipmentKind.Gloves || value == PlayerEquipmentKind.Dagger) &&
+            !AnimationPoseLocked && !IsDead && HasCombatLocomotion())
         {
             RestoreLocomotion();
         }
@@ -349,13 +358,16 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     public void OnHit()
     {
-        if (AnimationPoseLocked || IsDead || lastHitFrame == Time.frameCount) return;
+        bool scriptedHit = scriptedVictimCombat != null && scriptedVictimCombat.CanReceiveScriptedMmaAttacks;
+        if ((AnimationPoseLocked && !scriptedHit) || IsDead || lastHitFrame == Time.frameCount) return;
         if (HasThirdPersonMotion(hitState))
         {
             // Damaged 구독과 공격 취소 경로가 같은 피해를 알려도 한 번만 요청한다.
             lastHitFrame = Time.frameCount;
             combatRestorePending = false;
             ResetUpperLayer();
+            if (scriptedHit && thirdPersonWeaponLayer < thirdPersonAnimator.layerCount)
+                thirdPersonAnimator.SetLayerWeight(thirdPersonWeaponLayer, 0f);
             TriggerParameter(thirdPersonAnimator, hitTrigger);
         }
     }
@@ -378,6 +390,28 @@ public class PlayerAnimatorController : MonoBehaviour
         ResetUpperLayer();
         if (!AnimationPoseLocked) SetBool("IsDead", true);
     }
+    /// <summary>사망한 스토리 피격 대상에게만 기존 Humanoid 클립을 재생한다. 공용 Animator Controller는 수정하지 않는다.</summary>
+    public bool TryPlayScriptedDefeat(UnityEngine.Object owner, AnimationClip clip, float playbackSpeed)
+    {
+        if (!IsDead || scriptedVictimCombat == null || !scriptedVictimCombat.OwnsScriptedMmaVictim(owner) ||
+            playerController == null || playerController.HasOtherControlLock(owner) || clip == null || !clip.humanMotion ||
+            thirdPersonAnimator == null || !thirdPersonAnimator.isActiveAndEnabled || !thirdPersonAnimator.isHuman ||
+            scriptedDefeatGraph.IsValid()) return false;
+        activeUpperState = null;
+        combatRestorePending = false;
+        if (thirdPersonWeaponLayer < thirdPersonAnimator.layerCount) thirdPersonAnimator.SetLayerWeight(thirdPersonWeaponLayer, 0f);
+        scriptedDefeatClip = clip;
+        scriptedDefeatGraph = UnityEngine.Playables.PlayableGraph.Create("Owned Page2 Defeat");
+        scriptedDefeatGraph.SetTimeUpdateMode(UnityEngine.Playables.DirectorUpdateMode.UnscaledGameTime);
+        scriptedDefeatPlayable = UnityEngine.Animations.AnimationClipPlayable.Create(scriptedDefeatGraph, clip);
+        scriptedDefeatPlayable.SetApplyFootIK(false);
+        scriptedDefeatPlayable.SetSpeed(Mathf.Max(0.01f, playbackSpeed));
+        var output = UnityEngine.Animations.AnimationPlayableOutput.Create(scriptedDefeatGraph, "Defeat", thirdPersonAnimator);
+        output.SetSourcePlayable(scriptedDefeatPlayable);
+        scriptedDefeatGraph.Play();
+        return true;
+    }
+
     /// <summary>
     /// 성공한 이동 행동 중 점프에 대응하는 실제 Motion이 있으면 점프 Trigger를 전달한다.
     /// </summary>
@@ -488,7 +522,7 @@ public class PlayerAnimatorController : MonoBehaviour
     {
         get
         {
-            return useMmaCombatLocomotion && playerController != null && playerController.IsMmaCombatActive &&
+            return useMmaCombatLocomotion && playerController != null && playerController.IsMmaCombatStance &&
                 equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves;
         }
     }
@@ -503,6 +537,7 @@ public class PlayerAnimatorController : MonoBehaviour
     void Awake()
     {
         playerController = GetComponent<PlayerController>();
+        scriptedVictimCombat = GetComponent<PlayerMeleeCombat>();
         status = GetComponent<PlayerStatus>();
         movement = GetComponent<PlayerMovement>();
         equipment = GetComponent<PlayerEquipment>();
@@ -636,6 +671,8 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     private void OnDisable()
     {
+        if (scriptedDefeatGraph.IsValid()) scriptedDefeatGraph.Destroy();
+        scriptedDefeatClip = null;
         if (storyAnimationOwner != null) EndStoryFirstPerson(storyAnimationOwner, storyRequestId);
         if (status != null) { status.Damaged -= OnHit; status.Died -= OnDeath; }
         if (movement != null) movement.Succeeded -= MovementSucceeded;
@@ -648,6 +685,16 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        if (scriptedDefeatGraph.IsValid())
+        {
+            // 마지막 자세를 유지하여 검은 화면 뒤에서 Idle로 돌아오지 않는다.
+            if (scriptedDefeatClip != null && scriptedDefeatPlayable.GetTime() >= scriptedDefeatClip.length - 0.001f)
+            {
+                scriptedDefeatPlayable.SetTime(scriptedDefeatClip.length - 0.001f);
+                scriptedDefeatPlayable.SetSpeed(0);
+            }
+            return;
+        }
         if (AnimationPoseLocked) return;
         if (combatRestorePending)
         {

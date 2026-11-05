@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43313bb815d59934aa7d0005198d7b96, type: 3}
+  m_Name: Page1Script
+  m_EditorClassIdentifier: Assembly-CSharp::OfficialStoryScript
+  lines:
+  - id: P1_01_001
+    section: 1
+    speaker: "\uC8FC\uC778\uACF5(\uC18D\uC73C\uB85C)"
+    speakerKind: 1
+    text: "\uACB0\uC2B9\uC804."
+  - id: P1_01_002
+    section: 1
+    speaker: "\uC8FC\uC778\uACF5(\uC18D\uC73C\uB85C)"
+    speakerKind: 1
+    text: "\uBA87 \uB144\uC744 \uAE30\uB2E4\uB9B0 \uB0A0\uC778\uB370\u2026 \uC774\uC0C1\uD558\uAC8C
+      \uD3C9\uC18C\uBCF4\uB2E4 \uC870\uC6A9\uD558\uB124."
+  - id: P1_01_003
+    section: 1
+    speaker: "\uC640\uC774\uD504(\uBC29 \uBC16\uC5D0\uC11C)"
+    speakerKind: 0
+    text: "\uC77C\uC5B4\uB0AC\uC5B4? \uBC25 \uC2DD\uB294\uB2E4!"
+  - id: P1_01_004
+    section: 1
+    speaker: "\uC8FC\uC778\uACF5(\uC791\uAC8C \uC6C3\uC73C\uBA70)"
+    speakerKind: 1
+    text: "\uC751. \uC9C0\uAE08 \uAC00."
+  - id: P1_02_001
+    section: 2
+    speaker: "\uC640\uC774\uD504"
+    speakerKind: 0
+    text: "\uC6B0\uB9AC \uC120\uC218\uB2D8, \uB4DC\uB514\uC5B4 \uC77C\uC5B4\uB098\uC168\uB124."
+  - id: P1_02_002
+    section: 2
+    speaker: "\uC8FC\uC778\uACF5"
+    speakerKind: 1
+    text: "\uB180\uB9AC\uC9C0 \uB9C8. \uC548 \uADF8\uB798\uB3C4 \uAE34\uC7A5\uB3FC."
+  - id: P1_02_003
+    section: 2
+    speaker: "\uC544\uB4E4"
+    speakerKind: 0
+    text: "\uC838\uB3C4 \uB418\uB2C8\uAE4C \uC870\uC2EC\uD788 \uB2E4\uB140\uC640\uC694."
+  - id: P1_02_004
+    section: 2
+    speaker: "\uC8FC\uC778\uACF5"
+    speakerKind: 1
+    text: "\uADF8\uB7F0 \uB9D0 \uD558\uBA74 \uAF2D \uC9C0\uACE0 \uC640\uB3C4 \uB41C\uB2E4\uB294
+      \uAC83 \uAC19\uC796\uC544."
+  - id: P1_02_005
+    section: 2
+    speaker: "\uB538"
+    speakerKind: 0
+    text: "\uC544\uBE60 \uBB34\uC870\uAC74 \uC774\uAE30\uACE0 \uC640\uC694. \uB05D\uB098\uBA74
+      \uC544\uBE60\uAC00 \uC88B\uC544\uD558\uB294 \uAC70 \uBA39\uC73C\uB7EC \uAC00\uC694."
+  - id: P1_02_006
+    section: 2
+    speaker: "\uC8FC\uC778\uACF5"
+    speakerKind: 1
+    text: "\uC54C\uC558\uC5B4. \uC774\uAE30\uACE0\uC62C\uAC8C."
+  - id: P1_03_001
+    section: 3
+    speaker: "\uAC00\uC871\uB4E4"
+    speakerKind: 0
+    text: "\uC6B0\uB9B0 \uB9E8 \uC55E\uC5D0\uC11C \uBCFC \uAC70\uC57C! \uBABB \uBD24\uB2E4\uACE0
+      \uD558\uAE30 \uC5C6\uAE30!"
+  - id: P1_03_002
+    section: 3
+    speaker: "\uC8FC\uC778\uACF5"
+    speakerKind: 1
+    text: "\uC54C\uC558\uC5B4. \uB098\uB3C4 \uCC3E\uC744\uAC8C."
+  - id: P1_03_003
+    section: 3
+    speaker: "\uB538(\uBA40\uB9AC\uC11C)"
+    speakerKind: 0
+    text: "\uC5EC\uAE30! \uC5EC\uAE30\uC57C!"

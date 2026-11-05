@@ -65,8 +65,16 @@ public class PlayerMeleeCombat : MonoBehaviour
     /// </summary>
     public void ApplyExternalHit(PlayerCombatActions owner, int id, bool dagger)
     {
+        ApplyExternalHit(owner, id, dagger, 1f);
+    }
+
+    /// <summary>연속 펀치의 개별 피해 배율만 적용하며 기존 범위·방어·장애물 검사는 공유한다.</summary>
+    public void ApplyExternalHit(PlayerCombatActions owner, int id, bool dagger, float damageMultiplier)
+    {
         if (externalAction != owner || id != requestId) return;
-        ApplyHit(dagger ? daggerDamage : punchDamage, dagger ? DemoAction.DaggerHit : DemoAction.PunchHit);
+        if (float.IsNaN(damageMultiplier) || float.IsInfinity(damageMultiplier)) return;
+        ApplyHit((dagger ? daggerDamage : punchDamage) * Mathf.Max(0f, damageMultiplier),
+            dagger ? DemoAction.DaggerHit : DemoAction.PunchHit);
     }
     [SerializeField] private PlayerController playerController;
     [SerializeField] private PlayerStatus status;
@@ -398,6 +406,40 @@ public class PlayerMeleeCombat : MonoBehaviour
         return result == CombatHitResult.Blocked || result == CombatHitResult.UnblockedHit;
     }
 
+    // Page2 같은 명시적 스토리 소유자만 입력 잠금 중 피격을 허용한다. 일반 전투 정책은 바꾸지 않는다.
+    private UnityEngine.Object scriptedMmaVictimOwner;
+    public bool CanReceiveScriptedMmaAttacks
+    {
+        get
+        {
+            return scriptedMmaVictimOwner != null && isActiveAndEnabled && status != null && !status.IsDead &&
+                playerController != null && playerController.IsMmaCombatActive && playerController.HasAnimationControlLock &&
+                !playerController.HasOtherControlLock(scriptedMmaVictimOwner) &&
+                playerController.CanContinueOwnedCombat(scriptedMmaVictimOwner);
+        }
+    }
+
+    public bool TryBeginScriptedMmaVictim(UnityEngine.Object owner)
+    {
+        if (owner == null || scriptedMmaVictimOwner != null || playerController == null ||
+            !playerController.IsMmaCombatActive || !playerController.HasAnimationControlLock ||
+            playerController.HasOtherControlLock(owner) || status == null ||
+            (!status.IsDead && !playerController.CanContinueOwnedCombat(owner))) return false;
+        CancelActions();
+        scriptedMmaVictimOwner = owner;
+        return true;
+    }
+
+    public bool OwnsScriptedMmaVictim(UnityEngine.Object owner)
+    {
+        return owner != null && scriptedMmaVictimOwner == owner;
+    }
+
+    public void EndScriptedMmaVictim(UnityEngine.Object owner)
+    {
+        if (scriptedMmaVictimOwner == owner) scriptedMmaVictimOwner = null;
+    }
+
     public event Action<CombatHitResult> AttackReceived;
 
     /// <summary>
@@ -406,7 +448,7 @@ public class PlayerMeleeCombat : MonoBehaviour
     public CombatHitResult ReceiveAttackResult(float amount, Vector3 sourcePosition)
     {
         if (status == null || status.IsDead || amount <= 0f || float.IsNaN(amount) || float.IsInfinity(amount) ||
-            !isActiveAndEnabled || playerController == null || !playerController.CanControlPlayer) return CombatHitResult.Rejected;
+            !isActiveAndEnabled || playerController == null || (!playerController.CanControlPlayer && !CanReceiveScriptedMmaAttacks)) return CombatHitResult.Rejected;
         if (IsDodging)
         {
             Succeeded?.Invoke(DemoAction.EvadeHit, this);
@@ -524,6 +566,7 @@ public class PlayerMeleeCombat : MonoBehaviour
     /// </summary>
     private void OnDisable()
     {
+        scriptedMmaVictimOwner = null;
         CancelActions();
         ClearMmaFeedback();
     }

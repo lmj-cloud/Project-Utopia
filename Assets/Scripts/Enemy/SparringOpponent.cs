@@ -86,7 +86,7 @@ public class SparringOpponent : MonoBehaviour
         {
             return training && isActiveAndEnabled && executionOwner == null && Time.time >= grabbedUntil &&
                 health != null && !health.IsDead && player != null && playerController != null &&
-                playerController.CanUseMma && agent != null && agent.enabled && agent.isOnNavMesh;
+                (playerController.CanUseMma || player.CanReceiveScriptedMmaAttacks) && agent != null && agent.enabled && agent.isOnNavMesh;
         }
     }
 
@@ -120,7 +120,7 @@ public class SparringOpponent : MonoBehaviour
     {
         if (training) return;
         if (!isActiveAndEnabled || health == null || health.IsDead || player == null || playerController == null ||
-            !playerController.CanUseMma || attackOrigin == null || agent == null || !agent.enabled || !agent.isOnNavMesh)
+            (!playerController.CanUseMma && !player.CanReceiveScriptedMmaAttacks) || attackOrigin == null || agent == null || !agent.enabled || !agent.isOnNavMesh)
         {
             if (!hasWarnedStart)
             {

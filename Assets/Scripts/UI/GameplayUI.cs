@@ -129,7 +129,13 @@ public class GameplayUI : MonoBehaviour
     /// <summary>
     /// 현재 연결된 무기의 탄약 상태를 다시 읽어 표시한다.
     /// </summary>
-    private void RefreshAmmo() { if (ammoText != null) ammoText.text = weapon != null ? $"{weapon.CurrentAmmo} / {weapon.ReserveAmmo} ({weapon.TotalAmmo})" : ""; }
+    private void RefreshAmmo()
+    {
+        if (ammoText == null) return;
+        if (weapon == null) ammoText.text = "";
+        else if (weapon.HasUnlimitedReserve) ammoText.text = $"{weapon.CurrentAmmo} / ∞";
+        else ammoText.text = $"{weapon.CurrentAmmo} / {weapon.ReserveAmmo} ({weapon.TotalAmmo})";
+    }
     /// <summary>
     /// 장비 변경에 맞추어 인벤토리 또는 HUD의 선택 표시를 갱신한다.
     /// </summary>
@@ -232,7 +238,7 @@ public class GameplayUI : MonoBehaviour
     public void RestartTutorial() { if (tutorial != null) tutorial.RestartIndependentTest(); }
 
     private bool TutorialHUDAllowed => isActiveAndEnabled && !IsDemoEndVisible && hiddenOwners.Count == 0 &&
-        (status == null || !status.IsDead) && (dialogueUI == null || !dialogueUI.IsOpen) &&
+        (status == null || !status.IsDead) && (dialogueUI == null || !dialogueUI.BlocksGameplay) &&
         (inventoryUI == null || !inventoryUI.IsOpen);
 
     /// <summary>
@@ -453,7 +459,7 @@ public class GameplayUI : MonoBehaviour
     {
         UpdateTutorialVisibility();
         if (equippedItemPanel != null) equippedItemPanel.SetActive(hiddenOwners.Count == 0 && !IsDemoEndVisible &&
-            (status == null || !status.IsDead) && (dialogueUI == null || !dialogueUI.IsOpen) && (inventoryUI == null || !inventoryUI.IsOpen));
+            (status == null || !status.IsDead) && (dialogueUI == null || !dialogueUI.BlocksGameplay) && (inventoryUI == null || !inventoryUI.IsOpen));
         if (status != null)
         {
             if (healthFill != null) healthFill.fillAmount = status.HealthNormalized;

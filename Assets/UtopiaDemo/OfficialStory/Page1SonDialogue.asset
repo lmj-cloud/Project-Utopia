@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43313bb815d59934aa7d0005198d7b96, type: 3}
+  m_Name: Page1SonDialogue
+  m_EditorClassIdentifier: Assembly-CSharp::OfficialStoryScript
+  lines:
+  - id: P1_02_003
+    section: 2
+    speaker: "\uC544\uB4E4"
+    speakerKind: 0
+    text: "\uC838\uB3C4 \uB418\uB2C8\uAE4C \uC870\uC2EC\uD788 \uB2E4\uB140\uC640\uC694."
+  - id: P1_02_004
+    section: 2
+    speaker: "\uC8FC\uC778\uACF5"
+    speakerKind: 1
+    text: "\uADF8\uB7F0 \uB9D0 \uD558\uBA74 \uAF2D \uC9C0\uACE0 \uC640\uB3C4 \uB41C\uB2E4\uB294
+      \uAC83 \uAC19\uC796\uC544."

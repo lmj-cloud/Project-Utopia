@@ -113,6 +113,8 @@ public class PlayerMovement : MonoBehaviour
     private float verticalVelocity;
 
     private bool rotateImmediately;
+    private bool useDirectionalTravel;
+    private float requestedTurnSpeed;
     private bool jumpRequested;
     public bool IsSimulationEnabled { get; private set; } = true;
 
@@ -192,6 +194,16 @@ public class PlayerMovement : MonoBehaviour
         direction.y = 0f;
         facingDirection = direction;
         rotateImmediately = immediately;
+        useDirectionalTravel = immediately;
+        requestedTurnSpeed = turnSpeed;
+    }
+
+    /// <summary>복싱은 월드 이동 방향을 유지하며 몸만 부드럽게 회전한다. 실제 회전 소유자는 기존 UpdateRotation이다.</summary>
+    public void SetCombatFacingDirection(Vector3 direction, float degreesPerSecond)
+    {
+        SetFacingDirection(direction, false);
+        useDirectionalTravel = true;
+        requestedTurnSpeed = Mathf.Max(0f, degreesPerSecond);
     }
 
     /// <summary>
@@ -247,7 +259,7 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             transform.rotation = Quaternion.RotateTowards(
-                transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+                transform.rotation, targetRotation, requestedTurnSpeed * Time.deltaTime);
         }
     }
 
@@ -270,9 +282,9 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private void UpdateTravelDirection()
     {
-        if (rotateImmediately)
+        if (useDirectionalTravel)
         {
-            // 1인칭/조준: 카메라 기준 전후좌우로 이동한다.
+            // 1인칭·총기 조준·복싱 자세는 몸 회전과 별개로 요청된 월드 방향으로 이동한다.
             // 키를 떼면 마지막 이동 방향을 유지하며 감속한다.
             if (moveDirection.sqrMagnitude > 0.0001f)
                 travelDirection = moveDirection.normalized;

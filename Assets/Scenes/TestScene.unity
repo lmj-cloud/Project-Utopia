@@ -2925,7 +2925,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &85725082
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11531,9 +11531,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 6236ae3f1175b5e43aecbf2c418aa58d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 737492377}
-    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 6236ae3f1175b5e43aecbf2c418aa58d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1435479455}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6236ae3f1175b5e43aecbf2c418aa58d, type: 3}
 --- !u!1 &291423259
@@ -26626,7 +26623,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 10800000, guid: 76088a14524a1db48ab91e07f1ee36a0, type: 3}
       propertyPath: m_Intensity
-      value: 50
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 21200000, guid: 76088a14524a1db48ab91e07f1ee36a0, type: 3}
       propertyPath: m_Size.x
@@ -28337,6 +28334,9 @@ PrefabInstance:
       addedObject: {fileID: 1724442552}
     - targetCorrespondingSourceObject: {fileID: 7002966079874243597, guid: a5ce15a577dae344fb0a6c51d6270ad5, type: 3}
       insertIndex: -1
+      addedObject: {fileID: 1435479455}
+    - targetCorrespondingSourceObject: {fileID: 7002966079874243597, guid: a5ce15a577dae344fb0a6c51d6270ad5, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 543450653450682374}
     - targetCorrespondingSourceObject: {fileID: 7002966079874243597, guid: a5ce15a577dae344fb0a6c51d6270ad5, type: 3}
       insertIndex: -1
@@ -28454,6 +28454,22 @@ MonoBehaviour:
   spineWeight: 0.25
   chestWeight: 0.5
   upperChestWeight: 0.25
+  enableMmaIdleLookAt: 1
+  mmaLookHorizontalLimit: 45
+  mmaLookUpLimit: 25
+  mmaLookDownLimit: 20
+  mmaLookBlendSeconds: 0.2
+  mmaLookHeadWeight: 0.85
+  mmaLookClampWeight: 0.5
+  mmaLookDistance: 10
+  mmaLookTurnSpeed: 180
+  enableMmaAttackLookAt: 1
+  mmaIdleBodyWeight: 0.1
+  mmaAttackHeadWeight: 0.7
+  mmaAttackBodyWeight: 0.04
+  mmaAttackHorizontalLimit: 35
+  mmaAttackVerticalLimit: 20
+  mmaAttackBlendSeconds: 0.15
 --- !u!114 &640622113
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65197,6 +65213,8 @@ MonoBehaviour:
   m_Name: null
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   cameraController: {fileID: 1431126677}
+  mmaFacingTurnSpeed: 1440
+  mmaAttackFacingTolerance: 4
   weapon: {fileID: 640622113}
   equipment: {fileID: 1431126678}
   interactionKey: 20
@@ -65400,6 +65418,7 @@ MonoBehaviour:
   meleeLayer: 0
   medicationState: null
   medicationLayer: 0
+  useMmaCombatLocomotion: 0
 --- !u!114 &1431126676
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -65712,47 +65731,47 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 543450653450682374}
+    m_TransformParent: {fileID: 648041221}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalScale.x
-      value: 17
+      value: 0.20400007
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalScale.y
-      value: 17
+      value: 0.20400007
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalScale.z
-      value: 17
+      value: 0.20400006
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.0010526149
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.085
+      value: -0.0005098422
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.215
+      value: -0.0006652739
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.5213338
+      value: 0.101770654
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.47771442
+      value: -0.19030939
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.47771442
+      value: 0.012131103
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.5213338
+      value: -0.97635955
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 630159a1228c9aa4194402a7bf520630, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -98469,6 +98488,14 @@ MonoBehaviour:
   strongAttackStamina: 16
   strongHitDelay: 0.4
   strongAttackInterval: 1
+  mmaAudioSource: {fileID: 0}
+  mmaJabSwing: {fileID: 0}
+  mmaCrossSwing: {fileID: 0}
+  mmaHitSound: {fileID: 0}
+  mmaBlockSound: {fileID: 0}
+  mmaSoundVolume: 0.65
+  mmaHitEffectPrefab: {fileID: 0}
+  mmaHitEffectScale: 0.6
 --- !u!114 &2200000002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -99477,6 +99504,13 @@ MonoBehaviour:
   comboBufferEnd: 0.95
   comboResetSeconds: 0.8
   comboTransitionSeconds: 0.08
+  useRecoveryCombo: 0
+  comboInputBufferSeconds: 0.25
+  comboLinkNormalizedTime: 0.62
+  comboRecoverySeconds: 0.12
+  useThreeStageCombo: 0
+  comboFinisherRecoverySeconds: 0.6
+  comboPunchDamageMultiplier: 0.5
 --- !u!1001 &209094065414619325
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -99576,6 +99610,10 @@ PrefabInstance:
     - target: {fileID: 5939738012163717546, guid: 12c82e84c565bf94da06314b04bc141e, type: 3}
       propertyPath: m_Name
       value: PistolPickup
+      objectReference: {fileID: 0}
+    - target: {fileID: 5939738012163717546, guid: 12c82e84c565bf94da06314b04bc141e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 3999628492110033463, guid: 12c82e84c565bf94da06314b04bc141e, type: 3}

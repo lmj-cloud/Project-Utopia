@@ -213,6 +213,24 @@ public class WeaponAssaultRifle : MonoBehaviour
     public int MagazineCapacity => weaponSetting.maxAmmo;
     public int CurrentAmmo => weaponSetting.currentAmmo;
     public int ReserveAmmo => weaponSetting.reserveAmmo;
+    // 훈련장 소유자가 있을 때만 예비 탄약을 무제한으로 취급한다. 탄창 수량은 기존 경로로만 변경한다.
+    private UnityEngine.Object trainingReserveOwner;
+    public bool HasUnlimitedReserve { get { return trainingReserveOwner != null; } }
+    public bool AcquireTrainingReserve(UnityEngine.Object owner)
+    {
+        if (owner == null || WeaponName != WeaponName.AssaultRifle ||
+            (trainingReserveOwner != null && trainingReserveOwner != owner)) return false;
+        if (trainingReserveOwner == owner) return true;
+        trainingReserveOwner = owner;
+        NotifyAmmoChanged();
+        return true;
+    }
+    public void ReleaseTrainingReserve(UnityEngine.Object owner)
+    {
+        if (owner == null || trainingReserveOwner != owner) return;
+        trainingReserveOwner = null;
+        NotifyAmmoChanged();
+    }
     public int TotalAmmo => weaponSetting.currentAmmo + weaponSetting.reserveAmmo;
     public int InitialTotalAmmo => weaponSetting.initialTotalAmmo;
 
@@ -314,7 +332,7 @@ public class WeaponAssaultRifle : MonoBehaviour
     /// </summary>
     public void StartReload()
     {
-        if (isReload || !CanUse || weaponSetting.reserveAmmo <= 0 || weaponSetting.currentAmmo >= weaponSetting.maxAmmo)
+        if (isReload || !CanUse || (!HasUnlimitedReserve && weaponSetting.reserveAmmo <= 0) || weaponSetting.currentAmmo >= weaponSetting.maxAmmo)
             return;
 
         StopWeaponAction();
@@ -437,10 +455,10 @@ public class WeaponAssaultRifle : MonoBehaviour
             if (animator != null) animator.OnReloadCancelled();
             yield break;
         }
-        int amount = Mathf.Min(Mathf.Max(0, weaponSetting.maxAmmo - weaponSetting.currentAmmo),
-            Mathf.Max(0, weaponSetting.reserveAmmo));
+        int amount = Mathf.Max(0, weaponSetting.maxAmmo - weaponSetting.currentAmmo);
+        if (!HasUnlimitedReserve) amount = Mathf.Min(amount, Mathf.Max(0, weaponSetting.reserveAmmo));
         weaponSetting.currentAmmo += amount;
-        weaponSetting.reserveAmmo -= amount;
+        if (!HasUnlimitedReserve) weaponSetting.reserveAmmo -= amount;
         isReload = false;
         reloadRoutine = null;
         if (animator != null)

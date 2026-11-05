@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95ee6cdcdc2b54b488dbcd1804d622b0, type: 3}
+  m_Name: Page1SonIdentity
+  m_EditorClassIdentifier: Assembly-CSharp::AffinityCharacterData
+  characterId: page1-son
+  characterName: "\uC544\uB4E4"
+  group: 0
+  portrait: {fileID: 0}
+  characterCardImage: {fileID: 0}
+  description: 
+  affinityMaximum: 100
+  initialAffinity: 0
+  statusMaximum: 100
+  health: 0
+  attack: 0
+  defense: 0
+  agility: 0

@@ -96,7 +96,8 @@ public class ActionAnimationEventRelay : MonoBehaviour
     {
         if (combatOwner != null)
         {
-            if (MatchesCombatEvent(evt) && evt.animatorStateInfo.normalizedTime <= 0.15f)
+            // 빠른 재생·긴 프레임에서는 평가 시간이 이미 진행됐을 수 있으므로, 실제 Arm 이벤트의 Clip 시점을 검사한다.
+            if (MatchesCombatEvent(evt) && evt.time <= evt.animatorClipInfo.clip.length * 0.15f)
             {
                 combatArmed = true;
                 combatArmedFrame = Time.frameCount;
@@ -127,7 +128,14 @@ public class ActionAnimationEventRelay : MonoBehaviour
     {
         if (combatOwner != null)
         {
-            if (combatArmed && Time.frameCount > combatArmedFrame && !combatHitConsumed && !combatCompleteConsumed && MatchesCombatEvent(evt))
+            // 네 타격은 같은 요청을 공유하지만 이벤트의 1~4번 타격 번호로 각각 검증한다.
+            if (combatOwner.IsMmaComboPunch)
+            {
+                if (combatArmed && Time.frameCount >= combatArmedFrame && !combatCompleteConsumed && MatchesCombatEvent(evt))
+                    combatOwner.ConsumeComboHit(combatId, evt.intParameter);
+                return;
+            }
+            if (combatArmed && Time.frameCount >= combatArmedFrame && !combatHitConsumed && !combatCompleteConsumed && MatchesCombatEvent(evt))
             {
                 combatHitConsumed = true;
                 combatOwner.ConsumeHit(combatId);
@@ -145,7 +153,7 @@ public class ActionAnimationEventRelay : MonoBehaviour
     {
         if (combatOwner != null)
         {
-            if (combatArmed && Time.frameCount > combatArmedFrame && !combatCompleteConsumed && MatchesCombatEvent(evt))
+            if (combatArmed && Time.frameCount >= combatArmedFrame && !combatCompleteConsumed && MatchesCombatEvent(evt))
             {
                 combatCompleteConsumed = true;
                 combatOwner.ConsumeComplete(combatId);

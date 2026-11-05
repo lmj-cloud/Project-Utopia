@@ -91,7 +91,7 @@ public class VehicleController : MonoBehaviour
     public bool TryEnter(PlayerController player)
     {
         if (!CanEnter || player == null || !player.CanControlPlayer ||
-            (dialogueUI != null && dialogueUI.IsOpen)) return false;
+            (dialogueUI != null && dialogueUI.BlocksGameplay)) return false;
         PlayerMovement movement = player.GetComponent<PlayerMovement>();
         PlayerCameraController camera = player.GetComponent<PlayerCameraController>();
         CharacterController collider = player.GetComponent<CharacterController>();
@@ -137,7 +137,7 @@ public class VehicleController : MonoBehaviour
         isBraking = false;
         if (!IsOccupied) return;
         bool canDrive = driver.isActiveAndEnabled && driver.IsAlive && !driver.HasOtherControlLock(this) &&
-            !driverCamera.IsStoryFirstPerson && (dialogueUI == null || !dialogueUI.IsOpen);
+            !driverCamera.IsStoryFirstPerson && (dialogueUI == null || !dialogueUI.BlocksGameplay);
         if (!canDrive)
         {
             isBraking = true;

@@ -42509,14 +42509,17 @@ MonoBehaviour:
   obstructionLayers:
     serializedVersion: 2
     m_Bits: 32755
-  comboBufferStart: 0.45
+  comboBufferStart: 0.15
   comboBufferEnd: 0.95
-  comboResetSeconds: 0.7
+  comboResetSeconds: 0.8
   comboTransitionSeconds: 0.06
   useRecoveryCombo: 1
-  comboInputBufferSeconds: 0.25
-  comboLinkNormalizedTime: 0.62
-  comboRecoverySeconds: 0.12
+  comboInputBufferSeconds: 0.8
+  comboLinkNormalizedTime: 0.55
+  comboRecoverySeconds: 0.04
+  useThreeStageCombo: 1
+  comboFinisherRecoverySeconds: 0.9
+  comboPunchDamageMultiplier: 0.5
 --- !u!114 &1894306327
 MonoBehaviour:
   m_ObjectHideFlags: 0

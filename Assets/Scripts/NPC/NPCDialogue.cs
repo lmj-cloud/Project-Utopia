@@ -7,6 +7,11 @@ using UnityEngine.Events;
 public class NPCDialogue : MonoBehaviour
 {
     [SerializeField] private DialogueUI dialogueUI;
+    [Header("Official Script (optional)")]
+    [SerializeField] private OfficialStoryScript officialScript;
+    [SerializeField] private int officialSection;
+    [SerializeField, Min(0)] private int officialFirst;
+    [SerializeField, Min(1)] private int officialCount = int.MaxValue;
 
     [Header("First Dialogue Character Unlock")]
     [SerializeField] private AffinityCharacterData affinityCharacter;
@@ -39,6 +44,9 @@ public class NPCDialogue : MonoBehaviour
             if (!isActiveAndEnabled || dialogueInProgress || dialogueUI == null ||
                 !dialogueUI.IsReady || dialogueUI.IsOpen || dialogueUI.WasClosedThisFrame)
                 return false;
+            if (officialScript != null)
+                foreach (OfficialStoryScript.Line line in officialScript.lines)
+                    if (line.section == officialSection) return true;
             if (dialogueLines != null)
                 foreach (string line in dialogueLines)
                     if (!string.IsNullOrWhiteSpace(line)) return true;
@@ -69,10 +77,27 @@ public class NPCDialogue : MonoBehaviour
         // 첫 문장 이벤트가 Open 안에서 발생하므로 소유 상태와 구독을 먼저 준비한다.
         dialogueInProgress = true;
         dialogueUI.SpeakerChanged += OnSpeakerChanged;
-        bool opened = dialogueUI.TryOpenSequence(
-            dialogueLines, lineSpeakers, npcName,
-            () => { if (this != null) CompleteDialogue(); },
-            () => { if (this != null) CancelDialogueAnimation(); });
+        bool opened;
+        if (officialScript != null)
+        {
+            var texts = new System.Collections.Generic.List<string>();
+            var names = new System.Collections.Generic.List<string>();
+            var speakers = new System.Collections.Generic.List<DialogueSpeaker>();
+            int index = 0;
+            foreach (OfficialStoryScript.Line line in officialScript.lines)
+            {
+                if (line.section != officialSection) continue;
+                if (index++ < officialFirst || texts.Count >= officialCount) continue;
+                texts.Add(line.text); names.Add(line.speaker); speakers.Add(line.speakerKind);
+            }
+            opened = dialogueUI.TryOpenNamedSequence(texts.ToArray(), names.ToArray(), true,
+                () => { if (this != null) CompleteDialogue(); }, () => { if (this != null) CancelDialogueAnimation(); }, speakers.ToArray());
+        }
+        else
+        {
+            opened = dialogueUI.TryOpenSequence(dialogueLines, lineSpeakers, npcName,
+                () => { if (this != null) CompleteDialogue(); }, () => { if (this != null) CancelDialogueAnimation(); });
+        }
         if (!opened)
         {
             CancelDialogueAnimation();

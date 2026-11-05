@@ -30,4 +30,12 @@ MonoBehaviour:
     requiredClips:
     - {fileID: 7400000, guid: b47fcd3b6a441784085733445ddb663e, type: 2}
     timeoutSeconds: 2
+  - action: 9
+    statePath: Base Layer.MMA.ComboPunch
+    layerName: Base Layer
+    motion: {fileID: 7400000, guid: ef9ea97877a222a45851288c0e5671c2, type: 2}
+    appliedMotion: {fileID: 7400000, guid: ef9ea97877a222a45851288c0e5671c2, type: 2}
+    requiredClips:
+    - {fileID: 7400000, guid: ef9ea97877a222a45851288c0e5671c2, type: 2}
+    timeoutSeconds: 2
   guardedTransitions: []

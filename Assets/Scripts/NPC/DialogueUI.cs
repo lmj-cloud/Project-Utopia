@@ -56,6 +56,11 @@ public class DialogueUI : MonoBehaviour
     private Action cancelledCallback;
 
     public bool IsOpen => isOpen;
+    private bool blocksGameplay = true;
+    private int blockingClosedFrame = -1;
+    public bool BlocksGameplay => isOpen && blocksGameplay;
+    public bool WasBlockingClosedThisFrame => blockingClosedFrame == Time.frameCount;
+    public event Action<int, string, string> LinePresented;
     public bool WasClosedThisFrame => closedFrame == Time.frameCount;
     public bool IsReady => isActiveAndEnabled && dialoguePanel != null && dialogueText != null;
 
@@ -94,8 +99,12 @@ public class DialogueUI : MonoBehaviour
     /// <summary>
     /// 표시 참조와 대사·화자 정보를 확인하고 완료·취소 콜백을 가진 대화 시퀀스를 연다.
     /// </summary>
+    public bool TryOpenNamedSequence(string[] dialogueLines, string[] names, bool blockInput, Action onCompleted, Action onCancelled, DialogueSpeaker[] speakers = null)
+    {
+        return TryOpenSequence(dialogueLines, speakers, null, DialogueSpeaker.NPC, onCompleted, onCancelled, names, blockInput);
+    }
     private bool TryOpenSequence(string[] dialogueLines, DialogueSpeaker[] speakers, string npcName,
-        DialogueSpeaker defaultSpeaker, Action onCompleted, Action onCancelled)
+        DialogueSpeaker defaultSpeaker, Action onCompleted, Action onCancelled, string[] names = null, bool blockInput = true)
     {
         if (!IsReady || IsOpen || dialogueLines == null) return false;
         List<string> validLines = new();
@@ -107,6 +116,7 @@ public class DialogueUI : MonoBehaviour
             if (string.IsNullOrWhiteSpace(dialogueLines[i])) continue;
             DialogueSpeaker speaker = speakers != null && i < speakers.Length ? speakers[i] : defaultSpeaker;
             string displayName = speaker == DialogueSpeaker.Player ? playerName : npcName;
+            if (names != null && i < names.Length) displayName = names[i];
             validLines.Add(dialogueLines[i]);
             validSpeakers.Add(speaker);
             validNames.Add(string.IsNullOrWhiteSpace(displayName)
@@ -122,6 +132,7 @@ public class DialogueUI : MonoBehaviour
         completedCallback = onCompleted;
         cancelledCallback = onCancelled;
         isOpen = true;
+        blocksGameplay = blockInput;
         openedFrame = Time.frameCount;
         dialoguePanel.SetActive(true);
         ShowCurrentLine();
@@ -298,6 +309,7 @@ public class DialogueUI : MonoBehaviour
         // 화자 이벤트가 대화를 즉시 취소하면 정리된 대사 배열을 다시 읽지 않는다.
         if (!isOpen || lines == null) return;
         dialogueText.text = lines[lineIndex];
+        LinePresented?.Invoke(lineIndex, speakerNames[lineIndex], lines[lineIndex]);
         dialogueText.maxVisibleCharacters = 0;
         dialogueText.ForceMeshUpdate();
         int characterCount = dialogueText.textInfo.characterCount;
@@ -352,6 +364,7 @@ public class DialogueUI : MonoBehaviour
         StopTyping();
         ResetAdvanceState();
         isOpen = false;
+        if (blocksGameplay) blockingClosedFrame = Time.frameCount;
         closedFrame = Time.frameCount;
         lines = null;
         speakerNames = null;

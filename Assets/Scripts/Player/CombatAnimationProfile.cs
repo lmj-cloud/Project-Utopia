@@ -15,7 +15,8 @@ public enum CombatActionKind
     MmaAssassinate = 5,
     MmaFinish = 6,
     KnifeAssassinate = 7,
-    KnifeFinish = 8
+    KnifeFinish = 8,
+    MmaComboPunch = 9
 }
 
 /// <summary>

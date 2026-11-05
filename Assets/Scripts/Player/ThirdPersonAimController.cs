@@ -33,6 +33,38 @@ public class ThirdPersonAimController : MonoBehaviour
     [SerializeField, Min(0f)] private float chestWeight = 0.5f;
     [SerializeField, Min(0f)] private float upperChestWeight = 0.25f;
 
+    [Header("MMA Boxing Idle Look At")]
+    [SerializeField] private bool enableMmaIdleLookAt = true;
+    [SerializeField, Range(0f, 80f)] private float mmaLookHorizontalLimit = 45f;
+    [SerializeField, Range(0f, 60f)] private float mmaLookUpLimit = 25f;
+    [SerializeField, Range(0f, 60f)] private float mmaLookDownLimit = 20f;
+    [SerializeField, Min(0.01f)] private float mmaLookBlendSeconds = 0.2f;
+    [SerializeField, Range(0f, 1f)] private float mmaLookHeadWeight = 0.85f;
+    [SerializeField, Range(0f, 1f)] private float mmaLookClampWeight = 0.5f;
+    [SerializeField, Min(1f)] private float mmaLookDistance = 10f;
+    [SerializeField, Min(1f)] private float mmaLookTurnSpeed = 180f;
+
+    [Header("MMA Punch Look At")]
+    [SerializeField] private bool enableMmaAttackLookAt = true;
+    [SerializeField, Range(0f, 0.3f)] private float mmaIdleBodyWeight = 0.1f;
+    [SerializeField, Range(0f, 1f)] private float mmaAttackHeadWeight = 0.7f;
+    [SerializeField, Range(0f, 0.3f)] private float mmaAttackBodyWeight = 0.04f;
+    [SerializeField, Range(0f, 60f)] private float mmaAttackHorizontalLimit = 35f;
+    [SerializeField, Range(0f, 45f)] private float mmaAttackVerticalLimit = 20f;
+    [SerializeField, Min(0.01f)] private float mmaAttackBlendSeconds = 0.15f;
+
+    private PlayerAnimatorController playerAnimator;
+    private PlayerMovement playerMovement;
+    private PlayerCombatActions combatActions;
+    private PlayerEquipment equipment;
+    private Transform head;
+    private float mmaLookWeight;
+    private float mmaLookYaw;
+    private float mmaLookPitch;
+    private float mmaLookBodyBlend;
+    private float mmaLookHeadBlend;
+    private int mmaLookFrame = -1;
+
     private Animator animator;
     private int upperIKLayer = -1;
     private Transform spine;
@@ -88,6 +120,11 @@ public class ThirdPersonAimController : MonoBehaviour
         spine = animator.GetBoneTransform(HumanBodyBones.Spine);
         chest = animator.GetBoneTransform(HumanBodyBones.Chest);
         upperChest = animator.GetBoneTransform(HumanBodyBones.UpperChest);
+        head = animator.GetBoneTransform(HumanBodyBones.Head);
+        playerAnimator = playerController.GetComponent<PlayerAnimatorController>();
+        playerMovement = playerController.GetComponent<PlayerMovement>();
+        combatActions = playerController.GetComponent<PlayerCombatActions>();
+        equipment = playerController.GetComponent<PlayerEquipment>();
     }
 
     /// <summary>
@@ -112,6 +149,8 @@ public class ThirdPersonAimController : MonoBehaviour
             animator.GetLayerWeight(upperIKLayer) > 0f ? upperIKLayer : ikLayerIndex;
         if (!isActiveAndEnabled || layerIndex != selectedLayer)
             return;
+
+        ApplyMmaLookAt();
 
         if (!CanApplyPitch)
         {
@@ -175,6 +214,82 @@ public class ThirdPersonAimController : MonoBehaviour
         ApplyPitch(HumanBodyBones.Spine, spine, pitchToApply * spineShare / totalWeight, worldPitchAxis, 0, yawToApply * spineShare / totalWeight);
         ApplyPitch(HumanBodyBones.Chest, chest, pitchToApply * chestShare / totalWeight, worldPitchAxis, 1, yawToApply * chestShare / totalWeight);
         ApplyPitch(HumanBodyBones.UpperChest, upperChest, pitchToApply * upperChestShare / totalWeight, worldPitchAxis, 2, yawToApply * upperChestShare / totalWeight);
+    }
+
+    /// <summary>기존 IK Pass에서 MMA 시선을 더한다. 공격의 Root·판정은 유지하고 피격·총기·컷씬을 우선한다.</summary>
+    private void ApplyMmaLookAt()
+    {
+        if (mmaLookFrame == Time.frameCount) return;
+        mmaLookFrame = Time.frameCount;
+        if (head == null || playerController == null || playerAnimator == null || playerMovement == null ||
+            cameraController == null || !cameraController.isActiveAndEnabled || !cameraController.IsThirdPerson || !cameraController.LookEnabled ||
+            equipment == null || equipment.CurrentKind != PlayerEquipmentKind.Gloves ||
+            !playerController.CanUseMma || playerController.HasAnimationControlLock || !playerController.IsAlive ||
+            playerAnimator.IsHitReacting || (combatActions != null && combatActions.IsRunning && !combatActions.HasMmaAttackFacing))
+        {
+            ResetMmaLookAt();
+            animator.SetLookAtWeight(0f);
+            return;
+        }
+
+        AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
+        bool punch = combatActions != null && combatActions.IsRunning && combatActions.HasMmaAttackFacing;
+        // CrossFade의 이전·다음 펀치까지 포함해 Jab/Cross/Combo 사이에서 시선 블렌드를 초기화하지 않는다.
+        punch = punch || IsMmaPunchPose(state) ||
+            (animator.IsInTransition(0) && IsMmaPunchPose(animator.GetNextAnimatorStateInfo(0)));
+        bool idle = state.IsName("Base Layer.MMA.Locomotion") && !animator.IsInTransition(0) &&
+            playerMovement.IsGrounded && !playerMovement.IsCrouching && playerMovement.HorizontalVelocity.sqrMagnitude < 0.0025f;
+        bool requested = enableMmaIdleLookAt && ((idle && playerAnimator.UsesMmaCombatLocomotion) || (punch && enableMmaAttackLookAt));
+        float blendSeconds = Mathf.Max(0.01f, punch ? mmaAttackBlendSeconds : mmaLookBlendSeconds);
+        float headWeight = punch ? mmaAttackHeadWeight : mmaLookHeadWeight;
+        float bodyWeight = punch ? Mathf.Min(mmaAttackBodyWeight, mmaIdleBodyWeight) : mmaIdleBodyWeight;
+        if (mmaLookWeight <= 0f)
+        {
+            mmaLookHeadBlend = headWeight;
+            mmaLookBodyBlend = bodyWeight;
+        }
+        float blend = 1f - Mathf.Exp(-3f * Time.deltaTime / blendSeconds);
+        mmaLookHeadBlend = Mathf.Lerp(mmaLookHeadBlend, headWeight, blend);
+        mmaLookBodyBlend = Mathf.Lerp(mmaLookBodyBlend, bodyWeight, blend);
+        mmaLookWeight = Mathf.MoveTowards(mmaLookWeight, requested ? 1f : 0f, Time.deltaTime / blendSeconds);
+        if (mmaLookWeight <= 0f)
+        {
+            ResetMmaLookAt();
+            animator.SetLookAtWeight(0f);
+            return;
+        }
+
+        // 카메라 위치가 아닌 시선 방향을 머리에서 멀리 연장한다. 몸 기준 yaw/pitch를 제한해 뒤돌아보지 않는다.
+        Vector3 viewDirection = Quaternion.AngleAxis(cameraController.Pitch, Vector3.Cross(Vector3.up, cameraController.Forward)) * cameraController.Forward;
+        Vector3 localDirection = playerController.transform.InverseTransformDirection(viewDirection);
+        float yaw = Mathf.Atan2(localDirection.x, localDirection.z) * Mathf.Rad2Deg;
+        float pitch = -Mathf.Atan2(localDirection.y, new Vector2(localDirection.x, localDirection.z).magnitude) * Mathf.Rad2Deg;
+        float yawLimit = punch ? mmaAttackHorizontalLimit : mmaLookHorizontalLimit;
+        float upLimit = punch ? mmaAttackVerticalLimit : mmaLookUpLimit;
+        float downLimit = punch ? mmaAttackVerticalLimit : mmaLookDownLimit;
+        yaw = Mathf.Clamp(yaw, -yawLimit, yawLimit);
+        pitch = Mathf.Clamp(pitch, -upLimit, downLimit);
+        mmaLookYaw = Mathf.MoveTowardsAngle(mmaLookYaw, yaw, mmaLookTurnSpeed * Time.deltaTime);
+        mmaLookPitch = Mathf.MoveTowards(mmaLookPitch, pitch, mmaLookTurnSpeed * Time.deltaTime);
+        Vector3 lookDirection = playerController.transform.rotation * Quaternion.Euler(mmaLookPitch, mmaLookYaw, 0f) * Vector3.forward;
+        animator.SetLookAtPosition(head.position + lookDirection * mmaLookDistance);
+        // 공격의 골반·어깨 회전을 지우지 않도록 상체 영향은 Idle보다 낮춘다. 눈 IK는 사용하지 않는다.
+        animator.SetLookAtWeight(mmaLookWeight, mmaLookBodyBlend, mmaLookHeadBlend, 0f, mmaLookClampWeight);
+    }
+
+    private static bool IsMmaPunchPose(AnimatorStateInfo state)
+    {
+        return state.IsName("Base Layer.MMA.LeftPunch") || state.IsName("Base Layer.MMA.RightPunch") ||
+            state.IsName("Base Layer.MMA.ComboPunch");
+    }
+
+    private void ResetMmaLookAt()
+    {
+        mmaLookWeight = 0f;
+        mmaLookYaw = 0f;
+        mmaLookPitch = 0f;
+        mmaLookBodyBlend = 0f;
+        mmaLookHeadBlend = 0f;
     }
 
     /// <summary>
@@ -336,5 +451,10 @@ public class ThirdPersonAimController : MonoBehaviour
     /// <summary>
     /// 비활성화 시 이 컴포넌트가 남긴 진행 상태나 이벤트 연결을 정리한다.
     /// </summary>
-    private void OnDisable() => ResetPitchState();
+    private void OnDisable()
+    {
+        ResetMmaLookAt();
+        mmaLookFrame = -1;
+        ResetPitchState();
+    }
 }

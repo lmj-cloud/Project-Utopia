@@ -13,6 +13,8 @@ public class PlayerInteraction : MonoBehaviour
     [Header("NPC Settings")]
     [SerializeField, Min(0.1f)] private float npcInteractionDistance = 3f;
     [SerializeField] private LayerMask npcLayers = ~0;
+    // Page1 가족처럼 가까운 NPC는 시선을 우선한다. 다른 씬은 기존 거리 우선을 유지한다.
+    [SerializeField] private bool preferNpcInView;
 
     [SerializeField] private Transform selectionView;
     [SerializeField, Range(1f, 180f)] private float maxViewAngle = 65f;
@@ -129,15 +131,29 @@ public class PlayerInteraction : MonoBehaviour
 
         NPCDialogue nearestNpc = null;
         float nearestDistanceSquared = float.MaxValue;
+        float nearestViewAngle = float.MaxValue;
         foreach (Collider nearbyCollider in nearbyColliders)
         {
             NPCDialogue candidate = nearbyCollider.GetComponentInParent<NPCDialogue>();
             if (candidate == null || !candidate.CanStartDialogue) continue;
             float distanceSquared = (candidate.transform.position - transform.position).sqrMagnitude;
-            if (distanceSquared < nearestDistanceSquared ||
-                (Mathf.Approximately(distanceSquared, nearestDistanceSquared) && candidate == currentNpcTarget))
+            float viewAngle = 0f;
+            bool useView = preferNpcInView && selectionView != null;
+            if (useView)
+            {
+                viewAngle = Vector3.Angle(selectionView.forward, nearbyCollider.bounds.center - selectionView.position);
+                if (viewAngle > maxViewAngle) continue;
+            }
+            bool better = distanceSquared < nearestDistanceSquared;
+            if (useView)
+                better = viewAngle < nearestViewAngle ||
+                    (Mathf.Approximately(viewAngle, nearestViewAngle) && distanceSquared < nearestDistanceSquared);
+            if (better ||
+                (Mathf.Approximately(distanceSquared, nearestDistanceSquared) &&
+                 (!useView || Mathf.Approximately(viewAngle, nearestViewAngle)) && candidate == currentNpcTarget))
             {
                 nearestDistanceSquared = distanceSquared;
+                nearestViewAngle = viewAngle;
                 nearestNpc = candidate;
             }
         }
