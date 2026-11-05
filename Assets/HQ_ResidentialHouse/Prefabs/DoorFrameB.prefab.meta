@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2534a13b13afe324d81baf63d5279c88
+timeCreated: 1468311930
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/DoorFrameB.prefab
+  uploadId: 717776

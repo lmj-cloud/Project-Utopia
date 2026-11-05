@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 277f437478d2f294081869375d736d35
+timeCreated: 1466435271
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/ChangingDresser.prefab
+  uploadId: 717776

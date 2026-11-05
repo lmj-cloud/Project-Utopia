@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: adf3a92bf6b1db345b6fec60fe121d0e
+timeCreated: 1470933706
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/GarageBoxes/GarageBoxFilledA.prefab
+  uploadId: 717776

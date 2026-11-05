@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4d60abd8a78fd81439aeb3ceaebfc901
+timeCreated: 1443006707
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/Door_white_d.mat
+  uploadId: 717776

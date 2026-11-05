@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e236f78e59b4e0249aabf8e5f5281b22
+timeCreated: 1470588749
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/BoxSmallC.prefab
+  uploadId: 717776

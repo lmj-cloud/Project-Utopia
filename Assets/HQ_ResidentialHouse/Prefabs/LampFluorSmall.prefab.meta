@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ea366cb027168c24293dd56f52fd1277
+timeCreated: 1469266719
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/LampFluorSmall.prefab
+  uploadId: 717776

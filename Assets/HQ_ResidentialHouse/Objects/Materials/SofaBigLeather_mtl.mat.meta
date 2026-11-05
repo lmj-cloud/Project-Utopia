@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 55f9ee3719b94bc4da66b0b4ac7bcc25
+timeCreated: 1464621136
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/SofaBigLeather_mtl.mat
+  uploadId: 717776

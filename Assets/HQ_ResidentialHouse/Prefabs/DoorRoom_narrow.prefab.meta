@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e489021bb0233b7438cf0c8ad022362b
+timeCreated: 1443781947
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/DoorRoom_narrow.prefab
+  uploadId: 717776

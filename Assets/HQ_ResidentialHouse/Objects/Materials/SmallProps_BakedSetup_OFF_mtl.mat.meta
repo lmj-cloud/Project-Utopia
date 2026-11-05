@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f7d7ff78ff772b7419e9ef012d7256de
+timeCreated: 1443006706
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/SmallProps_BakedSetup_OFF_mtl.mat
+  uploadId: 717776

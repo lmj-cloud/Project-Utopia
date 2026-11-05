@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d29d947ba198c8644831f3e13832ac5c
+timeCreated: 1465377990
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/ChildrenChair.prefab
+  uploadId: 717776

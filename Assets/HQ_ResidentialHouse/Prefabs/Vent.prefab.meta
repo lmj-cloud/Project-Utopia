@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4a2ebbdc6e924d84f832badd099991db
+timeCreated: 1443690283
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Vent.prefab
+  uploadId: 717776

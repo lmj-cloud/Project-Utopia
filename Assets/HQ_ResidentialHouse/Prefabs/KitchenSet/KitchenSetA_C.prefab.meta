@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2b215d868ae11ce4c8b5f755861b59c4
+timeCreated: 1472289407
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/KitchenSet/KitchenSetA_C.prefab
+  uploadId: 717776

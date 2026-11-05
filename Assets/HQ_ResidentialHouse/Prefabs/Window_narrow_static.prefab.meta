@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8eaf02aed71c3b34ca8605433064b7ec
+timeCreated: 1471512778
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Window_narrow_static.prefab
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 92d0a6058c1906047a0083e49b9a8d40
+timeCreated: 1464773283
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/DiningCupboard_anim/Top_anim.anim
+  uploadId: 717776

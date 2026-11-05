@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6dee2ff9fcdf1fd4f9c074df8c09941a
+timeCreated: 1471422793
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/_Prefabs_BakedSetup/DiningCupboard_BakedSetup.prefab
+  uploadId: 717776

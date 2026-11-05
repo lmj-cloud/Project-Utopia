@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 25a500d95b1a90a49bd870e845e2f6aa
+timeCreated: 1468913480
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/WasherAndDryer_mtl.mat
+  uploadId: 717776

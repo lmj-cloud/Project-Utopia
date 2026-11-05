@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e5bd7db068b511e46bd2f1b45d53ee82
+timeCreated: 1470935267
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/GarageBoxes/GarageBoxEmptyB.prefab
+  uploadId: 717776

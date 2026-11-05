@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f3bd89abde37661469343fb8ba84e5ea
+timeCreated: 1445632311
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/CarpetRound_blue.mat
+  uploadId: 717776

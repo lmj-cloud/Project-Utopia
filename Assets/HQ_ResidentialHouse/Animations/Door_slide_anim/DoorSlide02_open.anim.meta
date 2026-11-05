@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0984c9df458ee1a4b8ce42787b610a4e
+timeCreated: 1443021013
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/Door_slide_anim/DoorSlide02_open.anim
+  uploadId: 717776

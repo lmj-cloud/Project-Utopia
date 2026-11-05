@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a7815b513e4296041bc87fa463965e17
+timeCreated: 1443006708
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/House_exterior_mtl.mat
+  uploadId: 717776

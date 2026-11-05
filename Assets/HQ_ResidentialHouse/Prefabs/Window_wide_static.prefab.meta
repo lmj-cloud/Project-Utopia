@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 29834da053499c1439132fda88e7f98c
+timeCreated: 1471512770
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Window_wide_static.prefab
+  uploadId: 717776

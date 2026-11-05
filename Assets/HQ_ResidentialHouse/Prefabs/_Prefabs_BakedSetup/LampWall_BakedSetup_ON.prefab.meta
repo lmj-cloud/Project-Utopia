@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: af9511a7e62af74499cf9e5c98e4343a
+timeCreated: 1471248884
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/_Prefabs_BakedSetup/LampWall_BakedSetup_ON.prefab
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6dd458425ad09084284fd5ecba50df7f
+timeCreated: 1465059364
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/BabyBed_mtl.mat
+  uploadId: 717776

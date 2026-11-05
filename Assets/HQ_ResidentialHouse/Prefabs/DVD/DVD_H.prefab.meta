@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c7fd13a611d705249bef7327dd32275b
+timeCreated: 1470054463
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/DVD/DVD_H.prefab
+  uploadId: 717776

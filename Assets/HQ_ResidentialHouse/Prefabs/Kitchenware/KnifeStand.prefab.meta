@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 24938084f6d60854698d387671a90e33
+timeCreated: 1469519370
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Kitchenware/KnifeStand.prefab
+  uploadId: 717776

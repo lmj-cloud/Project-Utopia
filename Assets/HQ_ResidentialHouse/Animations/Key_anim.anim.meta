@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1347ad99be36eb944be162b557f2fc76
+timeCreated: 1449512035
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/Key_anim.anim
+  uploadId: 717776

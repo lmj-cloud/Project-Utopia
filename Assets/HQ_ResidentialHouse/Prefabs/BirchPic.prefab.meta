@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d55b54ac3102f8a428645d699940ad94
+timeCreated: 1470210040
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/BirchPic.prefab
+  uploadId: 717776

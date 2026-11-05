@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: dcafc7f213cca9b47bf24beed67f3138
+timeCreated: 1445870318
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/LampCeiling_colored_BakedSetup_OFF_mtl.mat
+  uploadId: 717776

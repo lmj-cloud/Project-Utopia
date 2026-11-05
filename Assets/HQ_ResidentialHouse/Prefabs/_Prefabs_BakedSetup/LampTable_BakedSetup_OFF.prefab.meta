@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 83d241f35746b3a4ea84c2243c8b47ac
+timeCreated: 1471277505
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/_Prefabs_BakedSetup/LampTable_BakedSetup_OFF.prefab
+  uploadId: 717776

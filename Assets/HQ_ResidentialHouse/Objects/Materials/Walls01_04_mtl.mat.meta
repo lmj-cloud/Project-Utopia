@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 114e5a9f31934ec479f2a513e18e9e35
+timeCreated: 1443006707
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/Walls01_04_mtl.mat
+  uploadId: 717776

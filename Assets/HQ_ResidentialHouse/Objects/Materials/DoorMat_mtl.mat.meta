@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 536eb4f4a438fe742966da8f54d4389e
+timeCreated: 1470647673
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/DoorMat_mtl.mat
+  uploadId: 717776

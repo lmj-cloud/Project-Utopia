@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f96ea7449a324c74c9e0e51718d434e2
+timeCreated: 1443779411
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Closets_door02_narrow.prefab
+  uploadId: 717776

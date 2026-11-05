@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: dc6f075707a4488479762c645b5852da
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/DemoScene/PostProcessing_global.asset
+  uploadId: 717776

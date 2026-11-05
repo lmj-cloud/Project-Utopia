@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: dc818daf45d8b134e9d64f63b691f291
+timeCreated: 1449568116
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Readme.txt
+  uploadId: 717776

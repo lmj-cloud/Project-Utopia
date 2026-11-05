@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ce189a3b2a39a744c8fe00fe7d4b90ff
+timeCreated: 1442925712
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/SmallProps_BakedSetup_OFF_glass.mat
+  uploadId: 717776

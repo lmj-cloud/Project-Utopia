@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2146a1425c9e0ab48a0c320280d349a7
+timeCreated: 1467390220
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/PoufSmall.prefab
+  uploadId: 717776

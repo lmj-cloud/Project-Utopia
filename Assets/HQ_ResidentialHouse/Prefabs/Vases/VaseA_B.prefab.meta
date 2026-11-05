@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6ce96b72f3ff0f54fb13b8f22c725101
+timeCreated: 1469960384
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Vases/VaseA_B.prefab
+  uploadId: 717776

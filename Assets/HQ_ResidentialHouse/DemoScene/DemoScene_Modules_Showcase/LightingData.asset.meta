@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4df5a8cff65b66f4d85bebd9c43846ed
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 112000000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/DemoScene/DemoScene_Modules_Showcase/LightingData.asset
+  uploadId: 717776

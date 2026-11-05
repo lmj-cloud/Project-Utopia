@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a464d7b11565d2a4494f9320ca6f097f
+timeCreated: 1449512035
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Key.prefab
+  uploadId: 717776

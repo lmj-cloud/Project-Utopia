@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4f2d52e19024be8469042f361b4c9cc3
+timeCreated: 1445706570
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/LampCeiling_birch_BakedSetup_ON_mtl.mat
+  uploadId: 717776

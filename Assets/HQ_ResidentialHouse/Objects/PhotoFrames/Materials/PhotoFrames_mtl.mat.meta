@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 69d0e3021db112b498e3dcc920902c96
+timeCreated: 1469957842
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/PhotoFrames/Materials/PhotoFrames_mtl.mat
+  uploadId: 717776

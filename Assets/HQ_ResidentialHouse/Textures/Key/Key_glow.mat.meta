@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: cb0ce16a3768faf439d9ba0639920b20
+timeCreated: 1449512035
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Textures/Key/Key_glow.mat
+  uploadId: 717776

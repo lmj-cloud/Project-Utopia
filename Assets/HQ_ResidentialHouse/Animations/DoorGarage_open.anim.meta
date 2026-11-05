@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 07de5807255b0c146aeadf51956d5fbb
+timeCreated: 1449563881
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/DoorGarage_open.anim
+  uploadId: 717776

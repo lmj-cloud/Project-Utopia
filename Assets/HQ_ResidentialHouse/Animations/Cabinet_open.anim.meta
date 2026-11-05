@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 63cc861a476be0a4d9f4da2f8d76b57c
+timeCreated: 1449560030
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/Cabinet_open.anim
+  uploadId: 717776

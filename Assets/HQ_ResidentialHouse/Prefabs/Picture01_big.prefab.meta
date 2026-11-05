@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 37062ee4538bc2b44bebddf7a9a7d05b
+timeCreated: 1446019896
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Picture01_big.prefab
+  uploadId: 717776

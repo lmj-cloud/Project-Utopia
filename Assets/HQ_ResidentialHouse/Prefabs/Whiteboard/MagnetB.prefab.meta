@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d6c3c98f1c4a77c4e967c997ca412c0c
+timeCreated: 1470223068
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Whiteboard/MagnetB.prefab
+  uploadId: 717776

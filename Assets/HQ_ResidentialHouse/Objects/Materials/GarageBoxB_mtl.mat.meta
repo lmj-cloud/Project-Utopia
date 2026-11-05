@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 19937387ac212a84087434249fbeef7f
+timeCreated: 1470924728
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/GarageBoxB_mtl.mat
+  uploadId: 717776

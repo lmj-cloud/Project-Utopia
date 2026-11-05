@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e314127c45159db4ea6ffe4e5f876747
+timeCreated: 1469728956
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Books/BooksSetA.prefab
+  uploadId: 717776

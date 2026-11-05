@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f00d04c7fcd4d9647aa0d170add8ded6
+timeCreated: 1470577815
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Particles/Steam.mat
+  uploadId: 717776

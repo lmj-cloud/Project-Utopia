@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4adf5b881dcf0b24b901773487d1ed10
+timeCreated: 1468322524
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/BathroomWare/Materials/BathroomWareB_mtl.mat
+  uploadId: 717776

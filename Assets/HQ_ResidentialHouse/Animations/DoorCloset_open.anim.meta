@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 25bb3fab12318db4cbbedf4b27f336ad
+timeCreated: 1449558779
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/DoorCloset_open.anim
+  uploadId: 717776

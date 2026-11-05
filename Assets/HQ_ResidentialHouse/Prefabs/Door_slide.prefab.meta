@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0b2cd981521c4034fac46674e0fdafdc
+timeCreated: 1443774203
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Door_slide.prefab
+  uploadId: 717776

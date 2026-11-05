@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ea2bfd5e9940c704e8ec5997fb921c8d
+timeCreated: 1462449452
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/HallwayDresser_mtl.mat
+  uploadId: 717776

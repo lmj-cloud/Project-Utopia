@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7fd252e3046e1c34097cc54d74dfa566
+timeCreated: 1471189228
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/RoundStand.prefab
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 193e94da2fd6dbd478c467fbb01bf292
+timeCreated: 1464108183
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/DiningTable.prefab
+  uploadId: 717776

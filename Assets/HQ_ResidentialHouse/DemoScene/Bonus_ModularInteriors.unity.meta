@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 99642acf765dc9e429d2e48ba29b30a2
+timeCreated: 1468302487
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/DemoScene/Bonus_ModularInteriors.unity
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ce8765f34ca8fe441a08c3c5a77381b5
+timeCreated: 1468324031
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/BathroomWare/ShampooB.prefab
+  uploadId: 717776

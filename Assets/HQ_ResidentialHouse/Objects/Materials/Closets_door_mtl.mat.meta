@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3cf2634ee05312a45927101c036440bb
+timeCreated: 1443006707
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/Closets_door_mtl.mat
+  uploadId: 717776

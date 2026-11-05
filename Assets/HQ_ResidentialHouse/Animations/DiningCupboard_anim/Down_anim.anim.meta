@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3def3c63de9226146832ee6c8de36d86
+timeCreated: 1464771966
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/DiningCupboard_anim/Down_anim.anim
+  uploadId: 717776

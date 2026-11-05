@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: db4bef242c85d684ca6a51242ce5d8ab
+timeCreated: 1443776822
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Stairs.prefab
+  uploadId: 717776

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ac64a68306a8e074eaf38f581155b211
+timeCreated: 1468244280
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/Refrigerator.prefab
+  uploadId: 717776

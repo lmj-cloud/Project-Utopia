@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 02304d192394c204b9c68c3ce68c6cf7
+timeCreated: 1443891264
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/LampTable_solid.prefab
+  uploadId: 717776

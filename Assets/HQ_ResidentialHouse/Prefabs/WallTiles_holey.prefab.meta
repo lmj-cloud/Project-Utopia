@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 65129507f81567945afc7ef6b0227c72
+timeCreated: 1445629912
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/WallTiles_holey.prefab
+  uploadId: 717776

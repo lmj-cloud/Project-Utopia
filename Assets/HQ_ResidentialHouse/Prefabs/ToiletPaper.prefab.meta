@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a6ef44ba4d88628419a46438021440e5
+timeCreated: 1445330805
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Prefabs/ToiletPaper.prefab
+  uploadId: 717776

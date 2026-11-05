@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1bf1ce400a56bc54a8aa5141122b7c37
+timeCreated: 1469188464
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Objects/Materials/BlindsAndJalousie_mtl.mat
+  uploadId: 717776

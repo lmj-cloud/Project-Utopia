@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 56dc047847217b54c896dd709ffbba74
+timeCreated: 1442501843
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 48976
+  packageName: HQ Residential House
+  packageVersion: 2.2.1
+  assetPath: Assets/HQ_ResidentialHouse/Animations/FireLight/FireLight.anim
+  uploadId: 717776
