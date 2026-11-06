@@ -5,7 +5,7 @@ using UnityEngine.Events;
 /// <summary>
 /// 튜토리얼에 보고할 이동·전투·상호작용 성공 행동을 구분한다.
 /// </summary>
-public enum DemoAction { Move, Inspect, Jump, Crouch, Dodge, EvadeHit, PunchHit, DaggerHit, BlockHit, Grab, Assassination, ShotHit, Reload, Equip, Pickup, Medication, Dialogue, DoorOpened }
+public enum DemoAction { Move, Inspect, Jump, Crouch, Dodge, EvadeHit, PunchHit, DaggerHit, BlockHit, Grab, Assassination, ShotHit, Reload, Equip, Pickup, Medication, Dialogue, DoorOpened, ShotFired, MeleeAttackStarted, CombatStance }
 
 /// <summary>
 /// 게임플레이 성공 알림을 현재 튜토리얼 단계의 대상·행동 조건과 대조하고 안내 진행을 관리한다.
@@ -41,6 +41,7 @@ public class TutorialManager : MonoBehaviour
         [Min(1)] public int requiredCount = 1;
         public string title;
         public string instruction;
+        public TutorialKeyLayout keys;
         public UnityEvent onStarted = new();
         public UnityEvent onCompleted = new();
     }
@@ -71,6 +72,8 @@ public class TutorialManager : MonoBehaviour
     private bool sequencePending;
     private bool foundStep;
     private int lastCountedFrame = -1;
+    private int movementKeyMask;
+    public int MovementKeyMask { get { return movementKeyMask; } }
     private GameFlowStage requestedStage;
     private WeaponAssaultRifle weapon;
     public event Action Changed;
@@ -119,14 +122,15 @@ public class TutorialManager : MonoBehaviour
     /// </summary>
     private void WeaponChanged(WeaponAssaultRifle next)
     {
-        if (weapon != null) { weapon.OnDamageApplied -= Hit; weapon.OnReloadCompleted -= Reloaded; }
+        if (weapon != null) { weapon.OnDamageApplied -= Hit; weapon.OnReloadCompleted -= Reloaded; weapon.OnFired -= Fired; }
         weapon = next;
-        if (weapon != null) { weapon.OnDamageApplied += Hit; weapon.OnReloadCompleted += Reloaded; }
+        if (weapon != null) { weapon.OnDamageApplied += Hit; weapon.OnReloadCompleted += Reloaded; weapon.OnFired += Fired; }
     }
     /// <summary>
     /// 현재 훈련 대상에 대한 실제 피해 성공을 튜토리얼에 보고한다.
     /// </summary>
     private void Hit(UnityEngine.Object target) => Report(DemoAction.ShotHit, target);
+    private void Fired(Vector3 position) => Report(DemoAction.ShotFired, weapon);
     /// <summary>
     /// 실제 재장전 완료를 현재 튜토리얼 조건에 보고한다.
     /// </summary>
@@ -163,6 +167,7 @@ public class TutorialManager : MonoBehaviour
     private void NextStep()
     {
         currentCount = 0;
+        movementKeyMask = 0;
         do { currentStep++; } while (currentStep < steps.Length && (steps[currentStep] == null || (!standaloneTest && steps[currentStep].stage != flow.CurrentStage)));
         if (currentStep >= steps.Length)
         {
@@ -224,6 +229,7 @@ public class TutorialManager : MonoBehaviour
             Time.frameCount == lastCountedFrame || !IsCurrentFlow || currentStep < 0 || currentStep >= steps.Length ||
             gameplayUI == null || !gameplayUI.CanCountTutorial(this)) return;
         Step step = steps[currentStep];
+        if (step.keys == TutorialKeyLayout.WASD && movementKeyMask != 15) return;
         if ((!standaloneTest && step.stage != flow.CurrentStage) || step.action != action ||
             (step.requireTarget && step.target == null) || (step.target != null && step.target != target)) return;
         if (step.checkEquipmentKind && (equipment == null || equipment.CurrentKind != step.equipmentKind)) return;
@@ -266,6 +272,18 @@ public class TutorialManager : MonoBehaviour
     /// 지정 조사 대상의 상호작용 성공을 튜토리얼에 보고한다.
     /// </summary>
     public void OnInspected(UnityEngine.Object target) => Report(DemoAction.Inspect, target);
+    /// <summary>Bridge가 실제 이동을 확인한 키만 기록한다. 같은 키와 UI/컷씬 중 입력은 성공시키지 않는다.</summary>
+    public void RecordMovementKey(int index)
+    {
+        if (index < 0 || index > 3 || !running || !IsCurrentFlow || CurrentStep == null ||
+            CurrentStep.keys != TutorialKeyLayout.WASD || displayState != TutorialDisplayState.Active ||
+            gameplayUI == null || !gameplayUI.CanCountTutorial(this)) return;
+        int bit = 1 << index;
+        if ((movementKeyMask & bit) != 0) return;
+        movementKeyMask |= bit;
+        Changed?.Invoke();
+        if (movementKeyMask == 15) Report(DemoAction.Move, CurrentStep.target);
+    }
     /// <summary>
     /// 지정 대화 대상의 실제 완료를 튜토리얼에 보고한다.
     /// </summary>

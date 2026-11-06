@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97619f2a40acec747b9b295fb06fcc2e, type: 3}
+  m_Name: Page4KnifeCombat
+  m_EditorClassIdentifier: Assembly-CSharp::CombatAnimationProfile
+  controller: {fileID: 9100000, guid: 201bc808cc6587d478d4ec154228a309, type: 2}
+  bindings:
+  - action: 1
+    statePath: Base Layer.MMA.LeftPunch
+    layerName: Base Layer
+    motion: {fileID: 7400000, guid: c2a8a44f3a90bb4458ffa339f993b442, type: 2}
+    appliedMotion: {fileID: 7400000, guid: c2a8a44f3a90bb4458ffa339f993b442, type: 2}
+    requiredClips:
+    - {fileID: 7400000, guid: c2a8a44f3a90bb4458ffa339f993b442, type: 2}
+    timeoutSeconds: 1.8666668
+    normalizedHitTimes: []
+  - action: 2
+    statePath: Base Layer.MMA.RightPunch
+    layerName: Base Layer
+    motion: {fileID: 7400000, guid: b47fcd3b6a441784085733445ddb663e, type: 2}
+    appliedMotion: {fileID: 7400000, guid: b47fcd3b6a441784085733445ddb663e, type: 2}
+    requiredClips:
+    - {fileID: 7400000, guid: b47fcd3b6a441784085733445ddb663e, type: 2}
+    timeoutSeconds: 2
+    normalizedHitTimes: []
+  - action: 9
+    statePath: Base Layer.MMA.ComboPunch
+    layerName: Base Layer
+    motion: {fileID: 7400000, guid: ef9ea97877a222a45851288c0e5671c2, type: 2}
+    appliedMotion: {fileID: 7400000, guid: ef9ea97877a222a45851288c0e5671c2, type: 2}
+    requiredClips:
+    - {fileID: 7400000, guid: ef9ea97877a222a45851288c0e5671c2, type: 2}
+    timeoutSeconds: 2
+    normalizedHitTimes: []
+  - action: 10
+    statePath: KnifeUpperBody.Knife_Slash_R
+    layerName: KnifeUpperBody
+    motion: {fileID: 7400000, guid: dc58100830bf9ce43b2c14bb28a4583c, type: 2}
+    appliedMotion: {fileID: 7400000, guid: dc58100830bf9ce43b2c14bb28a4583c, type: 2}
+    requiredClips:
+    - {fileID: 7400000, guid: dc58100830bf9ce43b2c14bb28a4583c, type: 2}
+    timeoutSeconds: 1.0833334
+    normalizedHitTimes:
+    - 0.5
+  - action: 11
+    statePath: KnifeUpperBody.Knife_Slash_L
+    layerName: KnifeUpperBody
+    motion: {fileID: 7400000, guid: c5b717950984bcf45b560711c2382574, type: 2}
+    appliedMotion: {fileID: 7400000, guid: c5b717950984bcf45b560711c2382574, type: 2}
+    requiredClips:
+    - {fileID: 7400000, guid: c5b717950984bcf45b560711c2382574, type: 2}
+    timeoutSeconds: 1.0833334
+    normalizedHitTimes:
+    - 0.45
+  - action: 12
+    statePath: KnifeUpperBody.Knife_DoubleStep
+    layerName: KnifeUpperBody
+    motion: {fileID: 7400000, guid: cdd49fdf4f4bcb546b2168323b1bf27c, type: 2}
+    appliedMotion: {fileID: 7400000, guid: cdd49fdf4f4bcb546b2168323b1bf27c, type: 2}
+    requiredClips:
+    - {fileID: 7400000, guid: cdd49fdf4f4bcb546b2168323b1bf27c, type: 2}
+    timeoutSeconds: 1.6666667
+    normalizedHitTimes:
+    - 0.36363637
+    - 0.94545454
+  guardedTransitions: []

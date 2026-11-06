@@ -17,6 +17,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField, Min(1f)] private float mmaFacingTurnSpeed = 1440f;
     [SerializeField, Range(0f, 15f)] private float mmaAttackFacingTolerance = 4f;
     private bool mmaCombatStance;
+    [Header("Page4 단검 전투") ]
+    [SerializeField] private bool enableKnifeCombat;
+    public bool IsKnifeCombatEnabled { get { return enableKnifeCombat; } }
+    public bool IsKnifeCombatStance
+    {
+        get { return enableKnifeCombat && !IsMmaCombatActive && equipment != null &&
+            equipment.CurrentKind == PlayerEquipmentKind.Dagger && CanUseMelee &&
+            Mouse.current != null && Mouse.current.rightButton.isPressed; }
+    }
     public bool IsMmaCombatStance
     {
         get { return mmaCombatStance && CanUseMma && CanUseMelee && equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves; }
@@ -356,6 +365,7 @@ public class PlayerController : MonoBehaviour
         {
             if (keyboard.digit1Key.wasPressedThisFrame) equipment.Equip(WeaponName.AssaultRifle);
             else if (keyboard.digit2Key.wasPressedThisFrame) equipment.Equip(WeaponName.Pistol);
+            else if (enableKnifeCombat && !IsMmaCombatActive && CanUseWeapons && keyboard.digit3Key.wasPressedThisFrame) equipment.EquipDagger();
             else if (Pressed(keyboard, daggerKey)) equipment.EquipDagger();
             else if (Pressed(keyboard, glovesKey)) equipment.EquipGloves();
             else if (Pressed(keyboard, bareHandsKey)) equipment.EquipBareHands();
@@ -390,6 +400,11 @@ public class PlayerController : MonoBehaviour
                         if (Mouse.current.leftButton.wasPressedThisFrame) combatActions.TryMmaComboAttack();
                         combatActions.TryMmaHeldAttack();
                     }
+                }
+                else if (enableKnifeCombat && equipment.CurrentKind == PlayerEquipmentKind.Dagger)
+                {
+                    // 유지 입력은 재공격으로 취급하지 않는다. 우클릭은 전술 이동 전용이다.
+                    if (Mouse.current.leftButton.wasPressedThisFrame && combatActions != null) combatActions.TryKnifeComboAttack();
                 }
                 else
                 {
@@ -484,7 +499,7 @@ public class PlayerController : MonoBehaviour
     private void UpdateSpeed(Vector2 input)
     {
         playerMovement.TargetSpeed = playerStatus.WalkSpeed;
-        if (isAiming || IsMmaCombatStance)
+        if (isAiming || IsMmaCombatStance || IsKnifeCombatStance)
         {
             // 조준은 기존 걷기 속도를 사용한다. Shift의 스태미나 검사도 실행하지 않는다.
             playerMovement.LimitHorizontalSpeed(playerStatus.WalkSpeed);
@@ -510,18 +525,25 @@ public class PlayerController : MonoBehaviour
             // 한 공격의 정렬 방향은 모션이 끝날 때까지 유지한다. 카메라 자체는 계속 자유롭게 움직인다.
             playerMovement.SetCombatFacingDirection(combatActions.MmaAttackFacingDirection, mmaFacingTurnSpeed);
         }
-        else if (IsMmaCombatStance)
+        else if (IsMmaCombatStance || IsKnifeCombatStance)
             playerMovement.SetCombatFacingDirection(MmaCameraForward, mmaFacingTurnSpeed);
         else if (cameraController.IsThirdPerson && !isAiming)
             playerMovement.SetFacingDirection(moveDirection, false);
         else
             playerMovement.SetFacingDirection(cameraController.Forward, true);
 
-        if (playerAnimator != null && playerAnimator.UsesMmaCombatLocomotion)
+        if (playerAnimator != null && (playerAnimator.UsesMmaCombatLocomotion || IsKnifeCombatStance))
         {
             // 요청 방향 대신 실제 수평 속도를 현재 몸의 로컬 축으로 변환한다.
             Vector3 localMove = Quaternion.Inverse(transform.rotation) * playerMovement.HorizontalVelocity;
             localMove = Vector3.ClampMagnitude(localMove / Mathf.Max(0.01f, playerStatus.WalkSpeed), 1f);
+            // 물리 이동은 단위 원으로 정규화한다. Tree의 대각선 (±1,±1)에만 좌표를 맞춘다.
+            if (IsKnifeCombatStance)
+            {
+                float amount = localMove.magnitude;
+                float largest = Mathf.Max(Mathf.Abs(localMove.x), Mathf.Abs(localMove.z));
+                if (largest > .0001f) localMove = localMove / largest * amount;
+            }
             float maxDelta = animationChangedSecond * Time.deltaTime;
             animationInput.x = Mathf.MoveTowards(animationInput.x, localMove.x, maxDelta);
             animationInput.y = Mathf.MoveTowards(animationInput.y, localMove.z, maxDelta);
@@ -555,7 +577,7 @@ public class PlayerController : MonoBehaviour
             if (keyboard.wKey.isPressed) vertical += 1f;
         }
         // 복싱 이동은 UpdateMove에서 몸의 기준 방향으로 변환한 뒤 한 번만 보간한다.
-        if (playerAnimator != null && playerAnimator.UsesMmaCombatLocomotion)
+        if (playerAnimator != null && (playerAnimator.UsesMmaCombatLocomotion || IsKnifeCombatStance))
             return new Vector2(horizontal, vertical);
         float maxDelta = animationChangedSecond * Time.deltaTime;
         animationInput.x = Mathf.MoveTowards(animationInput.x, horizontal, maxDelta);

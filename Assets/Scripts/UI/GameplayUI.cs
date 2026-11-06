@@ -11,6 +11,7 @@ public class GameplayUI : MonoBehaviour
 {
     [Header("Tutorial")]
     [SerializeField] private TutorialManager tutorial;
+    [SerializeField] private TutorialKeyImages tutorialKeyImages;
     [SerializeField] private GameObject tutorialPanel;
     [SerializeField] private TMP_Text tutorialTitleText;
     [SerializeField] private Animator tutorialAnimator;
@@ -229,6 +230,12 @@ public class GameplayUI : MonoBehaviour
         TutorialManager.Step current = tutorial.CurrentStep;
         if (tutorialTitleText != null) tutorialTitleText.text = current.title;
         if (instructionText != null) instructionText.text = current.instruction;
+        if (tutorialKeyImages != null)
+        {
+            tutorialKeyImages.Refresh(current.keys, tutorial.MovementKeyMask);
+            if (countText != null) { countText.text = ""; countText.gameObject.SetActive(false); }
+            return;
+        }
         string countLabel = current.action == DemoAction.ShotHit ? "명중" : "성공";
         if (countText != null) countText.text = $"단계 {step} / {tutorial.StepTotal} · {countLabel} {tutorial.CurrentCount} / {Mathf.Max(1, current.requiredCount)}";
     }

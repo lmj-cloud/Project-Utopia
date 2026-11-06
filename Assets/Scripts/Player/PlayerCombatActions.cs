@@ -142,7 +142,7 @@ public class PlayerCombatActions : MonoBehaviour
         int layer = source.GetLayerIndex(binding.layerName);
         if (layer < 0) return false;
         AnimatorStateInfo state = source.GetCurrentAnimatorStateInfo(layer);
-        if (!state.IsName(binding.statePath) && source.IsInTransition(layer)) state = source.GetNextAnimatorStateInfo(layer);
+        if ((IsKnifeAction || !state.IsName(binding.statePath)) && source.IsInTransition(layer)) state = source.GetNextAnimatorStateInfo(layer);
         if (!state.IsName(binding.statePath)) return false;
         progress = state.normalizedTime;
         return true;
@@ -173,6 +173,89 @@ public class PlayerCombatActions : MonoBehaviour
             return started;
         }
         return TryDirectionalAttack(nextMmaStage == 1, transition);
+    }
+
+    [Header("단검 클릭 3타 콤보")]
+    [SerializeField, Range(0f, 1f)] private float knifeBufferStart = .25f;
+    [SerializeField, Range(0f, 1f)] private float knifeBufferEnd = .9f;
+    [SerializeField, Min(0f)] private float knifeResetSeconds = .8f;
+    [SerializeField, Range(0f, .2f)] private float knifeTransitionSeconds = .05f;
+    private int knifeStartedFrame;
+    private int nextKnifeStage;
+    private bool hasBufferedKnifeAttack;
+    private float lastKnifeCompletedAt = float.NegativeInfinity;
+    public bool IsKnifeAction
+    {
+        get { return target == null && startedEquipment == PlayerEquipmentKind.Dagger &&
+            (action == CombatActionKind.KnifeSlashRight || action == CombatActionKind.KnifeSlashLeft ||
+             action == CombatActionKind.KnifeDoubleStep); }
+    }
+    public int KnifeStage { get { return IsKnifeAction && isRunning ? (action == CombatActionKind.KnifeSlashRight ? 1 : action == CombatActionKind.KnifeSlashLeft ? 2 : 3) : 0; } }
+
+    /// <summary>클릭 한 번에 다음 단계 하나만 예약한다. MMA의 유지 입력 버퍼와 공유하지 않는다.</summary>
+    public bool TryKnifeComboAttack()
+    {
+        if (controller == null || !controller.IsKnifeCombatEnabled || !controller.CanUseMelee ||
+            equipment == null || equipment.CurrentKind != PlayerEquipmentKind.Dagger) return false;
+        if (isRunning)
+        {
+            float progress;
+            if (!IsKnifeAction || action == CombatActionKind.KnifeDoubleStep || hasBufferedKnifeAttack ||
+                !CanContinueAction || !TryGetMmaProgress(out progress) || progress < knifeBufferStart || progress > knifeBufferEnd) return false;
+            hasBufferedKnifeAttack = true;
+            return true;
+        }
+        if (Time.unscaledTime - lastKnifeCompletedAt > knifeResetSeconds) nextKnifeStage = 0;
+        return StartKnifeAttack();
+    }
+
+    private bool StartKnifeAttack()
+    {
+        CombatActionKind requested = CombatActionKind.KnifeSlashRight;
+        if (nextKnifeStage == 1) requested = CombatActionKind.KnifeSlashLeft;
+        else if (nextKnifeStage == 2) requested = CombatActionKind.KnifeDoubleStep;
+        if (!BeginAction(requested, null, false, knifeTransitionSeconds)) return false;
+        knifeStartedFrame = Time.frameCount;
+        nextKnifeStage = (nextKnifeStage + 1) % 3;
+        return true;
+    }
+
+    private void ResetKnifeCombo()
+    {
+        nextKnifeStage = 0;
+        hasBufferedKnifeAttack = false;
+        lastKnifeCompletedAt = float.NegativeInfinity;
+    }
+
+    /// <summary>실제 UMotion 손 궤적에서 확인한 프레임을 현재 요청의 Animator 시간으로 검사한다.</summary>
+    private void UpdateKnifeActionTiming()
+    {
+        if (!isRunning || !IsKnifeAction || !CanContinueAction || Time.frameCount <= knifeStartedFrame) return;
+        float progress;
+        if (!TryGetMmaProgress(out progress)) return;
+        CombatAnimationProfile.Binding binding = profile.GetBinding(action);
+        if (binding == null || binding.normalizedHitTimes == null || binding.normalizedHitTimes.Length == 0) return;
+        for (int i = 0; i < binding.normalizedHitTimes.Length; i++)
+        {
+            if (progress >= binding.normalizedHitTimes[i]) ConsumeKnifeHit(requestId, i + 1);
+        }
+        int allHits = (1 << binding.normalizedHitTimes.Length) - 1;
+        if (progress >= 1f && comboStrikeMask == allHits) ConsumeComplete(requestId);
+    }
+
+    public bool ConsumeKnifeHit(int id, int strikeIndex)
+    {
+        int count = action == CombatActionKind.KnifeDoubleStep ? 2 : 1;
+        if (!IsKnifeAction || !CanContinueAction || id != requestId || hasConsumedComplete ||
+            strikeIndex < 1 || strikeIndex > count || lastComboStrikeFrame == Time.frameCount) return false;
+        int bit = 1 << (strikeIndex - 1);
+        if ((comboStrikeMask & bit) != 0) return false;
+        comboStrikeMask |= bit;
+        lastComboStrikeFrame = Time.frameCount;
+        hasConsumedHit = true;
+        // 매 타격의 대상 중복 제거·거리·각도·장애물·피해 처리는 기존 근접 경로가 담당한다.
+        melee.ApplyExternalHit(this, id, true);
+        return true;
     }
 
     private PlayerStatus status;
@@ -354,7 +437,7 @@ public class PlayerCombatActions : MonoBehaviour
     /// </summary>
     public bool ConsumeHit(int id)
     {
-        if (IsMmaComboPunch) return false;
+        if (IsMmaComboPunch || IsKnifeAction) return false;
         if (!CanContinueAction || id != requestId || hasConsumedHit || hasConsumedComplete) return false;
         hasConsumedHit = true;
         if (OwnsControlLock)
@@ -392,6 +475,16 @@ public class PlayerCombatActions : MonoBehaviour
     {
         if (!CanContinueAction || id != requestId || hasConsumedComplete) return false;
         hasConsumedComplete = true;
+        if (IsKnifeAction)
+        {
+            bool chainKnife = action != CombatActionKind.KnifeDoubleStep && hasBufferedKnifeAttack;
+            hasBufferedKnifeAttack = false;
+            if (action == CombatActionKind.KnifeDoubleStep) nextKnifeStage = 0;
+            lastKnifeCompletedAt = Time.unscaledTime;
+            EndAction(!chainKnife, chainKnife);
+            if (chainKnife && !StartKnifeAttack() && animator != null) animator.EndCombatAction();
+            return true;
+        }
         if (IsMmaComboPunch)
         {
             // 마지막 동작은 회복 구간을 생략하지 않는다. 예약은 버리고 다음 순환은 Jab부터 시작한다.
@@ -418,6 +511,7 @@ public class PlayerCombatActions : MonoBehaviour
     /// </summary>
     public void CancelAction()
     {
+        ResetKnifeCombo();
         ResetMmaCombo();
         if (!isRunning) return;
         EndAction();
@@ -428,6 +522,7 @@ public class PlayerCombatActions : MonoBehaviour
     /// </summary>
     private void CancelFromDamage()
     {
+        ResetKnifeCombo();
         ResetMmaCombo();
         if (!isRunning) return;
         EndAction(false);
@@ -480,6 +575,9 @@ public class PlayerCombatActions : MonoBehaviour
             }
         }
         if (isRunning && (!CanContinueAction || Time.unscaledTime >= deadline)) CancelAction();
+        UpdateKnifeActionTiming();
+        if (!isRunning && (equipment == null || equipment.CurrentKind != PlayerEquipmentKind.Dagger ||
+            controller == null || !controller.CanUseMelee)) ResetKnifeCombo();
         if (useRecoveryCombo && isRunning && IsMmaPunch() && !IsMmaComboPunch && hasBufferedMmaAttack)
         {
             if (Time.unscaledTime > bufferedMmaUntil) hasBufferedMmaAttack = false;

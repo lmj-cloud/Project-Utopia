@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemName: "\uB2E8\uAC80"
   description: "\uBCF4\uAD00\uD568\uC5D0\uC11C \uC9C0\uAE09\uBC1B\uC740 \uB2E8\uAC80.
-    4\uBC88 \uD0A4\uB85C \uC7A5\uCC29\uD569\uB2C8\uB2E4."
+    \uC7A5\uBE44 \uC120\uD0DD \uD0A4\uB85C \uC7A5\uCC29\uD569\uB2C8\uB2E4."
   icon: {fileID: 0}
   category: 0
   isFixedWeapon: 1

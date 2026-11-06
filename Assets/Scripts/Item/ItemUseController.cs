@@ -57,6 +57,7 @@ public class ItemUseController : MonoBehaviour
     private int activeConsume;
     private bool activeMedication;
     public event Action<ItemData> ItemUsed;
+    public bool LastSuccessfulUseWasEquipped { get; private set; }
     private MedicineSource activeSource;
     private int timelineId;
     private bool timelineConfirmed;
@@ -214,6 +215,7 @@ public class ItemUseController : MonoBehaviour
                 : world != null && world.TryConsumeExternalInteraction();
         if (success)
         {
+            LastSuccessfulUseWasEquipped = selected;
             ItemUsed?.Invoke(item);
             if (medication) Succeeded?.Invoke(DemoAction.Medication, item);
             binding?.onCompleted.Invoke();

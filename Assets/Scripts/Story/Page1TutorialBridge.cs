@@ -30,6 +30,13 @@ public class Page1TutorialBridge : MonoBehaviour
     private bool photoReportPending;
     private bool wifeTalked;
     private bool hasArrived;
+    private bool livingRoomArrived;
+    private bool sonTalked;
+    private bool daughterTalked;
+    [SerializeField] private Transform livingRoomTarget;
+    public void LivingRoomArrived() { if (started && player.CanControlPlayer) livingRoomArrived = true; }
+    public void SonDialogueCompleted() { sonTalked = true; }
+    public void DaughterDialogueCompleted() { daughterTalked = true; }
     public bool HasPhoto { get { return photoInspected; } }
     public bool HasWifeDialogue { get { return wifeTalked; } }
 
@@ -73,36 +80,27 @@ public class Page1TutorialBridge : MonoBehaviour
 
     private void ObserveSuccess(Vector3 position, Quaternion rotation)
     {
-        int step = tutorial.StepNumber - 1;
-        if (step < 0 || step >= 6 || actionTargets == null || actionTargets.Length <= step || actionTargets[step] == null) return;
-        Keyboard keyboard = Keyboard.current;
-        if (keyboard == null) return;
-        Vector3 displacement = position - lastPosition;
-        displacement.y = 0f;
-        if (step < 4)
+        TutorialManager.Step step = tutorial.CurrentStep;
+        if (step == null) return;
+        if (step.keys == TutorialKeyLayout.WASD)
         {
+            Keyboard keyboard = Keyboard.current;
+            if (keyboard == null) return;
+            Vector3 displacement = position - lastPosition;
+            displacement.y = 0;
             Key[] keys = { Key.W, Key.A, Key.S, Key.D };
             Vector2[] directions = { Vector2.up, Vector2.left, Vector2.down, Vector2.right };
-            bool correctKey = keyboard[keys[step]].isPressed;
-            for (int i = 0; i < 4; i++)
-                if (i != step && keyboard[keys[i]].isPressed) correctKey = false;
-            Vector3 expected = playerCamera.GetMoveDirection(directions[step]);
-            if (correctKey && Vector3.Dot(displacement, expected) > 0f) progress += displacement.magnitude;
-            if (progress >= movementDistance) tutorial.Report(DemoAction.Move, actionTargets[step]);
+            for (int i = 0; i < keys.Length; i++)
+                if (keyboard[keys[i]].isPressed && displacement.sqrMagnitude > .000001f &&
+                    Vector3.Dot(displacement, playerCamera.GetMoveDirection(directions[i])) > .00001f)
+                    tutorial.RecordMovementKey(i);
         }
-        else if (step == 4)
-        {
-            if (Mouse.current != null && Mouse.current.delta.ReadValue().sqrMagnitude > 0f && playerCamera.LookEnabled)
-                progress += Quaternion.Angle(lastCameraRotation, rotation);
-            if (progress >= lookDegrees) tutorial.Report(DemoAction.Move, actionTargets[step]);
-        }
-        else if (keyboard.leftShiftKey.isPressed && status != null && status.RunSpeed > status.WalkSpeed &&
-                 !movement.IsCrouching && movement.TargetSpeed > status.WalkSpeed &&
-                 movement.CurrentSpeed >= status.RunSpeed * runningSpeedFraction && displacement.magnitude > 0.001f)
-        {
-            progress += displacement.magnitude;
-            if (progress >= movementDistance) tutorial.Report(DemoAction.Move, actionTargets[step]);
-        }
+        else if (step.action == DemoAction.Inspect && step.target == livingRoomTarget && livingRoomArrived)
+            tutorial.Report(DemoAction.Inspect, livingRoomTarget);
+        else if (step.action == DemoAction.Dialogue && wifeTalked && sonTalked && daughterTalked)
+            tutorial.Report(DemoAction.Dialogue, this);
+        else if (step.action == DemoAction.DoorOpened && hasArrived)
+            tutorial.Report(DemoAction.DoorOpened, this);
     }
 
     public void TutorialCompleted()
@@ -129,7 +127,7 @@ public class Page1TutorialBridge : MonoBehaviour
     public void ArenaArrived()
     {
         hasArrived = true;
-        if (tutorial != null && tutorial.IsRunning) tutorial.StopTutorial();
+        // 문 성공은 S03의 실제 정상 도착으로만 인정한다. HUD 복구 뒤 현재 단계에 전달한다.
         if (dialogueUI != null && dialogueUI.IsOpen) dialogueUI.CancelDialogue();
         RefreshObjective();
     }
@@ -137,18 +135,8 @@ public class Page1TutorialBridge : MonoBehaviour
     private void RefreshObjective()
     {
         if (objectiveText == null) return;
-        if (hasArrived)
-        {
-            objectiveText.text = "경기장 도착 · Page1 완료";
-            return;
-        }
-        string controls = "진행 중";
-        if (tutorial != null && tutorial.IsCompleted) controls = "완료";
-        string photo = photoInspected ? "완료" : "가족사진 조사";
-        string wife = wifeTalked ? "완료" : "아내와 대화";
-        objectiveText.text = "집 탐색  |  조작: " + controls + "  ·  사진: " + photo + "  ·  대화: " + wife;
-        if (tutorial != null && tutorial.IsCompleted && photoInspected && wifeTalked)
-            objectiveText.text += "\n준비가 되면 출입문에서 F · 경기장으로 이동";
+        if (hasArrived) { objectiveText.text = "경기장 도착 · 링으로 이동하세요."; return; }
+        objectiveText.text = tutorial != null && tutorial.CurrentStep != null ? tutorial.CurrentStep.instruction : "집을 둘러보세요.";
         if (interaction != null && interaction.SelectedTarget != null && player.CanControlPlayer)
             objectiveText.text += "\n[F] " + interaction.SelectedTarget.name;
     }

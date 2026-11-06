@@ -261,7 +261,7 @@ public class Page3StoryController : MonoBehaviour
                 drivingDialogueStarted = true;
                 StartCoroutine(DrivingDialogue());
             }
-            if (objective != null) objective.text = "W/S 가속·후진 / A/D 조향 / Space 브레이크 / F 저속 하차";
+            if (objective != null) objective.text = "앞쪽 길을 따라 직진하세요.";
         }
         else
         {

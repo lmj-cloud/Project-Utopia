@@ -931,12 +931,17 @@ public class InventoryUI : MonoBehaviour
     /// <summary>
     /// 더블클릭한 보관 슬롯을 빈 퀵슬롯에 등록한다. 드래그 및 사용 예약 중에는 변경하지 않는다.
     /// </summary>
+    public event System.Action<ItemData> StorageItemEquipped;
+
     public bool EquipStorageSlot(InventorySlotUI slot)
     {
         if (!InteractionAllowed || dragSource != null || inventory == null || slot == null || slot.IsEquipped) return false;
         InventoryEntry entry = inventory.GetEntry(false, slot.SlotIndex);
         if (entry == null || entry.Item != slot.Item || entry.Quantity != slot.Quantity) return false;
-        return inventory.TryAssignFirstEmpty(slot.SlotIndex);
+        ItemData selectedItem = entry.Item;
+        bool success = inventory.TryAssignFirstEmpty(slot.SlotIndex);
+        if (success) StorageItemEquipped?.Invoke(selectedItem);
+        return success;
     }
 
     /// <summary>

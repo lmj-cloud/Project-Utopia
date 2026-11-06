@@ -16,7 +16,10 @@ public enum CombatActionKind
     MmaFinish = 6,
     KnifeAssassinate = 7,
     KnifeFinish = 8,
-    MmaComboPunch = 9
+    MmaComboPunch = 9,
+    KnifeSlashRight = 10,
+    KnifeSlashLeft = 11,
+    KnifeDoubleStep = 12
 }
 
 /// <summary>
@@ -38,6 +41,8 @@ public class CombatAnimationProfile : ScriptableObject
         [HideInInspector] public Motion appliedMotion;
         public AnimationClip[] requiredClips = new AnimationClip[0];
         [Min(0.1f)] public float timeoutSeconds = 4f;
+        // UMotion 원본 Event를 변경하지 않고 현재 공격 State의 시간으로 타격을 소비한다.
+        public float[] normalizedHitTimes = new float[0];
     }
 
     [SerializeField] private RuntimeAnimatorController controller;

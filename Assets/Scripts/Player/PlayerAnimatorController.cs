@@ -43,6 +43,7 @@ public class PlayerAnimatorController : MonoBehaviour
         if (thirdPersonWeaponLayer < thirdPersonAnimator.layerCount) thirdPersonAnimator.SetLayerWeight(thirdPersonWeaponLayer, 0f);
         activeUpperState = null;
         int layer = thirdPersonAnimator.GetLayerIndex(binding.layerName);
+        if (binding.layerName == knifeUpperLayer) isKnifeUpperActive = true;
         if (transitionSeconds > 0f)
         {
             thirdPersonAnimator.CrossFadeInFixedTime(binding.statePath, transitionSeconds, layer, 0f);
@@ -59,10 +60,38 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     public void EndCombatAction()
     {
+        if (isKnifeUpperActive)
+        {
+            // Base Layer의 보행 위상은 재시작하지 않고 상체만 Guard로 돌려준다.
+            isKnifeUpperActive = false;
+            return;
+        }
         // 다른 컷신 소유자가 잠근 상태에서는 게임플레이 자세를 강제로 복구하지 않는다.
         combatRestorePending = AnimationPoseLocked;
         if (!combatRestorePending && !IsDead) RestoreLocomotion();
     }
+    [Header("단검 전용 상체 Layer")]
+    [SerializeField] private string knifeUpperLayer = "KnifeUpperBody";
+    private bool isKnifeUpperActive;
+
+    private int KnifeLayerIndex
+    {
+        get { return thirdPersonAnimator != null && thirdPersonAnimator.runtimeAnimatorController != null ? thirdPersonAnimator.GetLayerIndex(knifeUpperLayer) : -1; }
+    }
+
+    private void UpdateKnifeUpperLayer()
+    {
+        int layer = KnifeLayerIndex;
+        if (layer < 0) return;
+        bool available = equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Dagger &&
+            playerController != null && playerController.IsKnifeCombatEnabled && !IsDead && !IsHitReacting && !AnimationPoseLocked;
+        if (!available) isKnifeUpperActive = false;
+        float targetWeight = available && isKnifeUpperActive ? 1f : 0f;
+        float weight = Mathf.MoveTowards(thirdPersonAnimator.GetLayerWeight(layer), targetWeight, Time.deltaTime / .08f);
+        if (!available) weight = 0f;
+        thirdPersonAnimator.SetLayerWeight(layer, weight);
+    }
+
     private bool combatRestorePending;
     private int lastHitFrame = -1;
     /// <summary>실제 피격 State가 끝나기 전에는 새로운 근접 공격으로 자세를 덮어쓰지 않는다.</summary>
@@ -277,6 +306,7 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     public void OnEquipmentChanged(PlayerEquipmentKind value)
     {
+        isKnifeUpperActive = false;
         if (value == PlayerEquipmentKind.AssaultRifle || value == PlayerEquipmentKind.Pistol)
         {
             OnWeaponChanged(value == PlayerEquipmentKind.Pistol ? WeaponName.Pistol : WeaponName.AssaultRifle);
@@ -685,6 +715,7 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        UpdateKnifeUpperLayer();
         if (scriptedDefeatGraph.IsValid())
         {
             // 마지막 자세를 유지하여 검은 화면 뒤에서 Idle로 돌아오지 않는다.
@@ -704,6 +735,7 @@ public class PlayerAnimatorController : MonoBehaviour
         RestoreReloadPose();
         // 기존 일반 이동 Tree는 0, MMA 전투의 복싱 Tree는 1로 선택한다.
         SetFloat("MmaCombat", UsesMmaCombatLocomotion ? 1f : 0f);
+        SetFloat("KnifeTactical", playerController != null && playerController.IsKnifeCombatStance ? 1f : 0f);
         SetBool("IsDead", IsDead);
         if (equipment != null && HasParameter(thirdPersonAnimator, weaponParameter, AnimatorControllerParameterType.Int))
             thirdPersonAnimator.SetInteger(weaponParameter, (int)equipment.CurrentKind);

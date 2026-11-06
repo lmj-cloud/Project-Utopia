@@ -8,7 +8,7 @@ public enum Page4Stage
 {
     Loading, HospitalIntro, DoctorDialogue, Blackout, PlayerAwakening, OfficerGreeting,
     OfficerWalkingToArmory, ArmoryArrival, RiflePickupTutorial, OfficerWalkingToRange,
-    RangeBriefing, FreePractice, S13Starting, S13Playing, DemoCompleted, Failed
+    RangeBriefing, FreePractice, S13Starting, S13Playing, DemoCompleted, Failed, CorridorWaiting, OfficerCutscene
 }
 
 /// <summary>기존 플레이어·화면 효과·대화·튜토리얼을 Page4의 정상 완료 순서로 연결한다.</summary>
@@ -94,6 +94,17 @@ public class Page4StoryController : MonoBehaviour
     [SerializeField] private PageTimelineSequence rangeDialogueTimeline;
     [SerializeField] private PageTimelineSequence rehabilitationTimeline;
     [SerializeField] private PageTimelineSequence endingFadeTimeline;
+    [Header("복도·장비 보관함 Timeline")]
+    [SerializeField] private PageTimelineSequence officerLockerTimeline;
+    [SerializeField] private Transform officerCutsceneStart;
+    [SerializeField] private Transform officerCutsceneFinish;
+    [SerializeField] private InteractableObject pistolPickup;
+    private bool corridorEntered;
+    private bool officerSignalCompleted;
+    private bool officerSceneOwnsRestore;
+    private Vector3 officerStartPosition;
+    private Quaternion officerStartRotation;
+    private Quaternion officerStartCamera;
     private bool ownsEffects;
     private Renderer[] playerRenderers;
     private bool[] hiddenStates;
@@ -239,34 +250,44 @@ public class Page4StoryController : MonoBehaviour
 
     private IEnumerator OfficialArmoryAndRange()
     {
-        stage = Page4Stage.OfficerWalkingToArmory;
-        objective.text = "장교를 따라 무기고로 이동하세요.";
-        yield return armoryWalkTimeline.Play();
-        if (!armoryWalkTimeline.Completed) { Fail("무기고 이동 Timeline 취소"); yield break; }
-        if (stage == Page4Stage.Failed) yield break;
-        ArmoryArrivalCount++;
-        stage = Page4Stage.ArmoryArrival;
-        yield return armoryDialogueTimeline.Play();
-        yield return equipmentTimeline.Play();
-        if (!armoryDialogueTimeline.Completed || !equipmentTimeline.Completed) { Fail("무기고 대화 Timeline 취소"); yield break; }
-        stage = Page4Stage.RiflePickupTutorial;
-        objective.text = "F키로 지급 장비를 획득하세요.";
-        PlayerEquipment equipment = player.GetComponent<PlayerEquipment>();
-        ItemData rifleItem = equipment.GetRequiredItem(PlayerEquipmentKind.AssaultRifle);
-        ItemData knifeItem = equipment.GetRequiredItem(PlayerEquipmentKind.Dagger);
+        // 병실 11번 장면의 정상 완료 뒤에만 실제 복도 도착을 기다린다.
+        stage = Page4Stage.CorridorWaiting;
+        objective.text = "복도로 이동하세요.";
         rifleTutorial.BeginTutorial();
-        while (!equipment.HasOwnership(PlayerEquipmentKind.AssaultRifle) || !equipment.HasOwnership(PlayerEquipmentKind.Dagger) || rifleTutorial.StepNumber <= 2)
+        while (!corridorEntered)
         {
-            if (rifleTutorial.DisplayState == TutorialManager.TutorialDisplayState.WaitingForShow) rifleTutorial.RequestShowCurrentTutorial();
-            bool active = rifleTutorial.DisplayState == TutorialManager.TutorialDisplayState.Active;
-            riflePickup.enabled = active && rifleTutorial.CurrentStep.target == rifleItem;
-            knifePickup.enabled = active && rifleTutorial.CurrentStep.target == knifeItem;
-            if (active && rifleTutorial.CurrentStep.target == rifleItem && equipment.HasOwnership(PlayerEquipmentKind.AssaultRifle)) rifleTutorial.Report(DemoAction.Pickup, rifleItem);
-            if (active && rifleTutorial.CurrentStep.target == knifeItem && equipment.HasOwnership(PlayerEquipmentKind.Dagger)) rifleTutorial.Report(DemoAction.Pickup, knifeItem);
+            if (rifleTutorial.DisplayState == TutorialManager.TutorialDisplayState.WaitingForShow)
+                rifleTutorial.RequestShowCurrentTutorial();
             yield return null;
         }
-        riflePickup.gameObject.SetActive(false);
-        knifePickup.gameObject.SetActive(false);
+        while (rifleTutorial.StepNumber == 1)
+        {
+            rifleTutorial.Report(DemoAction.Inspect, this);
+            yield return null;
+        }
+        officerSignalCompleted = false;
+        Block();
+        gameplayUI.AcquireHidden(this);
+        stage = Page4Stage.OfficerCutscene;
+        objective.text = "";
+        // 진입 위치를 즉시 이동시키지 않는다. 경로 Track의 Ease In이 현재 자세에서 시작점을 연결한다.
+        yield return officerLockerTimeline.Play();
+        if (!officerLockerTimeline.Completed || !officerSignalCompleted) { Fail("장교 보관함 Timeline 취소"); yield break; }
+        player.GetComponent<PlayerMovement>().Teleport(officerCutsceneFinish.position, officerCutsceneFinish.rotation);
+        playerCamera.SynchronizeDirection(officerCutsceneFinish.rotation);
+        officerSceneOwnsRestore = false;
+        OfficerDialogueCount += 2;
+        ArmoryArrivalCount++;
+        Release();
+        stage = Page4Stage.RiflePickupTutorial;
+        objective.text = "보관함에서 무기를 획득하세요.";
+        RefreshPickups();
+        while (rifleTutorial.StepNumber <= 3)
+        {
+            if (rifleTutorial.DisplayState == TutorialManager.TutorialDisplayState.WaitingForShow)
+                rifleTutorial.RequestShowCurrentTutorial();
+            yield return null;
+        }
         rangeGate.SetActive(false);
         stage = Page4Stage.OfficerWalkingToRange;
         objective.text = "장교를 따라 사격장 입구로 이동하세요.";
@@ -280,6 +301,9 @@ public class Page4StoryController : MonoBehaviour
         RangeTrainingEnabled = true;
         objective.text = "안내에 따라 사격·재장전·단검 훈련을 진행하세요.";
         while (!rifleTutorial.IsCompleted) yield return null;
+        // 단검 상체 공격은 Base 이동 위에서 재생된다. 자기 잠금을 걸기 전에 현재 요청의 완료를 기다린다.
+        PlayerCombatActions trainingCombat = player.GetComponent<PlayerCombatActions>();
+        while (trainingCombat != null && trainingCombat.IsRunning && trainingCombat.IsKnifeAction) yield return null;
         Block();
         // 마지막 단검 명중 뒤 재활 Fade가 남은 공격 자세를 즉시 잘라내지 않게 한다.
         // 자기 입력 잠금은 애니메이션 복구도 막으므로, 연타 없이 실제 공격 종료를 기다릴 수 있다.
@@ -304,6 +328,58 @@ public class Page4StoryController : MonoBehaviour
         stage = Page4Stage.FreePractice;
         objective.text = "자유 사격 / 준비되면 출구에서 F";
     }
+    public void CorridorArrived()
+    {
+        if (corridorEntered || stage != Page4Stage.CorridorWaiting ||
+            HospitalCompletionCount != 1 || !player.CanControlPlayer) return;
+        officerStartPosition = player.transform.position;
+        officerStartRotation = player.transform.rotation;
+        officerStartCamera = playerCamera.ThirdPersonTarget.rotation;
+        officerSceneOwnsRestore = true;
+        // 잠금 뒤에는 Animator 파라미터 갱신도 차단된다. 이동 중 남은 Walk 값을 먼저 정리한다.
+        PlayerAnimatorController animator = player.GetComponent<PlayerAnimatorController>();
+        animator.CurrentSpeed = 0f;
+        animator.MoveHorizontal = 0f;
+        animator.MoveVertical = 0f;
+        player.AcquireControlLock(this);
+        player.AcquireMovementSimulationLock(this);
+        corridorEntered = true;
+    }
+    public void TimelineOfficerLock()
+    {
+        if (Application.isPlaying && stage == Page4Stage.OfficerCutscene) Block();
+    }
+    public void TimelineOfficerFinished()
+    {
+        if (Application.isPlaying && stage == Page4Stage.OfficerCutscene && officerLockerTimeline.IsRunning)
+            officerSignalCompleted = true;
+    }
+    private void Update()
+    {
+        if (stage == Page4Stage.RiflePickupTutorial || stage == Page4Stage.OfficerWalkingToRange ||
+            stage == Page4Stage.RangeBriefing || stage == Page4Stage.FreePractice) RefreshPickups();
+    }
+    private void RefreshPickups()
+    {
+        PlayerEquipment equipment = player.GetComponent<PlayerEquipment>();
+        RefreshPickup(riflePickup, equipment.HasOwnership(PlayerEquipmentKind.AssaultRifle));
+        RefreshPickup(pistolPickup, equipment.HasOwnership(PlayerEquipmentKind.Pistol));
+        RefreshPickup(knifePickup, equipment.HasOwnership(PlayerEquipmentKind.Dagger));
+    }
+    private void RefreshPickup(InteractableObject pickup, bool owned)
+    {
+        if (pickup == null) return;
+        pickup.enabled = !owned;
+        if (owned && pickup.gameObject.activeSelf) pickup.gameObject.SetActive(false);
+    }
+    private void RestoreOfficerPlayer()
+    {
+        if (!officerSceneOwnsRestore || player == null) return;
+        officerSceneOwnsRestore = false;
+        player.GetComponent<PlayerMovement>().Teleport(officerStartPosition, officerStartRotation);
+        if (playerCamera != null) playerCamera.SynchronizeDirection(officerStartCamera);
+    }
+
     private void Block()
     {
         player.AcquireControlLock(this);
@@ -361,6 +437,8 @@ public class Page4StoryController : MonoBehaviour
     private void Fail(string message)
     {
         stage = Page4Stage.Failed;
+        if (officerLockerTimeline != null && officerLockerTimeline.IsRunning) officerLockerTimeline.Cancel();
+        RestoreOfficerPlayer();
         RestoreRenderers();
         Release();
         Debug.LogError("[Page4] " + message, this);
@@ -386,8 +464,9 @@ public class Page4StoryController : MonoBehaviour
     private void OnDisable()
     {
         StopAllCoroutines();
-        foreach (PageTimelineSequence timeline in new[] { hospitalIntroTimeline, hospitalDoorTimeline, nurseEntryTimeline, nurseDialogueTimeline, nurseExitTimeline, officerEntryTimeline, officerGreetingTimeline, lossTimeline, armoryWalkTimeline, armoryDialogueTimeline, equipmentTimeline, rangeWalkTimeline, rangeDialogueTimeline, rehabilitationTimeline, endingFadeTimeline })
+        foreach (PageTimelineSequence timeline in new[] { officerLockerTimeline, hospitalIntroTimeline, hospitalDoorTimeline, nurseEntryTimeline, nurseDialogueTimeline, nurseExitTimeline, officerEntryTimeline, officerGreetingTimeline, lossTimeline, armoryWalkTimeline, armoryDialogueTimeline, equipmentTimeline, rangeWalkTimeline, rangeDialogueTimeline, rehabilitationTimeline, endingFadeTimeline })
             if (timeline != null) timeline.Cancel();
+        RestoreOfficerPlayer();
         if (activeConversation != null) activeConversation.enabled = false;
         if (ownsEffects && effects != null) effects.Release(this);
         if (hospitalCamera != null) hospitalCamera.Priority = 0;
