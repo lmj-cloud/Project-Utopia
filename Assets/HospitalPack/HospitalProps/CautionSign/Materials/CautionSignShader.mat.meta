@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e1ac025ce2e9897419c2141f1153b1f2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/CautionSign/Materials/CautionSignShader.mat
+  uploadId: 822378

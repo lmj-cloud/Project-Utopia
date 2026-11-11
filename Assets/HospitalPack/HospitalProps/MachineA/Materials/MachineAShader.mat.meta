@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7687d27890dba484bb157dfdeafc995e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/MachineA/Materials/MachineAShader.mat
+  uploadId: 822378

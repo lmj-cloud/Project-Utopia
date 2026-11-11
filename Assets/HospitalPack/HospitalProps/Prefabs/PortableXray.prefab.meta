@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ab15a36d045684047b26d003aa8e4475
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/PortableXray.prefab
+  uploadId: 822378

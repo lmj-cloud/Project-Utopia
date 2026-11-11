@@ -28,6 +28,14 @@ public class Page3StoryController : MonoBehaviour
     [SerializeField] private OfficialDialoguePlayer officialDialogue;
     [SerializeField] private GameObject familyChildren;
     [SerializeField] private GameObject vehicleFamily;
+    [SerializeField] private bool hideFamilyAfterExit = true;
+    [SerializeField] private Transform son;
+    [SerializeField] private Transform daughter;
+    [SerializeField] private Transform sonExitEnd;
+    [SerializeField] private Transform daughterExitEnd;
+    public bool WifeExitCompleted { get; private set; }
+    public bool SonExitCompleted { get; private set; }
+    public bool DaughterExitCompleted { get; private set; }
     private bool drivingDialogueStarted;
     private bool drivingDialogueCompleted;
     private bool completingAccident;
@@ -48,6 +56,7 @@ public class Page3StoryController : MonoBehaviour
     public float BlackAlpha { get { return blackOverlay.alpha; } }
     [Header("Page3 침대 대화")]
     [SerializeField] private PlayableDirector seatedDirector;
+    [SerializeField, Min(0f)] private float medicinePoseStart = 1f;
     [SerializeField] private CutsceneController standUp;
     [SerializeField] private Transform seatedSpawn;
     [SerializeField] private Transform standingSpawn;
@@ -64,6 +73,7 @@ public class Page3StoryController : MonoBehaviour
     [SerializeField] private PageTimelineSequence sofaWakeTimeline;
     [SerializeField] private PageTimelineSequence afterMedicineTimeline;
     [SerializeField] private PageTimelineSequence blackoutTimeline;
+    [SerializeField] private PageTimelineSequence wifeArrivalTimeline;
     [SerializeField] private PageTimelineSequence familyDialogueTimeline;
     [SerializeField] private PageTimelineSequence wifeExitTimeline;
     [SerializeField] private PageTimelineSequence vehicleDialogueTimeline;
@@ -93,8 +103,9 @@ public class Page3StoryController : MonoBehaviour
         blackOverlay.alpha = 1;
         if (officialDialogue != null)
         {
-            wife.gameObject.SetActive(false);
-            if (familyChildren != null) familyChildren.SetActive(false);
+            // 아내는 Timeline 경로의 화면 밖 시작점에서 대기한다. 등장 때 활성화하지 않는다.
+            wife.gameObject.SetActive(true);
+            if (familyChildren != null) familyChildren.SetActive(true);
             if (vehicleFamily != null) vehicleFamily.SetActive(false);
         }
     }
@@ -128,6 +139,7 @@ public class Page3StoryController : MonoBehaviour
         // 이동만 잠가 앉은 상태의 F/인벤토리/퀵슬롯 사용은 기존 입력 경로로 유지한다.
         player.AcquireMovementSimulationLock(this);
         playerCamera.AcquireTargetControl(this);
+        ResumeSeatedPose();
         conversationCamera.Priority = 110;
         yield return sofaWakeTimeline.Play();
         if (!officialDialogue.LastCompleted) { Fail("소파 기상 대화 취소"); yield break; }
@@ -139,7 +151,14 @@ public class Page3StoryController : MonoBehaviour
     {
         if (stage != Page3Stage.MedicineTutorial || !itemUse.IsUsing) return;
         stage = Page3Stage.MedicineUsing;
-        if (officialDialogue != null) { seatedDirector.Stop(); conversationCamera.Priority = 0; }
+        if (officialDialogue != null)
+        {
+            // 같은 Sitting 그래프의 상체 Eat 구간만 진행한다. 복용 Director는 카메라와 소비 완료를 담당한다.
+            seatedDirector.time = medicinePoseStart;
+            SetSeatedSpeed(1d);
+            seatedDirector.Evaluate();
+            conversationCamera.Priority = 0;
+        }
         // 약 복용 카메라는 기존 ItemUse Timeline의 Shot/Transform Track이 담당한다.
         // 잠금은 ItemUseController가 요청한 기존 Cutscene에 맡긴다.
         onMedicineUseStarted.Invoke();
@@ -150,14 +169,14 @@ public class Page3StoryController : MonoBehaviour
         if (stage != Page3Stage.MedicineUsing) return;
         medicineCamera.Priority = 0;
         stage = Page3Stage.MedicineTutorial;
-        if (officialDialogue != null) { seatedDirector.Play(); seatedDirector.Evaluate(); conversationCamera.Priority = 110; }
+        if (officialDialogue != null) { ResumeSeatedPose(); conversationCamera.Priority = 110; }
     }
     public void MedicineCompleted()
     {
         if (stage != Page3Stage.MedicineUsing || itemUse.IsUsing || MedicineCompletionCount != 0) return;
         MedicineCompletionCount++;
         medicineCamera.Priority = 0;
-        if (officialDialogue != null) { seatedDirector.Play(); seatedDirector.Evaluate(); conversationCamera.Priority = 110; }
+        if (officialDialogue != null) { ResumeSeatedPose(); conversationCamera.Priority = 110; }
         onMedicineUseCompleted.Invoke();
         if (officialDialogue != null) StartCoroutine(AfterMedicine());
         else StartCoroutine(Blackout());
@@ -166,6 +185,10 @@ public class Page3StoryController : MonoBehaviour
     {
         yield return afterMedicineTimeline.Play();
         if (!officialDialogue.LastCompleted) { Fail("약 복용 후 대화 취소"); yield break; }
+        // 성공한 복용 이력을 기존 튜토리얼 UI가 처리한 뒤에 암전한다. 숨긴 UI 완료를 기다리는 교착을 막는다.
+        float deadline = Time.realtimeSinceStartup + 15f;
+        while (!tutorialBridge.MedicineTutorialCompleted && Time.realtimeSinceStartup < deadline) yield return null;
+        if (!tutorialBridge.MedicineTutorialCompleted) { Fail("약 튜토리얼 완료를 확인하지 못했습니다."); yield break; }
         yield return Blackout();
     }
     private IEnumerator Blackout()
@@ -183,6 +206,10 @@ public class Page3StoryController : MonoBehaviour
         float deadline = Time.realtimeSinceStartup + 15;
         while (!tutorialBridge.MedicineTutorialCompleted && Time.realtimeSinceStartup < deadline) yield return null;
         if (!tutorialBridge.MedicineTutorialCompleted) { Fail("약 튜토리얼 완료를 확인하지 못했습니다."); yield break; }
+        // 경로와 Walk/Idle은 Timeline이 소유한다. 도착 완료 후에만 기존 대화 Signal을 실행한다.
+        if (wifeArrivalTimeline == null) { Fail("아내 등장 Timeline 참조 누락"); yield break; }
+        yield return wifeArrivalTimeline.Play();
+        if (!wifeArrivalTimeline.Completed) { Fail("아내 등장 Timeline 취소"); yield break; }
         stage = Page3Stage.WifeDialogue;
         yield return familyDialogueTimeline.Play();
         if (!familyDialogueTimeline.Completed || DialogueCompletionCount != 1) { Fail("가족 대화 Timeline 취소"); yield break; }
@@ -195,8 +222,7 @@ public class Page3StoryController : MonoBehaviour
         // 안전 이동과 현재 상태 인계만 처리한다. Fade와 등장 시점은 Track이 소유한다.
         player.GetComponent<PlayerMovement>().Teleport(seatedSpawn.position, seatedSpawn.rotation);
         playerCamera.SynchronizeDirection(seatedSpawn.rotation);
-        seatedDirector.Play();
-        seatedDirector.Evaluate();
+        ResumeSeatedPose();
         stage = Page3Stage.SeatedAfterBlackout;
     }
 
@@ -228,13 +254,16 @@ public class Page3StoryController : MonoBehaviour
         wife.enabled = false;
         if (wifeWalkSpeed <= 0 || wifeTurnSpeed <= 0) { Fail("퇴장 초기 설정이 유효하지 않습니다."); yield break; }
         yield return wifeExitTimeline.Play();
-        if (!wifeExitTimeline.Completed || wifeExitWaypoints.Length == 0 ||
-            Vector3.Distance(wife.transform.position, wifeExitWaypoints[wifeExitWaypoints.Length - 1].position) > .1f)
-        { Fail("아내 퇴장 Timeline의 실제 문 도착을 확인하지 못했습니다."); yield break; }
-        // 마지막 경유점은 방 밖이며, 도착 전에는 NPC를 숨기지 않는다.
+        if (!wifeExitTimeline.Completed)
+        { Fail("가족 퇴장 Timeline이 완료되지 않았습니다."); yield break; }
+        // 각자의 월드 종점 도착을 확인한 뒤 해당 NPC만 숨긴다. 부모와 Binding은 유지한다.
+        Transform wifeExitEnd = wifeExitWaypoints.Length > 0 ? wifeExitWaypoints[wifeExitWaypoints.Length - 1] : null;
+        WifeExitCompleted = CompleteFamilyExit(wife.transform, wifeExitEnd);
+        SonExitCompleted = CompleteFamilyExit(son, sonExitEnd);
+        DaughterExitCompleted = CompleteFamilyExit(daughter, daughterExitEnd);
+        if (!WifeExitCompleted || !SonExitCompleted || !DaughterExitCompleted)
+        { Fail("가족 3명의 실제 퇴장 종점 도착을 확인하지 못했습니다."); yield break; }
         WifeExitCompletionCount++;
-        wife.gameObject.SetActive(false);
-        if (familyChildren != null) familyChildren.SetActive(false);
         stage = Page3Stage.PlayerStandingUp;
         if (objective != null) objective.text = officialDialogue != null ? "소파에서 일어나는 중입니다." : "침대에서 일어나는 중입니다.";
         seatedDirector.Stop();
@@ -249,6 +278,27 @@ public class Page3StoryController : MonoBehaviour
         stage = Page3Stage.WalkToCarTutorial;
         vehicle.enabled = true;
         tutorialBridge.BeginVehicleTutorial();
+    }
+    private void ResumeSeatedPose()
+    {
+        // 약 상체 연출의 완료와 기상을 분리한다. 기존 Sitting 그래프가 가족 퇴장까지 자세를 소유한다.
+        seatedDirector.extrapolationMode = DirectorWrapMode.Hold;
+        if (!seatedDirector.playableGraph.IsValid()) seatedDirector.Play();
+        seatedDirector.time = 0;
+        SetSeatedSpeed(0d);
+        seatedDirector.Evaluate();
+    }
+    private void SetSeatedSpeed(double speed)
+    {
+        // Pause는 Animator의 기본 Controller가 포즈를 다시 쓸 수 있다. Playing 그래프를 0배속으로 평가한다.
+        var graph = seatedDirector.playableGraph;
+        for (int i = 0; i < graph.GetRootPlayableCount(); i++) graph.GetRootPlayable(i).SetSpeed(speed);
+    }
+    private bool CompleteFamilyExit(Transform actor, Transform end)
+    {
+        if (actor == null || end == null || Vector3.Distance(actor.position, end.position) > .1f) return false;
+        if (hideFamilyAfterExit) actor.gameObject.SetActive(false);
+        return true;
     }
     private void Update()
     {
@@ -265,12 +315,15 @@ public class Page3StoryController : MonoBehaviour
         }
         else
         {
-            stage = Vector3.Distance(player.transform.position, vehicle.transform.position) < 3 ? Page3Stage.VehicleBoarding : Page3Stage.WalkToCarTutorial;
+            stage = tutorialBridge.VehicleInReach ? Page3Stage.VehicleBoarding : Page3Stage.WalkToCarTutorial;
             if (objective != null) objective.text = stage == Page3Stage.VehicleBoarding ? "F키를 눌러 차량에 탑승하세요." : "차량으로 이동하세요.";
         }
     }
     private IEnumerator DrivingDialogue()
     {
+        // 차량 카메라 전환은 기존 VehicleController가 끝냈다. 기존 Activation Track으로 좌석 가족만 표시한다.
+        if (!WifeExitCompleted || !SonExitCompleted || !DaughterExitCompleted)
+        { Fail("집 가족 퇴장이 완료되지 않아 차량 가족을 표시하지 않습니다."); yield break; }
         yield return vehicleDialogueTimeline.Play();
         drivingDialogueCompleted = officialDialogue.LastCompleted;
         if (!drivingDialogueCompleted) Fail("차량 가족 대화 취소");
@@ -335,7 +388,7 @@ public class Page3StoryController : MonoBehaviour
     private void OnDisable()
     {
         StopAllCoroutines();
-        foreach (PageTimelineSequence timeline in new[] { sofaWakeTimeline, afterMedicineTimeline, blackoutTimeline, familyDialogueTimeline, wifeExitTimeline, vehicleDialogueTimeline })
+        foreach (PageTimelineSequence timeline in new[] { sofaWakeTimeline, afterMedicineTimeline, blackoutTimeline, wifeArrivalTimeline, familyDialogueTimeline, wifeExitTimeline, vehicleDialogueTimeline })
             if (timeline != null) timeline.Cancel();
         if (standUp != null) { standUp.Completed -= StandFinished; standUp.Cancelled -= StandCancelled; if (standUp.IsPlaying && standUp.RequestOwner == this) standUp.StopCutscene(); }
         if (seatedDirector != null) seatedDirector.Stop();

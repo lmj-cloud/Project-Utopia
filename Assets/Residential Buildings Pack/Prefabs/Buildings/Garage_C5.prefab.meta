@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 97f2fb38df69b7a48ba3b1ae994c35ed
+labels:
+- Garage
+timeCreated: 1450101848
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Buildings/Garage_C5.prefab
+  uploadId: 762663

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.AI;
@@ -57,6 +57,7 @@ public class Page2StoryController : MonoBehaviour
     private const int TraumaPauseRequest = 1;
     private bool ownsEffects;
     private bool arrivalNotified;
+    [SerializeField] private Page2ArenaEntrance arenaEntrance;
     private Coroutine defeatRoutine;
     [Header("Page2 편집용 Timeline")]
     [SerializeField] private PageTimelineSequence arrivalTimeline;
@@ -107,7 +108,8 @@ public class Page2StoryController : MonoBehaviour
         return player != null && player.IsAlive && status != null && melee != null && combatActions != null &&
             playerAnimator != null && playerAnimator.CombatAnimator != null && playerAnimator.CombatAnimator.isInitialized &&
             playerCamera != null && combatStarter != null && opponent != null && opponentHealth != null &&
-            opponentAgent != null && opponentAgent.enabled && opponentAgent.isOnNavMesh && trauma != null && trauma.IsReady &&
+            opponentAgent != null && opponentAgent.enabled &&
+            (!opponent.gameObject.activeInHierarchy || opponentAgent.isOnNavMesh) && trauma != null && trauma.IsReady &&
             arrivalTimeline != null && introTimeline != null && glitchTimeline != null && defeatTimeline != null &&
             intro != null && intro.CanPlay() && screenEffects != null && screenEffects.IsReady && blackOverlay != null;
     }
@@ -116,8 +118,24 @@ public class Page2StoryController : MonoBehaviour
     {
         if (stage != Page2Stage.Arrival || arrivalNotified || !ReferencesReady()) return;
         arrivalNotified = true;
+        if (arenaEntrance != null)
+        {
+            arenaEntrance.BeginArrival();
+            ReleaseGameplayLocks();
+            return;
+        }
+        TryBeginArenaIntro();
+    }
+
+    /// <summary>가족 발견과 실제 링 입장이 정상 완료된 뒤 기존 경기 소개를 재사용한다.</summary>
+    public bool TryBeginArenaIntro()
+    {
+        if (stage != Page2Stage.Arrival || !arrivalNotified || !ReferencesReady()) return false;
+        BlockGameplay();
         SetStage(Page2Stage.Intro);
-        if (!intro.TryPlay(intro, out _)) Fail("경기 소개 시간축을 시작하지 못했습니다.");
+        if (intro.TryPlay(intro, out _)) return true;
+        Fail("경기 소개 시간축을 시작하지 못했습니다.");
+        return false;
     }
 
     private void IntroCompleted(CutsceneController source, int request)

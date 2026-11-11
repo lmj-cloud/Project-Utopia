@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using Capstone.Direction.Workspace.S10;
 
@@ -12,6 +12,7 @@ public class Page3S10Adapter : MonoBehaviour
     [SerializeField] private Camera vehicleCamera;
     [SerializeField] private AudioListener vehicleListener;
     [SerializeField] private GameObject presentationRoot;
+    [SerializeField] private GameObject gameplayRoad;
     [SerializeField] private S10CrashSequence sequence;
     [SerializeField] private S10StoryAdapter storyAdapter;
     [SerializeField] private Light homeSun;
@@ -25,6 +26,7 @@ public class Page3S10Adapter : MonoBehaviour
     private bool completed;
     private bool wasKinematic;
     private bool sunEnabled;
+    private bool roadWasActive;
     private Vector3 velocity;
     private Vector3 angularVelocity;
     private Renderer[] renderers;
@@ -68,6 +70,7 @@ public class Page3S10Adapter : MonoBehaviour
         if (owned || completed || incoming != vehicle || !vehicle.IsOccupied || vehicle.Driver != player ||
             !story.CanStartAccident) return false;
         owned = true;
+        roadWasActive = gameplayRoad != null && gameplayRoad.activeSelf;
         wasKinematic = vehicleBody.isKinematic;
         velocity = vehicleBody.linearVelocity;
         angularVelocity = vehicleBody.angularVelocity;
@@ -89,6 +92,8 @@ public class Page3S10Adapter : MonoBehaviour
         sunEnabled = homeSun != null && homeSun.enabled;
         if (homeSun != null) homeSun.enabled = false;
         story.AccidentStarted();
+        // 주행용 도로와 원본 사고 리그의 도로가 동시에 표시되지 않도록 인계한다.
+        if (gameplayRoad != null) gameplayRoad.SetActive(false);
         presentationRoot.SetActive(true);
         sequence.enabled = true;
         sequence.outputCamera.enabled = true;
@@ -136,6 +141,7 @@ public class Page3S10Adapter : MonoBehaviour
         if (!owned) return;
         owned = false;
         if (presentationRoot != null) presentationRoot.SetActive(false);
+        if (gameplayRoad != null) gameplayRoad.SetActive(roadWasActive);
         if (vehicleBody != null)
         {
             vehicleBody.isKinematic = wasKinematic;

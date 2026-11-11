@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 600d73fb338ed6b4a9557c0fb185b33d
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/SingleWindowBlinds.prefab
+  uploadId: 822378

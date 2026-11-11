@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 14a09ff7eca2f3d4fa4a7657a60706ff
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/SteelCap.prefab
+  uploadId: 822378

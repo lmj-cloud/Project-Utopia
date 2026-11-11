@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d58fcecd7f5a0a847900fa67b2d769ff
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/AirCon.prefab
+  uploadId: 822378

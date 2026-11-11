@@ -41,17 +41,17 @@ MonoBehaviour:
     text: "\uAC00\uC871\uC774 \uC5B4\uB5BB\uAC8C \uB410\uB294\uC9C0\uB9CC \uB9D0\uD574."
   - id: P4_11_006
     section: 11
-    speaker: "\uC7A5\uAD50(\uB0AE\uAC8C)"
+    speaker: "\uC7A5\uAD50"
     speakerKind: 0
     text: "\u2026\uBBF8\uC548\uD558\uB2E4."
   - id: P4_11_007
     section: 11
-    speaker: "\uC8FC\uC778\uACF5(\uC18D\uC73C\uB85C)"
+    speaker: "\uC8FC\uC778\uACF5"
     speakerKind: 1
     text: "\uC774\uBC88\uC5D0\uB3C4\u2026 \uC544\uBB34\uB3C4 \uC7A1\uC9C0 \uBABB\uD588\uB2E4."
   - id: P4_12_001
     section: 12
-    speaker: "\uC7A5\uAD50(\uB4A4\uC5D0\uC11C)"
+    speaker: "\uC7A5\uAD50"
     speakerKind: 0
     text: "\uC774\uC81C \uB9C9 \uD68C\uBCF5\uD588\uC796\uC544. \uC5B4\uB514 \uAC00\uB824\uACE0?"
   - id: P4_12_002
@@ -127,7 +127,8 @@ MonoBehaviour:
     section: 14
     speaker: "\uC7A5\uAD50"
     speakerKind: 0
-    text: "\uC544\uC9C1 \uC0B4\uC544\uC788\uAD6C\uB9CC \uD604\uC5ED\uC774\uC57C \uD604\uC5ED"
+    text: "\uADFC\uC811 \uBB34\uAE30 \uD6C8\uB828\uC18C\uC5D0\uC11C \uC5F0\uC2B5\uC744
+      \uD558\uC790."
   - id: P4_14_004
     section: 14
     speaker: "\uC7A5\uAD50"

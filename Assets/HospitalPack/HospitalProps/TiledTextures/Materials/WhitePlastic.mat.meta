@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 158c95d0c33882a4982f72725bb79593
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/TiledTextures/Materials/WhitePlastic.mat
+  uploadId: 822378

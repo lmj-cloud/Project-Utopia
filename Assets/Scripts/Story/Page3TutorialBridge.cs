@@ -19,6 +19,17 @@ public class Page3TutorialBridge : MonoBehaviour
     private bool started;
     private bool wasInventoryOpen;
     private bool straightArrived;
+    private PlayerInteraction playerInteraction;
+    // 기존 상호작용 시스템이 선택한 차량만 도착으로 인정한다. 별도 거리 판정을 만들지 않는다.
+    public bool VehicleInReach
+    {
+        get
+        {
+            if (playerInteraction == null && player != null) playerInteraction = player.GetComponent<PlayerInteraction>();
+            return playerInteraction != null && playerInteraction.CurrentTarget != null &&
+                playerInteraction.CurrentTarget.GetComponent<VehicleController>() == vehicle && vehicle.CanEnter;
+        }
+    }
     public bool MedicineTutorialCompleted { get { return started && tutorial.StepNumber >= 4; } }
     public bool PickedUp { get; private set; }
     public bool OpenedInventory { get; private set; }
@@ -75,9 +86,13 @@ public class Page3TutorialBridge : MonoBehaviour
         if (wasInventoryOpen && !open && Registered && HasEquippedMedicine())
         {
             ClosedAfterRegistration = true;
-            if (storyProgress != null) storyProgress.SetFlag(registrationFlag);
+
         }
         wasInventoryOpen = open;
+        // 실제 등록·닫기를 마치고 복용 안내 단계에 도달한 뒤에만 기존 약 사용 조건을 연다.
+        if (storyProgress != null && ClosedAfterRegistration && Registered &&
+            tutorial.StepNumber >= 3 && (Used || HasEquippedMedicine()))
+            storyProgress.SetFlag(registrationFlag);
         // 실제 등록을 해제했다면 복용 준비 플래그도 해제한다. 소비 확정 뒤에는 성공 이력을 보존한다.
         if (!Used && !HasEquippedMedicine() && storyProgress != null) storyProgress.RemoveFlag(registrationFlag);
         if (tutorial.StepNumber >= 4 && !vehicleTutorialStarted) return;
@@ -86,17 +101,23 @@ public class Page3TutorialBridge : MonoBehaviour
         if (tutorial.DisplayState != TutorialManager.TutorialDisplayState.Active || !gameplayUI.CanCountTutorial(tutorial)) return;
         switch (tutorial.StepNumber)
         {
-            case 1: if (Used) tutorial.Report(DemoAction.Medication, medicine); break;
-            case 2: if (OpenedInventory && Registered && ClosedAfterRegistration && !open) tutorial.Report(DemoAction.Equip, medicine); break;
+            case 1: if (PickedUp) tutorial.Report(DemoAction.Pickup, medicine); break;
+            case 2: if (OpenedInventory && Registered && (Used || HasEquippedMedicine())) tutorial.Report(DemoAction.Equip, medicine); break;
             case 3: if (UsedViaQuickSlot && ClosedAfterRegistration) tutorial.Report(DemoAction.Medication, medicine); break;
             case 4:
+                if (VehicleInReach || (vehicle.IsOccupied && vehicle.Driver == player)) tutorial.Report(DemoAction.Inspect, vehicle);
+                break;
+            case 5:
+                if (vehicle.IsOccupied && vehicle.Driver == player) tutorial.Report(DemoAction.Inspect, vehicle);
+                break;
+            case 6:
                 Rigidbody body = vehicle.GetComponent<Rigidbody>();
                 if (vehicle.IsOccupied && vehicle.Driver == player && !player.HasOtherControlLock(vehicle) &&
                     Keyboard.current != null && Keyboard.current.wKey.isPressed && body != null &&
                     Vector3.Dot(body.linearVelocity, vehicle.transform.forward) > .15f)
                     tutorial.Report(DemoAction.Move, vehicle);
                 break;
-            case 5: if (straightArrived) tutorial.Report(DemoAction.Inspect, vehicle); break;
+            case 7: if (straightArrived) tutorial.Report(DemoAction.Inspect, vehicle); break;
         }
     }
     private void OnDisable()

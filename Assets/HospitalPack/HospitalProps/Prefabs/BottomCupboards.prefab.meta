@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d3a4a26cdc9e5e347875fd435c8df6c7
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/BottomCupboards.prefab
+  uploadId: 822378

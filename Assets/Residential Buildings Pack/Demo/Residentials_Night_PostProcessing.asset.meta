@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: babd78395beeb554ba666655f1dbf2e0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Demo/Residentials_Night_PostProcessing.asset
+  uploadId: 762663

@@ -80,7 +80,8 @@ public class DoorScript : MonoBehaviour {
 	public DoorTexts doorTexts = new DoorTexts();
 	public KeySystem keySystem = new KeySystem();
 
-	Transform player;
+	// 접근 Trigger의 태그와 시선 기준을 분리한다. 미지정 시 기존 태그 탐색을 유지한다.
+	[SerializeField] private Transform player;
 	bool Opened = false;
 	bool inZone = false; 
 	Canvas TextObj;
@@ -122,13 +123,16 @@ public class DoorScript : MonoBehaviour {
 		if(PlayerHeadTag == "")
 			Debug.LogError("You need to set a tag!");
 
-		if (GameObject.FindWithTag (PlayerHeadTag) != null) {
-			player = GameObject.FindWithTag (PlayerHeadTag).transform;
-		} 
-		else {
-			Debug.LogWarning(gameObject.name + ": You need to set your player's camera tag to " + "'"+PlayerHeadTag+"'." + " The " + "'" + gameObject.name+"'" +" can't open/close if you don't set this tag");
+		if (player == null)
+		{
+			if (GameObject.FindWithTag (PlayerHeadTag) != null) {
+				player = GameObject.FindWithTag (PlayerHeadTag).transform;
+			} 
+			else {
+				Debug.LogWarning(gameObject.name + ": You need to set your player's camera tag to " + "'"+PlayerHeadTag+"'." + " The " + "'" + gameObject.name+"'" +" can't open/close if you don't set this tag");
+			}
+	
 		}
-
 
 		AddText();
 		AddLock();

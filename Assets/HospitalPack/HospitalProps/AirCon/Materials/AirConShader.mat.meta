@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b5c66986d70b8a742aa3e0d14a9f811a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/AirCon/Materials/AirConShader.mat
+  uploadId: 822378

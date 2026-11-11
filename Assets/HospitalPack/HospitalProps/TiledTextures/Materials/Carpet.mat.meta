@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2f34e584eaf29334c9db0da8fff75313
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/TiledTextures/Materials/Carpet.mat
+  uploadId: 822378

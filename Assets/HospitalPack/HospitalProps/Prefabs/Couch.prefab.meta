@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0aa9bfd1edae844459294b751c545021
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/Couch.prefab
+  uploadId: 822378

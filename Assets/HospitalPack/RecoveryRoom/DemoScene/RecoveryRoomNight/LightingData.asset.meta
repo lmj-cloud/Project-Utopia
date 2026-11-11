@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a636db5c9260b114bbd73c98a7d65c50
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 112000000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/RecoveryRoom/DemoScene/RecoveryRoomNight/LightingData.asset
+  uploadId: 822378

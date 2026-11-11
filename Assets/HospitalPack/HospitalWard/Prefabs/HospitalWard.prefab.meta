@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: fc7dcb02807fed94a98ffd13fe6544a7
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalWard/Prefabs/HospitalWard.prefab
+  uploadId: 822378

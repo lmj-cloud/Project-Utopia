@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 8545e8b652f62eb45bd5d28bf81d9340
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/RecoveryRoom/DemoScene/RecoveryRoomNight.unity
+  uploadId: 822378

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f0a0b318e4578a34ab4db744705177c4
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/LifePak/Materials/LifePakShader.mat
+  uploadId: 822378

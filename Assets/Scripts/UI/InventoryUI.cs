@@ -40,6 +40,10 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private Image detailBackground;
     private InventorySlotUI shownSlot;
     private ItemData shownItem;
+    // 상세 패널 표시와 논리적 선택은 독립적이다. 빈 곳 클릭·닫기로 선택을 지우지 않는다.
+    private ItemData selectedInventoryItem;
+    private int selectedInventoryIndex = -1;
+    private bool selectedInventoryEquipped;
     private int closedFrame = -1;
 
     /// <summary>
@@ -142,7 +146,24 @@ public class InventoryUI : MonoBehaviour
     /// <summary>
     /// 해당 종류와 인덱스의 슬롯이 현재 선택된 슬롯인지 확인한다.
     /// </summary>
-    public bool IsSelected(InventorySlotUI slot) => shownItem != null && slot != null && slot.Item == shownItem && (shownSlot == null || slot == shownSlot);
+    public bool IsSelected(InventorySlotUI slot)
+    {
+        ValidateSelection();
+        return selectedInventoryItem != null && slot != null && slot.Item == selectedInventoryItem &&
+            slot.SlotIndex == selectedInventoryIndex && slot.IsEquipped == selectedInventoryEquipped;
+    }
+
+    /// <summary>선택한 실제 보관 위치의 아이템이 제거되거나 교체된 경우에만 선택을 정리한다.</summary>
+    private void ValidateSelection()
+    {
+        if (selectedInventoryItem == null) return;
+        InventoryEntry entry = inventory != null ? inventory.GetEntry(selectedInventoryEquipped, selectedInventoryIndex) : null;
+        if (entry == null || entry.Item != selectedInventoryItem || entry.Quantity <= 0)
+        {
+            selectedInventoryItem = null;
+            selectedInventoryIndex = -1;
+        }
+    }
 
 
     public bool IsOpen => inventoryPanel != null && inventoryPanel.activeSelf;
@@ -287,6 +308,7 @@ public class InventoryUI : MonoBehaviour
     /// </summary>
     private void Refresh()
     {
+        ValidateSelection();
         if (!Application.isPlaying || !IsOpen || inventory == null || slotPrefab == null) return;
         CancelSlotDrag();
         if (!warnedCategory) foreach (InventoryEntry entry in inventory.Entries)
@@ -387,6 +409,9 @@ public class InventoryUI : MonoBehaviour
         if (!InteractionAllowed || dragSource != null || item == null || quantity <= 0) return;
         ShowDetails(item, quantity);
         shownSlot = slot;
+        selectedInventoryItem = item;
+        selectedInventoryIndex = slot.SlotIndex;
+        selectedInventoryEquipped = slot.IsEquipped;
         UpdateSelection();
     }
 

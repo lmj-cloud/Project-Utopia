@@ -9,6 +9,7 @@ using UnityEngine.UI;
 /// 대사에 사용할 화자 이름과 표시 정보를 보관한다.
 /// </summary>
 public enum DialogueSpeaker { NPC = 0, Player = 1 }
+public enum DialogueProgressMode { Manual = 0, Auto = 1 }
 
 /// <summary>
 /// 대사 타이핑과 Enter 진행·유지 입력, 화자 표시 및 대화 완료·취소 콜백을 관리한다.
@@ -22,15 +23,33 @@ public class DialogueUI : MonoBehaviour
     [SerializeField] private TMP_Text speakerNameText;
     [Header("Speaker")]
     [SerializeField] private string playerName = "플레이어";
+    [Header("Speaker Name Colors")]
+    [SerializeField] private Color playerNameColor = Color.white;
+    [SerializeField] private Color sonNameColor = new Color32(0, 52, 255, 255);
+    [SerializeField] private Color daughterNameColor = new Color32(255, 0, 255, 255);
+    [SerializeField] private Color wifeNameColor = new Color32(131, 56, 236, 255);
+    [SerializeField] private Color officerNameColor = new Color32(6, 255, 165, 255);
+    [SerializeField] private Color otherNameColor = new Color32(57, 255, 20, 255);
 
     [Header("Typewriter Settings")]
     [SerializeField, Min(1f)] private float charactersPerSecond = 30f;
 
     [Header("Dialogue Advance Timing")]
     [SerializeField, Min(0f)] private float autoAdvanceDelay = 2f;
+    [SerializeField] private bool allowAutoAdvance = true;
+    [SerializeField] private bool allowHoldAdvance = true;
     [SerializeField, Min(0.01f)] private float holdThreshold = 1f;
     [SerializeField, Min(0.01f)] private float holdAdvanceInterval = 0.2f;
 
+    [Header("Per-dialogue Auto Reading")]
+    [SerializeField, Min(0f)] private float autoReadBaseDelay = 1.5f;
+    [SerializeField, Min(0f)] private float autoReadSecondsPerCharacter = .04f;
+    private bool currentAutoAdvance;
+    private bool lengthBasedReading;
+    private Func<int, IEnumerator> beforeNextLine;
+    private Coroutine lineTransitionRoutine;
+    private int dialogueRevision;
+    public event Action<int> LineCompleted;
     private float lineDisplayedAt = -1f;
     private float holdStartedAt = -1f;
     private float nextHoldAdvanceAt;
@@ -99,12 +118,12 @@ public class DialogueUI : MonoBehaviour
     /// <summary>
     /// 표시 참조와 대사·화자 정보를 확인하고 완료·취소 콜백을 가진 대화 시퀀스를 연다.
     /// </summary>
-    public bool TryOpenNamedSequence(string[] dialogueLines, string[] names, bool blockInput, Action onCompleted, Action onCancelled, DialogueSpeaker[] speakers = null)
+    public bool TryOpenNamedSequence(string[] dialogueLines, string[] names, bool blockInput, Action onCompleted, Action onCancelled, DialogueSpeaker[] speakers = null, DialogueProgressMode? progressMode = null, Func<int, IEnumerator> lineTransition = null)
     {
-        return TryOpenSequence(dialogueLines, speakers, null, DialogueSpeaker.NPC, onCompleted, onCancelled, names, blockInput);
+        return TryOpenSequence(dialogueLines, speakers, null, DialogueSpeaker.NPC, onCompleted, onCancelled, names, blockInput, progressMode, lineTransition);
     }
     private bool TryOpenSequence(string[] dialogueLines, DialogueSpeaker[] speakers, string npcName,
-        DialogueSpeaker defaultSpeaker, Action onCompleted, Action onCancelled, string[] names = null, bool blockInput = true)
+        DialogueSpeaker defaultSpeaker, Action onCompleted, Action onCancelled, string[] names = null, bool blockInput = true, DialogueProgressMode? progressMode = null, Func<int, IEnumerator> lineTransition = null)
     {
         if (!IsReady || IsOpen || dialogueLines == null) return false;
         List<string> validLines = new();
@@ -125,6 +144,10 @@ public class DialogueUI : MonoBehaviour
         if (validLines.Count == 0) return false;
 
         ResetAdvanceState();
+        dialogueRevision++;
+        currentAutoAdvance = progressMode.HasValue ? progressMode.Value == DialogueProgressMode.Auto : allowAutoAdvance;
+        lengthBasedReading = progressMode.HasValue && progressMode.Value == DialogueProgressMode.Auto;
+        beforeNextLine = lineTransition;
         lines = validLines.ToArray();
         speakerNames = validNames.ToArray();
         sequenceSpeakers = validSpeakers.ToArray();
@@ -167,7 +190,7 @@ public class DialogueUI : MonoBehaviour
     /// </summary>
     private void LateUpdate()
     {
-        if (!IsOpen || Time.frameCount <= openedFrame || WasClosedThisFrame || processedFrame == Time.frameCount) return;
+        if (!IsOpen || lineTransitionRoutine != null || Time.frameCount <= openedFrame || WasClosedThisFrame || processedFrame == Time.frameCount) return;
         processedFrame = Time.frameCount;
         bool hasInput = inputFrame == Time.frameCount;
         bool pressed = hasInput && enterPressed;
@@ -206,7 +229,7 @@ public class DialogueUI : MonoBehaviour
         if (held)
         {
             // A carried-over key needs a fresh press. Auto advance stays paused while held.
-            if (holdStartedAt < 0f || holdProgress < 1f) return;
+            if (!allowHoldAdvance || holdStartedAt < 0f || holdProgress < 1f) return;
             if (!isFastAdvancing)
             {
                 isFastAdvancing = true;
@@ -223,7 +246,7 @@ public class DialogueUI : MonoBehaviour
         }
 
         // 입력이 없으면 타이핑 완료 시점부터 자동 진행 대기 시간을 계산한다.
-        if (!isTyping && lineDisplayedAt >= 0f && now - lineDisplayedAt >= Mathf.Max(0f, autoAdvanceDelay))
+        if (currentAutoAdvance && !isTyping && lineDisplayedAt >= 0f && now - lineDisplayedAt >= CurrentReadDelay())
             AdvanceCurrentLine(false);
     }
 
@@ -237,9 +260,40 @@ public class DialogueUI : MonoBehaviour
             CompleteCurrentLine();
             if (!fastAdvance) return;
         }
-        lineIndex++;
+        int revision = dialogueRevision;
+        LineCompleted?.Invoke(lineIndex);
+        if (!IsOpen || lines == null || revision != dialogueRevision) return;
+        int next = lineIndex + 1;
+        if (next < lines.Length && beforeNextLine != null)
+        {
+            // Manual/Auto 모두 같은 카메라 전환 완료를 기다린 뒤 다음 문장을 표시한다.
+            lineTransitionRoutine = StartCoroutine(AdvanceAfterTransition(next, dialogueRevision));
+            return;
+        }
+        lineIndex = next;
         if (lineIndex >= lines.Length) CloseDialogue();
         else ShowCurrentLine();
+    }
+
+    private float CurrentReadDelay()
+    {
+        if (!lengthBasedReading) return Mathf.Max(0f, autoAdvanceDelay);
+        return autoReadBaseDelay + autoReadSecondsPerCharacter * dialogueText.textInfo.characterCount;
+    }
+    private IEnumerator AdvanceAfterTransition(int next, int revision)
+    {
+        yield return beforeNextLine(next);
+        if (!IsOpen || revision != dialogueRevision) yield break;
+        lineTransitionRoutine = null;
+        lineIndex = next;
+        ShowCurrentLine();
+    }
+    private void CancelLineTransition()
+    {
+        dialogueRevision++;
+        if (lineTransitionRoutine != null) StopCoroutine(lineTransitionRoutine);
+        lineTransitionRoutine = null;
+        beforeNextLine = null;
     }
 
     /// <summary>
@@ -296,14 +350,32 @@ public class DialogueUI : MonoBehaviour
     public void CancelDialogue() => FinishDialogue(false);
 
     /// <summary>
-    /// 현재 줄과 화자 표시를 설정하고 대사 타이핑을 시작한다.
+    /// 괄호 지시문과 별칭을 포함한 화자 이름으로 이름칸 색상을 선택한다.
     /// </summary>
+    private Color GetSpeakerNameColor(string displayName, DialogueSpeaker speaker)
+    {
+        string label = string.IsNullOrWhiteSpace(displayName) ? "" : displayName.Trim().ToLowerInvariant();
+        if (speaker == DialogueSpeaker.Player || label.Contains("주인공") || label.Contains("플레이어") ||
+            label == "나" || label.StartsWith("나(") || label.StartsWith("player") || label.StartsWith("protagonist"))
+            return playerNameColor;
+        if (label.Contains("아들") || label.StartsWith("son")) return sonNameColor;
+        if (label.Contains("딸") || label.StartsWith("daughter")) return daughterNameColor;
+        if (label.Contains("아내") || label.Contains("와이프") || label.StartsWith("wife")) return wifeNameColor;
+        if (label.Contains("장교") || label.StartsWith("officer")) return officerNameColor;
+        return otherNameColor;
+    }
+
+    /// <summary>현재 줄과 화자 표시를 설정하고 대사 타이핑을 시작한다.</summary>
     private void ShowCurrentLine()
     {
         StopTyping();
         lineDisplayedAt = -1f;
         // 문장이 바뀔 때 같은 인덱스의 화자 이름도 바로 갱신한다.
-        if (speakerNameText != null) speakerNameText.text = speakerNames[lineIndex];
+        if (speakerNameText != null)
+        {
+            speakerNameText.text = speakerNames[lineIndex];
+            speakerNameText.color = GetSpeakerNameColor(speakerNames[lineIndex], sequenceSpeakers[lineIndex]);
+        }
         // 타이핑 완성 여부와 관계없이 현재 문장의 실제 발언자를 알린다.
         SpeakerChanged?.Invoke(sequenceSpeakers[lineIndex]);
         // 화자 이벤트가 대화를 즉시 취소하면 정리된 대사 배열을 다시 읽지 않는다.
@@ -361,6 +433,7 @@ public class DialogueUI : MonoBehaviour
         Action callback = completed ? completedCallback : cancelledCallback;
         completedCallback = null;
         cancelledCallback = null;
+        CancelLineTransition();
         StopTyping();
         ResetAdvanceState();
         isOpen = false;

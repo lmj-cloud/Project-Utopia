@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: cf9998256eb70a144a4499cef182096e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/MopBucket/Materials/MopBucketShader.mat
+  uploadId: 822378

@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: ab83f960e48ac154a85616df14f3d66b
+labels:
+- Road
+- Tarmac
+- Asphalt
+- Sidewalk
+- Driveway
+timeCreated: 1450186418
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Road/Road_narrower_right_marking.prefab
+  uploadId: 762663

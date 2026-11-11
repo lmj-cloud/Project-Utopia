@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: f7aa5c340e8bde144ad2354f872fd6a3
+labels:
+- Hydrant
+timeCreated: 1453384352
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Props/Firehydrant.prefab
+  uploadId: 762663

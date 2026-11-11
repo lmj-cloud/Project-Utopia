@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a5aa6d34512bf4a40b0ae4d76e939314
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/flyawayChairs.prefab
+  uploadId: 822378

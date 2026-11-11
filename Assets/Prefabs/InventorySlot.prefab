@@ -144,9 +144,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 569993701, guid: f5b71b03118225f48968d3879430ebe2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 82e334c8ce4bb2242a322b642cfe30ea, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -175,6 +175,11 @@ MonoBehaviour:
   hoverScale: 1.07
   pressedScale: 0.95
   transitionSpeed: 12
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 0.65882355, g: 0.8745098, b: 1, a: 1}
+  selectedColor: {r: 0.32941177, g: 0.7490196, b: 1, a: 1}
+  selectedHoverColor: {r: 0.5568628, g: 0.8745098, b: 1, a: 1}
+  colorTransitionDuration: 0.12
 --- !u!1 &2606042027537283203
 GameObject:
   m_ObjectHideFlags: 0
@@ -227,7 +232,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2606042027537283203}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -240,7 +245,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 958974178, guid: b9777c428c3e63b4f9bdd8d7c6bd7fa0, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 82e334c8ce4bb2242a322b642cfe30ea, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -475,7 +480,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6262585861087271174}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -488,7 +493,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -845961036, guid: 509a33bd2e2a26f4d89292c5ef50fc4b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 82e334c8ce4bb2242a322b642cfe30ea, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1

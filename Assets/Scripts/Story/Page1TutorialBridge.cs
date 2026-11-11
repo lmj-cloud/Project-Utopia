@@ -39,6 +39,17 @@ public class Page1TutorialBridge : MonoBehaviour
     public void DaughterDialogueCompleted() { daughterTalked = true; }
     public bool HasPhoto { get { return photoInspected; } }
     public bool HasWifeDialogue { get { return wifeTalked; } }
+    public bool HasCompletedFamilyTutorial
+    {
+        get
+        {
+            // 선행 이동·거실·가족 대화 단계의 실제 완료 후 문 단계로 넘어갔는지 확인한다.
+            if (!started || !livingRoomArrived || !wifeTalked || !sonTalked || !daughterTalked || tutorial == null)
+                return false;
+            return tutorial.IsCompleted || (tutorial.CurrentStep != null &&
+                tutorial.CurrentStep.action == DemoAction.DoorOpened && tutorial.CurrentStep.target == this);
+        }
+    }
 
     public void BeginAfterWake()
     {

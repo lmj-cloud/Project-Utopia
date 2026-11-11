@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.Timeline;
+using Unity.Cinemachine;
 
 /// <summary>Page 전용 Timeline의 대화 대기와 완료 인계만 담당한다. 연출 시간은 Track/Clip에 둔다.</summary>
 [RequireComponent(typeof(PlayableDirector))]
@@ -15,6 +17,9 @@ public class PageTimelineSequence : MonoBehaviour
         public int count = int.MaxValue;
         public bool blocksGameplay = true;
         public bool pauseTimeline = true;
+        public bool overrideProgressMode;
+        public DialogueProgressMode progressMode = DialogueProgressMode.Manual;
+        public bool synchronizeCamera;
     }
 
     [SerializeField] private PlayableDirector director;
@@ -28,6 +33,14 @@ public class PageTimelineSequence : MonoBehaviour
     [SerializeField] private Transform walkingActor;
     [SerializeField, Min(1f)] private float followDistance = 6f;
     [SerializeField] private bool holdFinalPose;
+    [Header("Dialogue camera synchronization (optional)")]
+    [SerializeField] private CinemachineTrack dialogueCameraTrack;
+    [SerializeField] private SignalAsset[] dialogueCameraSignals = new SignalAsset[0];
+    [SerializeField, Min(0f)] private float dialogueCameraBlendDuration = .4f;
+    private int dialogueCameraOverride = -1;
+    private ICinemachineCamera currentDialogueCamera;
+    private bool dialoguePresentationBusy;
+    public bool IsDialoguePresentationBusy { get { return dialoguePresentationBusy; } }
     private bool waiting;
     private bool active;
     private bool looping;
@@ -65,7 +78,12 @@ public class PageTimelineSequence : MonoBehaviour
     private void Stopped(PlayableDirector source)
     {
         active = false;
-        if (!Completed && waiting) CancelWait();
+        if (!Completed)
+        {
+            CancelWait();
+            StopAllCoroutines();
+            ReleaseDialogueCamera();
+        }
     }
 
     public bool Begin(bool loop = false)
@@ -87,7 +105,7 @@ public class PageTimelineSequence : MonoBehaviour
     public IEnumerator Play()
     {
         if (!Begin()) yield break;
-        while (active && (director.time < director.duration || waiting)) yield return null;
+        while (active && (director.time < director.duration || waiting || dialoguePresentationBusy)) yield return null;
         if (!active) yield break;
         Completed = true;
         active = false;
@@ -144,9 +162,97 @@ public class PageTimelineSequence : MonoBehaviour
     {
         if (!Application.isPlaying || !active || dialogue == null || index < 0 || index >= dialogueCues.Length) return;
         DialogueCue cue = dialogueCues[index];
-        IEnumerator routine = dialogue.Play(cue.section, cue.blocksGameplay, cue.first, cue.count, this);
+        IEnumerator routine = PlayDialogueCue(cue);
         if (cue.pauseTimeline) WaitFor(routine);
         else StartCoroutine(routine);
+    }
+
+    private IEnumerator PlayDialogueCue(DialogueCue cue)
+    {
+        DialogueProgressMode? mode = null;
+        if (cue.overrideProgressMode) mode = cue.progressMode;
+        if (!cue.synchronizeCamera || dialogueCameraTrack == null)
+        {
+            yield return dialogue.Play(cue.section, cue.blocksGameplay, cue.first, cue.count, this, mode);
+            yield break;
+        }
+        dialoguePresentationBusy = true;
+        currentDialogueCamera = CameraAtTime(director.time);
+        try
+        {
+            // 기존 Timeline Shot/Signal을 읽고 같은 Brain의 소유 Override만 사용한다.
+            yield return BlendDialogueCamera(CameraForLine(cue.first));
+            yield return dialogue.Play(cue.section, cue.blocksGameplay, cue.first, cue.count, this, mode,
+                next => BlendDialogueCamera(CameraForLine(cue.first + next)));
+            if (dialogue.LastCompleted) yield return BlendDialogueCamera(CameraAtTime(director.time));
+        }
+        finally
+        {
+            ReleaseDialogueCamera();
+        }
+    }
+    private ICinemachineCamera CameraForLine(int line)
+    {
+        if (line >= 0 && line < dialogueCameraSignals.Length && director.playableAsset is TimelineAsset timeline)
+        {
+            SignalAsset signal = dialogueCameraSignals[line];
+            foreach (TrackAsset track in timeline.GetOutputTracks())
+            {
+                foreach (IMarker marker in track.GetMarkers())
+                {
+                    if (marker is SignalEmitter emitter && emitter.asset == signal)
+                        return CameraAtTime(emitter.time);
+                }
+            }
+        }
+        return CameraAtTime(director.time);
+    }
+    private ICinemachineCamera CameraAtTime(double time)
+    {
+        ICinemachineCamera result = null;
+        double start = double.MinValue;
+        foreach (TimelineClip clip in dialogueCameraTrack.GetClips())
+        {
+            if (clip.start <= time && clip.start >= start && clip.asset is CinemachineShot shot)
+            {
+                CinemachineVirtualCameraBase camera = shot.VirtualCamera.Resolve(director);
+                if (camera != null) { result = camera; start = clip.start; }
+            }
+        }
+        return result;
+    }
+    private IEnumerator BlendDialogueCamera(ICinemachineCamera target)
+    {
+        CinemachineBrain brain = director.GetGenericBinding(dialogueCameraTrack) as CinemachineBrain;
+        if (brain == null || target == null) yield break;
+        if (currentDialogueCamera == null) currentDialogueCamera = target;
+        float duration = currentDialogueCamera == target ? 0f : dialogueCameraBlendDuration;
+        float elapsed = 0f;
+        while (active && elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float weight = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
+            dialogueCameraOverride = brain.SetCameraOverride(dialogueCameraOverride, dialogueCameraTrack.TrackPriority + 1,
+                currentDialogueCamera, target, weight, Time.unscaledDeltaTime);
+            yield return null;
+        }
+        if (!active) yield break;
+        dialogueCameraOverride = brain.SetCameraOverride(dialogueCameraOverride, dialogueCameraTrack.TrackPriority + 1,
+            target, target, 1f, Time.unscaledDeltaTime);
+        currentDialogueCamera = target;
+        // Brain LateUpdate에서 최종 Camera가 반영된 다음 문장을 표시한다.
+        yield return null;
+    }
+    private void ReleaseDialogueCamera()
+    {
+        if (dialogueCameraOverride >= 0 && director != null && dialogueCameraTrack != null)
+        {
+            CinemachineBrain brain = director.GetGenericBinding(dialogueCameraTrack) as CinemachineBrain;
+            if (brain != null) brain.ReleaseCameraOverride(dialogueCameraOverride);
+        }
+        dialogueCameraOverride = -1;
+        currentDialogueCamera = null;
+        dialoguePresentationBusy = false;
     }
 
     public void WaitFor(IEnumerator gameplayCondition)
@@ -206,6 +312,7 @@ public class PageTimelineSequence : MonoBehaviour
     {
         CancelWait();
         StopAllCoroutines();
+        ReleaseDialogueCamera();
         if (director != null && director.playableGraph.IsValid()) director.Stop();
         active = false;
         Completed = false;

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e36b9294f90294444ae2d7bcd55c80fc
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/ElevatorInterior.prefab
+  uploadId: 822378

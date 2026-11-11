@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3b12fcf0cc7d688458c0996dace404b9
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/Ceiling2M.prefab
+  uploadId: 822378

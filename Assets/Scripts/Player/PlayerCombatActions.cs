@@ -522,6 +522,7 @@ public class PlayerCombatActions : MonoBehaviour
     /// </summary>
     private void CancelFromDamage()
     {
+        if (animator != null && animator.PreservesBoxingActionOnDamage && (!isRunning || IsMmaPunch())) return;
         ResetKnifeCombo();
         ResetMmaCombo();
         if (!isRunning) return;

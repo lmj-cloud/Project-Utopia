@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f1127e2b95bf37342ace8a2bb359ce6b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/HeadboardSplit.prefab
+  uploadId: 822378

@@ -1,0 +1,26 @@
+fileFormatVersion: 2
+guid: cc2cc374a13f5fb4dad5b89bdc814b6f
+labels:
+- mailbox
+- trash
+- litter
+- bin
+- rubbish
+- garbage
+- hydrant
+- firehydrant
+- residential
+- suburb
+timeCreated: 1438204580
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/SuburbanProps GarbageCans/Trashcan4_LOD.prefab
+  uploadId: 762663

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 339fb5e77c0ef7c4c9e683a6c3b019c1
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/GloveDispenser.prefab
+  uploadId: 822378

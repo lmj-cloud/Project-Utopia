@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e7bdd8267fcee934fbdfb50053effff2
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/DoubleWindow.prefab
+  uploadId: 822378

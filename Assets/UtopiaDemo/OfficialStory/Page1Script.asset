@@ -15,23 +15,23 @@ MonoBehaviour:
   lines:
   - id: P1_01_001
     section: 1
-    speaker: "\uC8FC\uC778\uACF5(\uC18D\uC73C\uB85C)"
+    speaker: "\uC8FC\uC778\uACF5"
     speakerKind: 1
     text: "\uACB0\uC2B9\uC804."
   - id: P1_01_002
     section: 1
-    speaker: "\uC8FC\uC778\uACF5(\uC18D\uC73C\uB85C)"
+    speaker: "\uC8FC\uC778\uACF5"
     speakerKind: 1
     text: "\uBA87 \uB144\uC744 \uAE30\uB2E4\uB9B0 \uB0A0\uC778\uB370\u2026 \uC774\uC0C1\uD558\uAC8C
       \uD3C9\uC18C\uBCF4\uB2E4 \uC870\uC6A9\uD558\uB124."
   - id: P1_01_003
     section: 1
-    speaker: "\uC640\uC774\uD504(\uBC29 \uBC16\uC5D0\uC11C)"
+    speaker: "\uC640\uC774\uD504"
     speakerKind: 0
     text: "\uC77C\uC5B4\uB0AC\uC5B4? \uBC25 \uC2DD\uB294\uB2E4!"
   - id: P1_01_004
     section: 1
-    speaker: "\uC8FC\uC778\uACF5(\uC791\uAC8C \uC6C3\uC73C\uBA70)"
+    speaker: "\uC8FC\uC778\uACF5"
     speakerKind: 1
     text: "\uC751. \uC9C0\uAE08 \uAC00."
   - id: P1_02_001
@@ -79,6 +79,6 @@ MonoBehaviour:
     text: "\uC54C\uC558\uC5B4. \uB098\uB3C4 \uCC3E\uC744\uAC8C."
   - id: P1_03_003
     section: 3
-    speaker: "\uB538(\uBA40\uB9AC\uC11C)"
+    speaker: "\uB538"
     speakerKind: 0
     text: "\uC5EC\uAE30! \uC5EC\uAE30\uC57C!"

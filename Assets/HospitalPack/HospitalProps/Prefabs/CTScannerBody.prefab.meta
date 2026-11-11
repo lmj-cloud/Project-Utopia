@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e5d9591e6168be44494e71a1a06b04c4
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/CTScannerBody.prefab
+  uploadId: 822378

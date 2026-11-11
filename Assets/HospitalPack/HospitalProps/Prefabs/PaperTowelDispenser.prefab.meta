@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c2676fd9292b0ac4da9ba6831662a709
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/PaperTowelDispenser.prefab
+  uploadId: 822378

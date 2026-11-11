@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 065ad628a675a2a4899659bb66b911f0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/MainDoorFrame.prefab
+  uploadId: 822378

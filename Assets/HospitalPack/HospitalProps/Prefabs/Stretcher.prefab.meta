@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e36be5c273111f641827936b96ca7e53
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/Stretcher.prefab
+  uploadId: 822378

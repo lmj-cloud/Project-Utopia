@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 47ca2fe8617095a4d91b44c070d74797
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 198272
+  packageName: Modular military character 2
+  packageVersion: 1.4
+  assetPath: Assets/Military/Settings/UniversalRenderPipelineAsset.asset
+  uploadId: 494977

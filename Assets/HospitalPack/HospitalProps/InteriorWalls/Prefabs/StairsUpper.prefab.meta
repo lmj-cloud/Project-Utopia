@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b1b0e564844f48741a29f0ca40817cc0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/StairsUpper.prefab
+  uploadId: 822378

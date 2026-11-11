@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public enum TutorialKeyLayout { None, WASD, Interact, MouseLeft, MouseRight, Medicine, Inventory, QuickSlot, Forward, Weapons, Knife }
+public enum TutorialKeyLayout { None, WASD, Interact, MouseLeft, MouseRight, Medicine, Inventory, QuickSlot, Forward, Weapons, Knife, Confirm, Guard, MmaControls }
 
 /// <summary>Inspector에서 구성한 실제 키 이미지 묶음과 WASD 성공 색상만 표시한다.</summary>
 public class TutorialKeyImages : MonoBehaviour

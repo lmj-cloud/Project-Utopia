@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 75bb345381538c34eb5dcd567c8e6cb8
+labels:
+- Road
+- Tarmac
+- Asphalt
+- Sidewalk
+- Driveway
+timeCreated: 1450186391
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Road/Road_Turn_Marking.prefab
+  uploadId: 762663

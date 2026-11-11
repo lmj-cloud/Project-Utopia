@@ -33,13 +33,13 @@ public class Page4S13Adapter : MonoBehaviour
             !ending.target.InRange) { exitInteraction.CancelExternalInteraction(); return; }
         if (!story.TryBeginS13()) { exitInteraction.CancelExternalInteraction(); return; }
         started = true;
-        if (officialDialogue != null) StartCoroutine(DepartureDialogue());
-        else BeginOriginalEnding();
+        StartCoroutine(DepartureDialogue());
     }
     private IEnumerator DepartureDialogue()
     {
-        yield return departureTimeline.Play();
-        if (!departureTimeline.Completed || !officialDialogue.LastCompleted) { Cancelled(); yield break; }
+        // F 성공 안내의 Hide 완료 뒤에만 컷씬 UI 잠금과 대화를 시작한다.
+        yield return story.WaitForExitTutorial();
+        if (story.Stage != Page4Stage.S13Starting) { Cancelled(); yield break; }
         yield return null;
         BeginOriginalEnding();
     }

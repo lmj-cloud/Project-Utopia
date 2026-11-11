@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b3ba71db0f51f634ea9ae858da86481e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/HospitalBedRigged.prefab
+  uploadId: 822378

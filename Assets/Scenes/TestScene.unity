@@ -3369,6 +3369,7 @@ MonoBehaviour:
   dialogueLookAt: {fileID: 576324548}
   idleState: Base Layer.NPC_Idle
   talkingState: Base Layer.NPC_Talk
+  externalSpeakerAnimation: 0
   flow: {fileID: 0}
   tutorial: {fileID: 2200000003}
 --- !u!136 &103332289
@@ -5545,6 +5546,7 @@ MonoBehaviour:
   dialogueLookAt: {fileID: 2098368320}
   idleState: Base Layer.NPC_Idle
   talkingState: Base Layer.NPC_Talk
+  externalSpeakerAnimation: 0
   flow: {fileID: 0}
   tutorial: {fileID: 2200000003}
 --- !u!136 &161570736
@@ -7980,6 +7982,7 @@ MonoBehaviour:
   dialogueLookAt: {fileID: 1718739090}
   idleState: Base Layer.NPC_Idle
   talkingState: Base Layer.NPC_Talk
+  externalSpeakerAnimation: 0
   flow: {fileID: 0}
   tutorial: {fileID: 2200000003}
 --- !u!136 &218761186
@@ -16285,8 +16288,12 @@ MonoBehaviour:
   playerName: "\uC8FC\uC778\uACF5"
   charactersPerSecond: 30
   autoAdvanceDelay: 2
+  allowAutoAdvance: 1
+  allowHoldAdvance: 1
   holdThreshold: 0.5
   holdAdvanceInterval: 0.2
+  autoReadBaseDelay: 1.5
+  autoReadSecondsPerCharacter: 0.04
 --- !u!1001 &374054383
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26199,6 +26206,7 @@ MonoBehaviour:
   dialogueLookAt: {fileID: 2081691908}
   idleState: Base Layer.NPC_Idle
   talkingState: Base Layer.NPC_Talk
+  externalSpeakerAnimation: 0
   flow: {fileID: 0}
   tutorial: {fileID: 2200000003}
 --- !u!137 &623352335 stripped
@@ -26579,6 +26587,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1836488517}
   - {fileID: 85725082}
   - {fileID: 1064197161}
   - {fileID: 530220372}
@@ -26607,7 +26616,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -33626,9 +33635,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 82e334c8ce4bb2242a322b642cfe30ea, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -40919,14 +40928,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
-  m_RaycastTarget: 1
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: bffe9eb0eabdfb747b4fbfef281d58a1, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -45043,9 +45052,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 82e334c8ce4bb2242a322b642cfe30ea, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -55536,9 +55545,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 82e334c8ce4bb2242a322b642cfe30ea, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -65103,6 +65112,7 @@ MonoBehaviour:
   cameraController: {fileID: 1431126677}
   mmaFacingTurnSpeed: 1440
   mmaAttackFacingTolerance: 4
+  enableKnifeCombat: 0
   weapon: {fileID: 640622113}
   equipment: {fileID: 1431126678}
   interactionKey: 20
@@ -65146,6 +65156,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b31cb64b7eda302449ae342af6aa17e8, type: 3}
   m_Name: null
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimatorController
+  knifeUpperLayer: KnifeUpperBody
   firstPersonAnimator: {fileID: 744024411}
   thirdPersonAnimator: {fileID: 640622109}
   firstPersonWeaponLayer: 0
@@ -80986,6 +80997,7 @@ MonoBehaviour:
     instruction: "<b><color=#9CD9FF>WASD</color></b>\uB85C \uC774\uB3D9\uD558\uC138\uC694.\n<size=65%>\uAE00\uB7EC\uBE0C:
       \uBC29\uC5B4 <b>Q</b> \uC720\uC9C0 \xB7 \uC7A1\uAE30 <b>G</b>\n\uC0C1\uD638\uC791\uC6A9
       <b>F</b> \xB7 \uB2E8\uAC80 <b>3</b></size>"
+    keys: 0
     onStarted:
       m_PersistentCalls:
         m_Calls: []
@@ -81001,6 +81013,7 @@ MonoBehaviour:
     requiredCount: 1
     title: "\uC549\uAE30 \uC5F0\uC2B5"
     instruction: "<b><color=#9CD9FF>Left Ctrl</color></b>\uC744 \uB20C\uB7EC \uC549\uC73C\uC138\uC694."
+    keys: 0
     onStarted:
       m_PersistentCalls:
         m_Calls: []
@@ -81017,6 +81030,7 @@ MonoBehaviour:
     title: "\uC810\uD504 \uC5F0\uC2B5"
     instruction: "<b><color=#9CD9FF>Ctrl</color></b>\uC744 \uB193\uACE0 <b><color=#9CD9FF>Space</color></b>\uB85C
       \uC810\uD504\uD558\uC138\uC694."
+    keys: 0
     onStarted:
       m_PersistentCalls:
         m_Calls: []
@@ -81033,6 +81047,7 @@ MonoBehaviour:
     title: "\uC8FC \uCD1D\uAE30 \uC7A5\uCC29"
     instruction: "<b><color=#9CD9FF>1\uBC88 \uD0A4</color></b>\uB85C \uAE30\uAD00\uB2E8\uCD1D(\uC8FC
       \uCD1D\uAE30 \uC2AC\uB86F)\uC744 \uC7A5\uCC29\uD558\uC138\uC694."
+    keys: 0
     onStarted:
       m_PersistentCalls:
         m_Calls: []
@@ -81049,6 +81064,7 @@ MonoBehaviour:
     title: "\uC0AC\uACA9 \uC5F0\uC2B5"
     instruction: "<b><color=#9CD9FF>\uB9C8\uC6B0\uC2A4 \uC67C\uCABD \uBC84\uD2BC</color></b>\uC73C\uB85C
       \uC9C0\uC815 \uD45C\uC801\uC744 \uB9DE\uD788\uC138\uC694."
+    keys: 0
     onStarted:
       m_PersistentCalls:
         m_Calls: []
@@ -81065,6 +81081,7 @@ MonoBehaviour:
     title: "\uC7AC\uC7A5\uC804 \uC5F0\uC2B5"
     instruction: "<b><color=#9CD9FF>R</color></b>\uC744 \uB20C\uB7EC \uC7AC\uC7A5\uC804\uC744
       \uC644\uB8CC\uD558\uC138\uC694."
+    keys: 0
     onStarted:
       m_PersistentCalls:
         m_Calls: []
@@ -83640,6 +83657,81 @@ MonoBehaviour:
   m_FadeFactor: 0.7
   version: 1
   m_DecalLayerMask: 1
+--- !u!1 &1836488516
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1836488517}
+  - component: {fileID: 1836488519}
+  - component: {fileID: 1836488518}
+  m_Layer: 0
+  m_Name: InventoryBackground
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1836488517
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1836488516}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 639519272}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1836488518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1836488516}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 6112f5ee3a9ac844599a180c95eef910, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1836488519
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1836488516}
+  m_CullTransparentMesh: 1
 --- !u!1 &1839618011
 GameObject:
   m_ObjectHideFlags: 0
@@ -91857,6 +91949,7 @@ MonoBehaviour:
   dialogueLookAt: {fileID: 1576146521}
   idleState: Base Layer.NPC_Idle
   talkingState: Base Layer.NPC_Talk
+  externalSpeakerAnimation: 0
   flow: {fileID: 0}
   tutorial: {fileID: 2200000003}
 --- !u!136 &1999996617
@@ -93767,9 +93860,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 82e334c8ce4bb2242a322b642cfe30ea, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -96022,15 +96115,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5566038, g: 0.5566038, b: 0.5566038, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 8fb5fffac07030a49a1f6343c0c273be, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -97325,9 +97418,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 82e334c8ce4bb2242a322b642cfe30ea, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -98481,6 +98574,7 @@ MonoBehaviour:
   m_Name: null
   m_EditorClassIdentifier: Assembly-CSharp::GameplayUI
   tutorial: {fileID: 1762587735}
+  tutorialKeyImages: {fileID: 0}
   tutorialPanel: {fileID: 2300000000}
   tutorialTitleText: {fileID: 2300000013}
   tutorialAnimator: {fileID: 2300000004}
@@ -98491,6 +98585,7 @@ MonoBehaviour:
   tutorialHideState: Base Layer.TutorialHide
   tutorialAnimationTimeout: 10
   tutorialBackground: {fileID: 2300000003}
+  useAuthoredTutorialColor: 0
   dialogueUI: {fileID: 373749545}
   inventoryUI: {fileID: 1611399667}
   stepFeedbackDuration: 0.35
@@ -99358,6 +99453,10 @@ MonoBehaviour:
   useThreeStageCombo: 0
   comboFinisherRecoverySeconds: 0.6
   comboPunchDamageMultiplier: 0.5
+  knifeBufferStart: 0.25
+  knifeBufferEnd: 0.9
+  knifeResetSeconds: 0.8
+  knifeTransitionSeconds: 0.05
 --- !u!1001 &209094065414619325
 PrefabInstance:
   m_ObjectHideFlags: 0

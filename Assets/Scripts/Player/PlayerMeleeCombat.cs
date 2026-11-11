@@ -100,6 +100,7 @@ public class PlayerMeleeCombat : MonoBehaviour
     [SerializeField, Min(0.1f)] private float animationEventTimeout = 3f;
     // 일반 근접 행동을 시작할 때 소비하는 스태미나.
     [SerializeField, Min(0f)] private float attackStamina = 8f;
+    [SerializeField] private bool enableMmaGuard = true;
     [SerializeField, Range(0f, 1f)] private float blockReduction = 0.7f;
     [SerializeField, Range(0f, 180f)] private float blockAngle = 100f;
     [SerializeField, Min(0f)] private float blockStaminaPerSecond = 5f;
@@ -380,7 +381,7 @@ public class PlayerMeleeCombat : MonoBehaviour
     /// </summary>
     public void SetBlocking(bool value)
     {
-        blocking = value && CanAct && externalAction == null && equipment.CurrentKind == PlayerEquipmentKind.Gloves && attack == null && !IsDodging;
+        blocking = enableMmaGuard && value && CanAct && externalAction == null && equipment.CurrentKind == PlayerEquipmentKind.Gloves && attack == null && !IsDodging;
         if (animator != null) animator.OnDefense(blocking);
     }
     /// <summary>
@@ -455,7 +456,7 @@ public class PlayerMeleeCombat : MonoBehaviour
             AttackReceived?.Invoke(CombatHitResult.Evaded);
             return CombatHitResult.Evaded;
         }
-        bool defended = blocking && Vector3.Angle(transform.forward, sourcePosition - transform.position) <= blockAngle * 0.5f;
+        bool defended = enableMmaGuard && blocking && Vector3.Angle(transform.forward, sourcePosition - transform.position) <= blockAngle * 0.5f;
         status.TakeDamage(defended ? amount * (1f - blockReduction) : amount);
         if (defended) Succeeded?.Invoke(DemoAction.BlockHit, this);
         if (defended && animator != null) animator.OnDefenseHit();
@@ -534,7 +535,7 @@ public class PlayerMeleeCombat : MonoBehaviour
     {
         if (externalAction != null && externalAction.OwnsControlLock && externalAction.CanContinueAction) return;
         if (!CanAct) { CancelActions(); return; }
-        if (blocking && equipment.CurrentKind != PlayerEquipmentKind.Gloves) SetBlocking(false);
+        if (blocking && (!enableMmaGuard || equipment.CurrentKind != PlayerEquipmentKind.Gloves)) SetBlocking(false);
         if (blocking && !status.TryUseStamina(blockStaminaPerSecond * Time.deltaTime)) SetBlocking(false);
     }
     /// <summary>

@@ -26,10 +26,6 @@ public sealed class S03PlayerIntegration : MonoBehaviour
     [SerializeField] private Transform doorHinge;
     [SerializeField] private Transform doorFocus;
     [SerializeField] private Transform doorDollyEnd;
-    [SerializeField] private Transform destination;
-    [SerializeField] private Transform arenaShotStart;
-    [SerializeField] private Transform arenaShotEnd;
-    [SerializeField] private Transform arenaLookTarget;
     [SerializeField] private AudioClip doorSound;
     [SerializeField] private float doorOpenAngle = -95f;
     [SerializeField, Min(0.1f)] private float cameraReturnTimeout = 3f;
@@ -37,6 +33,9 @@ public sealed class S03PlayerIntegration : MonoBehaviour
     [Header("Successful arrival only")]
     [SerializeField] private UnityEvent onCompleted = new UnityEvent();
 
+    [SerializeField] private bool timelineOwnsDoorAndCamera;
+    private Renderer[] departureRenderers;
+    private bool[] departureRendererHidden;
     private bool isRunning;
     private bool hasArrived;
     private bool isPanning;
@@ -98,8 +97,7 @@ public sealed class S03PlayerIntegration : MonoBehaviour
             outputCamera != null && doorInteraction != null && sequence != null &&
             sequence.director != null && sequence.director.playableAsset != null &&
             screen != null && screen.overlay != null && cinematicCamera != null &&
-            doorHinge != null && doorFocus != null && doorDollyEnd != null &&
-            destination != null && arenaShotStart != null && arenaShotEnd != null && arenaLookTarget != null;
+            doorHinge != null && doorFocus != null && doorDollyEnd != null;
     }
 
     /// <summary>DirectionSequence가 시작에 성공한 뒤 이동·입력·카메라·HUD 소유권을 함께 취득한다.</summary>
@@ -118,6 +116,18 @@ public sealed class S03PlayerIntegration : MonoBehaviour
             gameplayUI.AcquireHidden(this);
 
         cinematicCamera.transform.SetPositionAndRotation(outputCamera.transform.position, outputCamera.transform.rotation);
+        // 출입구를 향한 1인칭 돌리에서 자기 몸/장비 안쪽이 렌더링되지 않게 한다.
+        // 원래 forceRenderingOff 상태를 보관해 정상 종료·취소 시 정확히 복원한다.
+        if (timelineOwnsDoorAndCamera)
+        {
+            departureRenderers = player.GetComponentsInChildren<Renderer>(true);
+            departureRendererHidden = new bool[departureRenderers.Length];
+            for (int i = 0; i < departureRenderers.Length; i++)
+            {
+                departureRendererHidden[i] = departureRenderers[i].forceRenderingOff;
+                departureRenderers[i].forceRenderingOff = true;
+            }
+        }
         originalCameraPositionForShot = outputCamera.transform.position;
         LensSettings lens = cinematicCamera.Lens;
         lens.FieldOfView = outputCamera.fieldOfView;
@@ -137,6 +147,9 @@ public sealed class S03PlayerIntegration : MonoBehaviour
             return;
         }
 
+        // Page1의 문·카메라 Track을 사용할 때는 같은 Transform을 스크립트로 덮어쓰지 않는다.
+        if (timelineOwnsDoorAndCamera) return;
+
         if (!hasArrived)
         {
             // 공통 DirectionScreen의 백색 전환 동안만 문과 진입 카메라를 보간한다.
@@ -150,8 +163,6 @@ public sealed class S03PlayerIntegration : MonoBehaviour
         else if (isPanning && sequence.director.state == PlayState.Playing)
         {
             float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((float)(sequence.director.time / sequence.director.duration)));
-            cinematicCamera.transform.position = Vector3.Lerp(arenaShotStart.position, arenaShotEnd.position, t);
-            cinematicCamera.transform.LookAt(arenaLookTarget.position);
         }
     }
 
@@ -166,13 +177,7 @@ public sealed class S03PlayerIntegration : MonoBehaviour
             throw new InvalidOperationException("Page1 S03 transfer requires full white coverage.");
 
         CoverageAtTransfer = screen.overlay.color.a;
-        Vector3 delta = destination.position - player.transform.position;
-        movement.Teleport(destination.position, destination.rotation);
-        playerCamera.SynchronizeDirection(destination.rotation);
-        NotifyCameraWarp(delta);
         doorHinge.localRotation = originalDoorRotation * Quaternion.Euler(0f, doorOpenAngle, 0f);
-        cinematicCamera.transform.SetPositionAndRotation(arenaShotStart.position, arenaShotStart.rotation);
-        cinematicCamera.transform.LookAt(arenaLookTarget.position);
         hasArrived = true;
     }
 
@@ -279,6 +284,14 @@ public sealed class S03PlayerIntegration : MonoBehaviour
 
     private void ReleaseLocks()
     {
+        if (departureRenderers != null)
+        {
+            for (int i = 0; i < departureRenderers.Length; i++)
+                if (departureRenderers[i] != null) departureRenderers[i].forceRenderingOff = departureRendererHidden[i];
+            departureRenderers = null;
+            departureRendererHidden = null;
+        }
+
         if (!ownsLocks)
             return;
         ownsLocks = false;

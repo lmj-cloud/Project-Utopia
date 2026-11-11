@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0e43ac6ebd0595c4c97e444d585c272b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/PolishedTiles4M.prefab
+  uploadId: 822378

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using Unity.Cinemachine;
@@ -91,6 +91,7 @@ public class Page4StoryController : MonoBehaviour
     [SerializeField] private PageTimelineSequence armoryDialogueTimeline;
     [SerializeField] private PageTimelineSequence equipmentTimeline;
     [SerializeField] private PageTimelineSequence rangeWalkTimeline;
+    [SerializeField] private PageTimelineSequence gunRangeWalkTimeline;
     [SerializeField] private PageTimelineSequence rangeDialogueTimeline;
     [SerializeField] private PageTimelineSequence rehabilitationTimeline;
     [SerializeField] private PageTimelineSequence endingFadeTimeline;
@@ -105,6 +106,7 @@ public class Page4StoryController : MonoBehaviour
     private Vector3 officerStartPosition;
     private Quaternion officerStartRotation;
     private Quaternion officerStartCamera;
+    private bool hospitalHandoffStarted;
     private bool ownsEffects;
     private Renderer[] playerRenderers;
     private bool[] hiddenStates;
@@ -119,8 +121,8 @@ public class Page4StoryController : MonoBehaviour
         HideRenderers();
         if (officialDialogue != null)
         {
-            nurse.SetActive(false);
-            officer.gameObject.SetActive(false);
+            nurse.SetActive(true);
+            officer.gameObject.SetActive(true);
             if (familyKeepsake != null) familyKeepsake.SetActive(false);
         }
     }
@@ -154,25 +156,58 @@ public class Page4StoryController : MonoBehaviour
         if (conversation == null) { Fail("장교 대화 참조 누락"); yield break; }
         if (actor == null) actor = officer;
         while (Vector3.Distance(player.transform.position, actor.position) > 4) yield return null;
-        Quaternion facing = Quaternion.LookRotation(Vector3.ProjectOnPlane(player.transform.position - actor.position, Vector3.up));
-        if (actor.parent != null && actor.parent.name.EndsWith("Motion"))
-            actor.parent.rotation = facing * Quaternion.Inverse(actor.localRotation);
-        else actor.rotation = facing;
+        // 병실의 최종 시선은 Timeline 회전 키가 담당한다. 대화 시작 때 다시 꺾지 않는다.
+        if (conversation != nurseDialogue && conversation != greeting)
+        {
+            Quaternion facing = Quaternion.LookRotation(Vector3.ProjectOnPlane(player.transform.position - actor.position, Vector3.up));
+            if (actor.parent != null && actor.parent.name.EndsWith("Motion"))
+                actor.parent.rotation = facing * Quaternion.Inverse(actor.localRotation);
+            else actor.rotation = facing;
+        }
         activeConversation = conversation;
         conversationCompleted = false;
         conversation.enabled = true;
         while (!conversation.CanStartDialogue) yield return null;
         conversation.StartDialogue();
-        while (!conversationCompleted) yield return null;
+        // 간호사 완료 이벤트가 다음 대화를 시작해도 이전 대화의 정리가 새 소유자를 지우지 않는다.
+        while (activeConversation == conversation && !conversationCompleted) yield return null;
         conversation.enabled = false;
-        activeConversation = null;
+        if (activeConversation == conversation) activeConversation = null;
     }
     public void OfficerDialogueCompleted()
     {
         if (activeConversation == null || conversationCompleted) return;
         conversationCompleted = true;
-        if (activeConversation == nurseDialogue) NurseDialogueCount++;
+        if (activeConversation == nurseDialogue)
+        {
+            NurseDialogueCount++;
+            BeginHospitalHandoff();
+        }
         else OfficerDialogueCount++;
+    }
+    private void BeginHospitalHandoff()
+    {
+        if (hospitalHandoffStarted) return;
+        hospitalHandoffStarted = true;
+        // 마지막 간호사 대화의 실제 완료 이벤트에서 두 재생을 함께 시작한다.
+        StartCoroutine(nurseExitTimeline.Play());
+        StartCoroutine(FinishNurseExit());
+        if (stage == Page4Stage.Failed) return;
+        onNurseCalledOfficer.Invoke();
+        StartCoroutine(officerGreetingTimeline.Play());
+    }
+    private IEnumerator FinishNurseExit()
+    {
+        // 퇴장 완료는 간호사 숨김만 담당하고 장교 대화의 시작 조건으로 사용하지 않는다.
+        while (nurseExitTimeline.IsRunning) yield return null;
+        if (!nurseExitTimeline.Completed)
+        {
+            if (officerGreetingTimeline.IsRunning) officerGreetingTimeline.Cancel();
+            if (lossTimeline.IsRunning) lossTimeline.Cancel();
+            Fail("간호사 퇴장 Timeline 취소");
+            yield break;
+        }
+        if (nurse.activeSelf) nurse.SetActive(false);
     }
     private IEnumerator OfficialHospital()
     {
@@ -189,15 +224,11 @@ public class Page4StoryController : MonoBehaviour
         if (stage == Page4Stage.Failed) yield break;
         stage = Page4Stage.DoctorDialogue;
         yield return nurseDialogueTimeline.Play();
-        yield return nurseExitTimeline.Play();
-        if (!nurseDialogueTimeline.Completed || !nurseExitTimeline.Completed) { Fail("간호사 Timeline 취소"); yield break; }
+        if (!nurseDialogueTimeline.Completed || !hospitalHandoffStarted) { Fail("간호사 대화 인계 취소"); yield break; }
+        // 퇴장은 독립 진행한다. 병실 다음 장면은 장교 대화 완료에만 맞춘다.
+        while (officerGreetingTimeline.IsRunning && stage != Page4Stage.Failed) yield return null;
         if (stage == Page4Stage.Failed) yield break;
-        nurse.SetActive(false);
-        onNurseCalledOfficer.Invoke();
-        yield return officerEntryTimeline.Play();
-        if (!officerEntryTimeline.Completed) { Fail("장교 입장 Timeline 취소"); yield break; }
-        if (stage == Page4Stage.Failed) yield break;
-        yield return officerGreetingTimeline.Play();
+        if (!officerGreetingTimeline.Completed) { Fail("장교 대화 Timeline 취소"); yield break; }
         stage = Page4Stage.Blackout;
         yield return lossTimeline.Play();
         if (!officerGreetingTimeline.Completed || !lossTimeline.Completed) { Fail("병원 인계 Timeline 취소"); yield break; }
@@ -230,11 +261,33 @@ public class Page4StoryController : MonoBehaviour
     }
     public void TimelineWorldExplanation()
     {
-        if (Application.isPlaying && stage == Page4Stage.Blackout) onWorldExplanationRequested.Invoke();
+        if (!Application.isPlaying || stage != Page4Stage.Blackout) return;
+        onWorldExplanationRequested.Invoke();
+        // 완전 암전이 퇴장 도착보다 빠르면 가려진 상태에서 퇴장을 마무리한다.
+        if (nurse.activeSelf && blackOverlay.alpha >= .999f)
+        {
+            nurseExitTimeline.StopVisuals();
+            if (nurse.activeSelf) nurse.SetActive(false);
+        }
     }
     public void TimelineHospitalWake()
     {
         if (!Application.isPlaying || stage != Page4Stage.Blackout) return;
+        // 병렬 퇴장은 계속 재생한다. 완전 암전에서만 기다려 복도 재등장을 막는다.
+        if (nurse.activeSelf) lossTimeline.WaitFor(WaitForNurseThenWake());
+        else ApplyHospitalWake();
+    }
+    private IEnumerator WaitForNurseHidden()
+    {
+        while (nurse.activeSelf && stage == Page4Stage.Blackout) yield return null;
+    }
+    private IEnumerator WaitForNurseThenWake()
+    {
+        yield return WaitForNurseHidden();
+        if (stage == Page4Stage.Blackout) ApplyHospitalWake();
+    }
+    private void ApplyHospitalWake()
+    {
         player.GetComponent<PlayerMovement>().Teleport(wakeSpawn.position, wakeSpawn.rotation);
         playerCamera.SynchronizeDirection(wakeSpawn.rotation);
         hospitalCamera.Priority = 0;
@@ -252,19 +305,11 @@ public class Page4StoryController : MonoBehaviour
     {
         // 병실 11번 장면의 정상 완료 뒤에만 실제 복도 도착을 기다린다.
         stage = Page4Stage.CorridorWaiting;
-        objective.text = "복도로 이동하세요.";
-        rifleTutorial.BeginTutorial();
-        while (!corridorEntered)
-        {
-            if (rifleTutorial.DisplayState == TutorialManager.TutorialDisplayState.WaitingForShow)
-                rifleTutorial.RequestShowCurrentTutorial();
-            yield return null;
-        }
-        while (rifleTutorial.StepNumber == 1)
-        {
-            rifleTutorial.Report(DemoAction.Inspect, this);
-            yield return null;
-        }
+        objective.text = "";
+        rifleTutorial.StopTutorial();
+        gameplayUI.AcquireHidden(this);
+        CorridorArrived();
+        while (!corridorEntered) yield return null;
         officerSignalCompleted = false;
         Block();
         gameplayUI.AcquireHidden(this);
@@ -280,9 +325,12 @@ public class Page4StoryController : MonoBehaviour
         ArmoryArrivalCount++;
         Release();
         stage = Page4Stage.RiflePickupTutorial;
+        rifleTutorial.BeginTutorialFromStep(2);
         objective.text = "보관함에서 무기를 획득하세요.";
         RefreshPickups();
-        while (rifleTutorial.StepNumber <= 3)
+        while (rifleTutorial.StepNumber <= 3 ||
+            !player.GetComponent<PlayerEquipment>().HasOwnership(PlayerEquipmentKind.AssaultRifle) ||
+            !player.GetComponent<PlayerEquipment>().HasOwnership(PlayerEquipmentKind.Dagger))
         {
             if (rifleTutorial.DisplayState == TutorialManager.TutorialDisplayState.WaitingForShow)
                 rifleTutorial.RequestShowCurrentTutorial();
@@ -290,43 +338,38 @@ public class Page4StoryController : MonoBehaviour
         }
         rangeGate.SetActive(false);
         stage = Page4Stage.OfficerWalkingToRange;
-        objective.text = "장교를 따라 사격장 입구로 이동하세요.";
+        objective.text = "장교를 따라 단검 훈련장으로 이동하세요.";
         yield return rangeWalkTimeline.Play();
         if (!rangeWalkTimeline.Completed) { Fail("사격장 이동 Timeline 취소"); yield break; }
         if (stage == Page4Stage.Failed) yield break;
+        // 같은 기존 튜토리얼에서 실제 단검 명중을 먼저 기다린다.
+        stage = Page4Stage.RangeBriefing;
+        RangeTrainingEnabled = true;
+        while (rifleTutorial.StepNumber <= 4)
+        {
+            if (rifleTutorial.DisplayState == TutorialManager.TutorialDisplayState.WaitingForShow)
+                rifleTutorial.RequestShowCurrentTutorial();
+            yield return null;
+        }
+        stage = Page4Stage.OfficerWalkingToRange;
+        objective.text = "더 안쪽 사격장으로 이동하세요.";
+        if (gunRangeWalkTimeline == null) { Fail("사격장 동행 Timeline 연결 누락"); yield break; }
+        yield return gunRangeWalkTimeline.Play();
+        if (!gunRangeWalkTimeline.Completed) { Fail("사격장 동행 Timeline 취소"); yield break; }
         RangeArrivalCount++;
         stage = Page4Stage.RangeBriefing;
         yield return rangeDialogueTimeline.Play();
         if (!rangeDialogueTimeline.Completed) { Fail("사격장 대화 Timeline 취소"); yield break; }
         RangeTrainingEnabled = true;
         objective.text = "안내에 따라 사격·재장전·단검 훈련을 진행하세요.";
-        while (!rifleTutorial.IsCompleted) yield return null;
+        while (rifleTutorial.StepNumber <= 7) yield return null;
         // 단검 상체 공격은 Base 이동 위에서 재생된다. 자기 잠금을 걸기 전에 현재 요청의 완료를 기다린다.
         PlayerCombatActions trainingCombat = player.GetComponent<PlayerCombatActions>();
         while (trainingCombat != null && trainingCombat.IsRunning && trainingCombat.IsKnifeAction) yield return null;
-        Block();
-        // 마지막 단검 명중 뒤 재활 Fade가 남은 공격 자세를 즉시 잘라내지 않게 한다.
-        // 자기 입력 잠금은 애니메이션 복구도 막으므로, 연타 없이 실제 공격 종료를 기다릴 수 있다.
-        Animator trainingAnimator = player.GetComponent<PlayerAnimatorController>().CombatAnimator;
-        yield return null;
-        while (trainingAnimator != null &&
-            trainingAnimator.GetCurrentAnimatorStateInfo(0).IsName("Base Layer.Knife.Attack") &&
-            trainingAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < .98f)
-        {
-            yield return null;
-        }
-        gameplayUI.AcquireHidden(this);
-        if (!effects.TryAcquire(this)) { Fail("재활 시간 경과 화면 효과 실패"); yield break; }
-        ownsEffects = true;
-        yield return rehabilitationTimeline.Play();
-        if (!rehabilitationTimeline.Completed) { Fail("재활 Timeline 취소"); yield break; }
-        effects.Release(this);
-        ownsEffects = false;
-        Release();
-        // 마지막 안내 발화는 재활 Timeline Signal에서 완료했다.
+        // 훈련 완료 후 시간 경과·추가 대사 없이 기존 출입문 안내로 진행한다.
         RangeBriefingCompleted = true;
         stage = Page4Stage.FreePractice;
-        objective.text = "자유 사격 / 준비되면 출구에서 F";
+        objective.text = "벙커 출입문으로 이동하세요.";
     }
     public void CorridorArrived()
     {
@@ -349,6 +392,16 @@ public class Page4StoryController : MonoBehaviour
     {
         if (Application.isPlaying && stage == Page4Stage.OfficerCutscene) Block();
     }
+    public void TimelineWaitForCorridorDialogue()
+    {
+        if (Application.isPlaying && stage == Page4Stage.OfficerCutscene)
+            officerLockerTimeline.WaitFor(WaitForCorridorDialogue());
+    }
+    private IEnumerator WaitForCorridorDialogue()
+    {
+        // 마지막 복도 발화가 끝나야 선반 방향으로 이동을 재개한다.
+        while (officialDialogue.IsBusy || officerLockerTimeline.IsDialoguePresentationBusy) yield return null;
+    }
     public void TimelineOfficerFinished()
     {
         if (Application.isPlaying && stage == Page4Stage.OfficerCutscene && officerLockerTimeline.IsRunning)
@@ -363,7 +416,8 @@ public class Page4StoryController : MonoBehaviour
     {
         PlayerEquipment equipment = player.GetComponent<PlayerEquipment>();
         RefreshPickup(riflePickup, equipment.HasOwnership(PlayerEquipmentKind.AssaultRifle));
-        RefreshPickup(pistolPickup, equipment.HasOwnership(PlayerEquipmentKind.Pistol));
+        // Page4 권총은 전시용이다. 모델은 남기고 상호작용을 계속 차단한다.
+        if (pistolPickup != null) pistolPickup.enabled = false;
         RefreshPickup(knifePickup, equipment.HasOwnership(PlayerEquipmentKind.Dagger));
     }
     private void RefreshPickup(InteractableObject pickup, bool owned)
@@ -389,16 +443,29 @@ public class Page4StoryController : MonoBehaviour
     public bool TryBeginS13()
     {
         if (!CanUseExit || DemoCompletionCount != 0) return false;
+        // 기존 TutorialUI가 실제 F 상호작용 성공을 받은 뒤 마지막 목표를 완료한다.
+        if (rifleTutorial.CurrentStep != null && rifleTutorial.CurrentStep.action == DemoAction.DoorOpened)
+        {
+            if (rifleTutorial.DisplayState != TutorialManager.TutorialDisplayState.Active) return false;
+            rifleTutorial.Report(DemoAction.DoorOpened, this);
+            if (rifleTutorial.DisplayState != TutorialManager.TutorialDisplayState.Hiding) return false;
+        }
         stage = Page4Stage.S13Starting;
         WeaponAssaultRifle weapon = player.GetComponent<PlayerEquipment>().CurrentWeapon;
         if (weapon != null) weapon.CancelWeaponActions();
         player.GetComponent<PlayerMeleeCombat>().CancelActions();
         player.GetComponent<PlayerCombatActions>().CancelAction();
         Block();
-        gameplayUI.AcquireHidden(this);
         objective.enabled = false;
         subtitle.text = "";
         return true;
+    }
+    public IEnumerator WaitForExitTutorial()
+    {
+        // Hide가 시작된 프레임에 패널을 끄면 기존 UI의 완료 검사가 실패한다.
+        while (rifleTutorial.DisplayState == TutorialManager.TutorialDisplayState.Hiding) yield return null;
+        if (!rifleTutorial.IsCompleted) { Fail("출입문 안내 완료 실패"); yield break; }
+        gameplayUI.AcquireHidden(this);
     }
     public void S13Started()
     {
@@ -464,7 +531,7 @@ public class Page4StoryController : MonoBehaviour
     private void OnDisable()
     {
         StopAllCoroutines();
-        foreach (PageTimelineSequence timeline in new[] { officerLockerTimeline, hospitalIntroTimeline, hospitalDoorTimeline, nurseEntryTimeline, nurseDialogueTimeline, nurseExitTimeline, officerEntryTimeline, officerGreetingTimeline, lossTimeline, armoryWalkTimeline, armoryDialogueTimeline, equipmentTimeline, rangeWalkTimeline, rangeDialogueTimeline, rehabilitationTimeline, endingFadeTimeline })
+        foreach (PageTimelineSequence timeline in new[] { officerLockerTimeline, hospitalIntroTimeline, hospitalDoorTimeline, nurseEntryTimeline, nurseDialogueTimeline, nurseExitTimeline, officerEntryTimeline, officerGreetingTimeline, lossTimeline, armoryWalkTimeline, armoryDialogueTimeline, equipmentTimeline, rangeWalkTimeline, gunRangeWalkTimeline, rangeDialogueTimeline, rehabilitationTimeline, endingFadeTimeline })
             if (timeline != null) timeline.Cancel();
         RestoreOfficerPlayer();
         if (activeConversation != null) activeConversation.enabled = false;

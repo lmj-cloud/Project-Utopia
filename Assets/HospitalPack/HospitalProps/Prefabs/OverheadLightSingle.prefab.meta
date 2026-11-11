@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 5893a7f606f50df4c969ae32065db697
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/OverheadLightSingle.prefab
+  uploadId: 822378

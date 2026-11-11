@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 435eee2e6b35a784290309e9cae49d78
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/PolishedConcrete4M.prefab
+  uploadId: 822378

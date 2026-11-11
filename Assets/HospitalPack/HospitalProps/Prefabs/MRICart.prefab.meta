@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 240634d1b25ceae4fb2ade256c7d3429
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/MRICart.prefab
+  uploadId: 822378

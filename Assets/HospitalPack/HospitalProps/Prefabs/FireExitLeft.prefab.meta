@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ebfc35d4b4ceb0248864f6962cea30fd
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/FireExitLeft.prefab
+  uploadId: 822378

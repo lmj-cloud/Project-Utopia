@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a736769801084c24fb78ccef19ec770d
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/MRIBed.prefab
+  uploadId: 822378

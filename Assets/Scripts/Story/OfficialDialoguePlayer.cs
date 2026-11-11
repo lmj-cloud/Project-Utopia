@@ -28,7 +28,7 @@ public class OfficialDialoguePlayer : MonoBehaviour
         if (!ownsDialogue || current == null || index < 0 || index >= current.Length) return;
         LinePresented?.Invoke(current[index]);
     }
-    public IEnumerator Play(int section, bool blocksGameplay = true, int first = 0, int count = int.MaxValue, UnityEngine.Object owner = null)
+    public IEnumerator Play(int section, bool blocksGameplay = true, int first = 0, int count = int.MaxValue, UnityEngine.Object owner = null, DialogueProgressMode? progressMode = null, Func<int, IEnumerator> lineTransition = null)
     {
         if (dialogueUI == null || script == null)
         {
@@ -60,7 +60,7 @@ public class OfficialDialoguePlayer : MonoBehaviour
         int revision = ++playbackRevision;
         bool finished = false;
         bool opened = dialogueUI.TryOpenNamedSequence(texts, names, blocksGameplay,
-            () => { LastCompleted = true; finished = true; }, () => { finished = true; }, speakers);
+            () => { LastCompleted = true; finished = true; }, () => { finished = true; }, speakers, progressMode, lineTransition);
         if (!opened) finished = true;
         while (!finished) yield return null;
         if (revision != playbackRevision) yield break;

@@ -27,6 +27,8 @@ public class GameplayUI : MonoBehaviour
     private int presentationVersion;
     private bool warnedTutorialAnimation;
     [SerializeField] private Image tutorialBackground;
+    [SerializeField] private bool useAuthoredTutorialColor;
+    private Color authoredTutorialColor;
     [SerializeField] private DialogueUI dialogueUI;
     [SerializeField] private InventoryUI inventoryUI;
     [SerializeField, Min(0f)] private float stepFeedbackDuration = 0.35f;
@@ -68,6 +70,8 @@ public class GameplayUI : MonoBehaviour
     /// </summary>
     private void Awake()
     {
+        // Page UI는 Inspector에서 선택한 원래 색상을 보존한다. 기존 씬은 종전 표시를 유지한다.
+        if (tutorialBackground != null) authoredTutorialColor = tutorialBackground.color;
         if (tutorialCanvasGroup != null)
         {
             tutorialCanvasGroup.interactable = false;
@@ -430,8 +434,12 @@ public class GameplayUI : MonoBehaviour
         if (visible && !tutorialWasVisible) RefreshTutorial();
         tutorialWasVisible = visible;
         if (tutorialPanel != null && tutorialPanel.activeSelf != visible) tutorialPanel.SetActive(visible);
-        if (tutorialBackground != null) tutorialBackground.color = Time.unscaledTime < stepFeedbackUntil
-            ? new Color(0.08f, 0.3f, 0.19f, 0.88f) : new Color(0.025f, 0.035f, 0.055f, 0.82f);
+        if (tutorialBackground != null)
+        {
+            Color normalColor = useAuthoredTutorialColor ? authoredTutorialColor : new Color(0.025f, 0.035f, 0.055f, 0.82f);
+            tutorialBackground.color = Time.unscaledTime < stepFeedbackUntil
+                ? new Color(0.08f, 0.3f, 0.19f, 0.88f) : normalColor;
+        }
     }
     /// <summary>
     /// 퀵슬롯 등록과 실제 아이템 총량·선택을 HUD에 갱신한다.

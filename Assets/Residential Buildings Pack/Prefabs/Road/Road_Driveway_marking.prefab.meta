@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: bf7253ff87171344a860aa0b26425cc1
+labels:
+- Road
+- Tarmac
+- Asphalt
+- Sidewalk
+- Driveway
+timeCreated: 1450201864
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Road/Road_Driveway_marking.prefab
+  uploadId: 762663

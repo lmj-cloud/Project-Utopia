@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7ab6a06cb5883264c9ef9a725a17701a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/MedicalTrayBoom.prefab
+  uploadId: 822378

@@ -31,6 +31,7 @@ public class NPCDialogue : MonoBehaviour
     [SerializeField] private string idleState = "Base Layer.NPC_Idle";
     [SerializeField] private string talkingState = "Base Layer.NPC_Talk";
     private bool isTalking;
+    [SerializeField] private bool externalSpeakerAnimation;
     [SerializeField] private GameFlowManager flow;
     [SerializeField] private TutorialManager tutorial;
     private GameFlowStage requestedStage;
@@ -140,7 +141,7 @@ public class NPCDialogue : MonoBehaviour
     /// </summary>
     private void OnSpeakerChanged(DialogueSpeaker speaker)
     {
-        if (!dialogueInProgress) return;
+        if (!dialogueInProgress || externalSpeakerAnimation) return;
         SetTalking(speaker == DialogueSpeaker.NPC);
     }
 

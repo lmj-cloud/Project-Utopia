@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 158fc5c8f050d2c4fa6b5d6c86e6939e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/WheelChair.prefab
+  uploadId: 822378

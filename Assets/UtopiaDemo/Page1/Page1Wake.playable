@@ -91,15 +91,15 @@ MonoBehaviour:
     m_PreExtrapolationTime: 0
     m_DisplayName: CM_FirstPerson
   - m_Version: 1
-    m_Start: 4.4
+    m_Start: 4.933333333333334
     m_ClipIn: 0
     m_Asset: {fileID: -4335754788410430361}
-    m_Duration: 1.5999999999999996
+    m_Duration: 1.0666666666666664
     m_TimeScale: 1
     m_ParentTrack: {fileID: -5339905202449231826}
     m_EaseInDuration: 0
     m_EaseOutDuration: 0
-    m_BlendInDuration: 1.5999999999999996
+    m_BlendInDuration: 0.5333332220713292
     m_BlendOutDuration: -1
     m_MixInCurve:
       serializedVersion: 2
@@ -163,13 +163,13 @@ MonoBehaviour:
     m_Start: 3.033333333333333
     m_ClipIn: 0
     m_Asset: {fileID: 6007531265651828687}
-    m_Duration: 2.966666666666667
+    m_Duration: 2.4333332220713295
     m_TimeScale: 1
     m_ParentTrack: {fileID: -5339905202449231826}
     m_EaseInDuration: 0
     m_EaseOutDuration: 0
     m_BlendInDuration: -1
-    m_BlendOutDuration: 1.5999999999999996
+    m_BlendOutDuration: 0.5333332220713292
     m_MixInCurve:
       serializedVersion: 2
       m_Curve: []
@@ -239,7 +239,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d21dcc2386d650c4597f3633c75a1f98, type: 3}
-  m_Name: "Player \u2022 existing Page1_WakeUp (0.617 sec)"
+  m_Name: "Player \u2014 Page1_WakeUp / Idle"
   m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.AnimationTrack
   m_Version: 3
   m_AnimClip: {fileID: 0}
@@ -254,13 +254,13 @@ MonoBehaviour:
     m_Start: 3
     m_ClipIn: 0
     m_Asset: {fileID: 2913390447951057330}
-    m_Duration: 0.6166666746139526
+    m_Duration: 2.616666555404663
     m_TimeScale: 1
     m_ParentTrack: {fileID: -3528611740446587018}
     m_EaseInDuration: 0
     m_EaseOutDuration: 0
     m_BlendInDuration: -1
-    m_BlendOutDuration: -1
+    m_BlendOutDuration: 0.15000000000000036
     m_MixInCurve:
       serializedVersion: 2
       m_Curve:
@@ -320,15 +320,15 @@ MonoBehaviour:
     m_PreExtrapolationTime: 3
     m_DisplayName: Page1_WakeUp
   - m_Version: 1
-    m_Start: 3.6166666746139526
+    m_Start: 5.466666555404663
     m_ClipIn: 0
     m_Asset: {fileID: 1220207501497064401}
-    m_Duration: 2.3833333253860474
+    m_Duration: 0.7333334445953374
     m_TimeScale: 1
     m_ParentTrack: {fileID: -3528611740446587018}
     m_EaseInDuration: 0
     m_EaseOutDuration: 0
-    m_BlendInDuration: -1
+    m_BlendInDuration: 0.15000000000000036
     m_BlendOutDuration: -1
     m_MixInCurve:
       serializedVersion: 2
@@ -399,11 +399,11 @@ MonoBehaviour:
   m_InfiniteClipApplyFootIK: 1
   mInfiniteClipLoop: 0
   m_MatchTargetFields: 63
-  m_Position: {x: 0, y: 0, z: 0}
-  m_EulerAngles: {x: 0, y: 0, z: 0}
+  m_Position: {x: 0, y: -0.14999998, z: 0}
+  m_EulerAngles: {x: -0, y: 0, z: 0}
   m_AvatarMask: {fileID: 0}
   m_ApplyAvatarMask: 1
-  m_TrackOffset: 1
+  m_TrackOffset: 0
   m_InfiniteClip: {fileID: 0}
   m_OpenClipOffsetRotation: {x: 0, y: 0, z: 0, w: 1}
   m_Rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -702,6 +702,116 @@ MonoBehaviour:
   m_Retroactive: 0
   m_EmitOnce: 1
   m_Asset: {fileID: 11400000, guid: 66a971d69265f0b42a14d511f1129eb4, type: 2}
+--- !u!114 &-874936263262418908
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d21dcc2386d650c4597f3633c75a1f98, type: 3}
+  m_Name: "Player movement \u2014 bed to floor (editable)"
+  m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.AnimationTrack
+  m_Version: 3
+  m_AnimClip: {fileID: 0}
+  m_Locked: 0
+  m_Muted: 0
+  m_CustomPlayableFullTypename: 
+  m_Curves: {fileID: 0}
+  m_Parent: {fileID: 11400000}
+  m_Children: []
+  m_Clips:
+  - m_Version: 1
+    m_Start: 0
+    m_ClipIn: 0
+    m_Asset: {fileID: -97227394195474539}
+    m_Duration: 6.2
+    m_TimeScale: 1
+    m_ParentTrack: {fileID: -874936263262418908}
+    m_EaseInDuration: 0
+    m_EaseOutDuration: 0
+    m_BlendInDuration: -1
+    m_BlendOutDuration: -1
+    m_MixInCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_MixOutCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_BlendInCurveMode: 0
+    m_BlendOutCurveMode: 0
+    m_ExposedParameterNames: []
+    m_AnimationCurves: {fileID: 0}
+    m_Recordable: 0
+    m_PostExtrapolationMode: 1
+    m_PreExtrapolationMode: 1
+    m_PostExtrapolationTime: Infinity
+    m_PreExtrapolationTime: 0
+    m_DisplayName: AnimationPlayableAsset
+  m_Markers:
+    m_Objects: []
+  m_InfiniteClipPreExtrapolation: 0
+  m_InfiniteClipPostExtrapolation: 0
+  m_InfiniteClipOffsetPosition: {x: 0, y: 0, z: 0}
+  m_InfiniteClipOffsetEulerAngles: {x: 0, y: 0, z: 0}
+  m_InfiniteClipTimeOffset: 0
+  m_InfiniteClipRemoveOffset: 0
+  m_InfiniteClipApplyFootIK: 1
+  mInfiniteClipLoop: 0
+  m_MatchTargetFields: 63
+  m_Position: {x: -6.193, y: 3.097, z: -31.222002}
+  m_EulerAngles: {x: -0, y: 90.00001, z: -0}
+  m_AvatarMask: {fileID: 0}
+  m_ApplyAvatarMask: 1
+  m_TrackOffset: 0
+  m_InfiniteClip: {fileID: 0}
+  m_OpenClipOffsetRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_Rotation: {x: 0, y: 0, z: 0, w: 1}
+  m_ApplyOffsets: 0
 --- !u!114 &-196892122472031144
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -718,6 +828,28 @@ MonoBehaviour:
   m_Retroactive: 0
   m_EmitOnce: 1
   m_Asset: {fileID: 11400000, guid: a0c7af84910b60242bc524841c218a9a, type: 2}
+--- !u!114 &-97227394195474539
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 030f85c3f73729f4f976f66ffb23b875, type: 3}
+  m_Name: AnimationPlayableAsset of Page1Wake_PlayerRoot
+  m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.AnimationPlayableAsset
+  m_Clip: {fileID: 7400000, guid: de726c12302afea4ba4c62012410ec52, type: 2}
+  m_Position: {x: 0, y: 0, z: 0}
+  m_EulerAngles: {x: 0, y: 0, z: 0}
+  m_UseTrackMatchFields: 1
+  m_MatchTargetFields: 63
+  m_RemoveStartOffset: 0
+  m_ApplyFootIK: 0
+  m_Loop: 0
+  m_Version: 1
+  m_Rotation: {x: 0, y: 0, z: 0, w: 1}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -738,6 +870,7 @@ MonoBehaviour:
   - {fileID: -3528611740446587018}
   - {fileID: 2964764845866122411}
   - {fileID: -3446875218192557156}
+  - {fileID: -874936263262418908}
   m_FixedDuration: 6
   m_EditorSettings:
     m_Framerate: 60
@@ -776,9 +909,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 030f85c3f73729f4f976f66ffb23b875, type: 3}
-  m_Name: Page1_WakeUp
+  m_Name: AnimationPlayableAsset of Page1_WakeUp
   m_EditorClassIdentifier: Unity.Timeline::UnityEngine.Timeline.AnimationPlayableAsset
-  m_Clip: {fileID: 7400000, guid: 6440f8513c80d9c4da5dea75eb5ca6c3, type: 2}
+  m_Clip: {fileID: 7400000, guid: 6fd59cf82f5dc5b40827e90d3f828731, type: 2}
   m_Position: {x: 0, y: 0, z: 0}
   m_EulerAngles: {x: 0, y: 0, z: 0}
   m_UseTrackMatchFields: 1

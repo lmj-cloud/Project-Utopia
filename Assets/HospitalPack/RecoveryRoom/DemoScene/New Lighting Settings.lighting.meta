@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3a0fc6554115f1f46b2b730b1da6ffe5
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/RecoveryRoom/DemoScene/New Lighting Settings.lighting
+  uploadId: 822378

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f429535d20cd0014a831eaeb1a98d342
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/DemoScene/Hospital.unity
+  uploadId: 822378

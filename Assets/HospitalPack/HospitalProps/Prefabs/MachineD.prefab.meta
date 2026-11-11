@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a2404dd0c5901244390b6b867e794355
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/MachineD.prefab
+  uploadId: 822378

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c1aafdd0436938349b6d807c6623e771
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/Vent.prefab
+  uploadId: 822378

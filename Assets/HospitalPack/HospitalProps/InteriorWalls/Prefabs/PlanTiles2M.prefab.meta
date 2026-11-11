@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 25ce577c8fae94b44b47811dcca98e87
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/PlanTiles2M.prefab
+  uploadId: 822378

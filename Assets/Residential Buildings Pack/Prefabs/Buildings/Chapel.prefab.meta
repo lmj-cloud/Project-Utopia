@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 4adde40827e0ad34d970e9ef02c4a05f
+labels:
+- Chapel
+- Church
+timeCreated: 1450176804
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Buildings/Chapel.prefab
+  uploadId: 762663

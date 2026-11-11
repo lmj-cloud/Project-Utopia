@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: f0339ff0e46444944bae3e06cfdacc64
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Source/Shader/LayeredDirt.shader
+  uploadId: 762663

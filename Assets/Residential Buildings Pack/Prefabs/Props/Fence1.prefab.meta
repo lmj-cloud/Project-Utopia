@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 52c5a02197d231841a4d953e0bdb3aec
+labels:
+- Fence
+timeCreated: 1450191122
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Props/Fence1.prefab
+  uploadId: 762663

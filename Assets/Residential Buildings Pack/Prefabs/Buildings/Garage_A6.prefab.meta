@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: e937561b2c1b6d749952d0be02cc1fda
+labels:
+- Garage
+timeCreated: 1450101768
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Buildings/Garage_A6.prefab
+  uploadId: 762663

@@ -388,6 +388,7 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     public void OnHit()
     {
+        if (PreservesBoxingActionOnDamage) return;
         bool scriptedHit = scriptedVictimCombat != null && scriptedVictimCombat.CanReceiveScriptedMmaAttacks;
         if ((AnimationPoseLocked && !scriptedHit) || IsDead || lastHitFrame == Time.frameCount) return;
         if (HasThirdPersonMotion(hitState))
@@ -557,6 +558,68 @@ public class PlayerAnimatorController : MonoBehaviour
         }
     }
 
+    [SerializeField] private bool useBoxingHitLayer;
+    private const string BoxingHitLayer = "Boxing_Hit_UpperBody";
+    private static readonly int BoxingHitState = Animator.StringToHash(BoxingHitLayer + ".Hit");
+    private static readonly int BoxingHitEmpty = Animator.StringToHash(BoxingHitLayer + ".Empty");
+    private int boxingHitLayer = -1;
+    private bool boxingHitPlaying;
+    private int boxingHitStartedFrame;
+    private float boxingHitStartedAt;
+
+    public bool PreservesBoxingActionOnDamage => boxingHitLayer >= 0 && !IsDead &&
+        !AnimationPoseLocked && playerController != null && playerController.IsMmaCombatActive &&
+        equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves &&
+        (scriptedVictimCombat == null || !scriptedVictimCombat.CanReceiveScriptedMmaAttacks);
+
+    private void OnBoxingAttackReceived(CombatHitResult result)
+    {
+        if (result != CombatHitResult.UnblockedHit || !PreservesBoxingActionOnDamage ||
+            !thirdPersonAnimator.isInitialized) return;
+        // An additional hit during the recoil is absorbed by the current pose.
+        if (boxingHitPlaying) return;
+        thirdPersonAnimator.Play(BoxingHitState, boxingHitLayer, 0f);
+        thirdPersonAnimator.SetLayerWeight(boxingHitLayer, .01f);
+        boxingHitStartedFrame = Time.frameCount;
+        boxingHitStartedAt = Time.unscaledTime;
+        boxingHitPlaying = true;
+    }
+
+    private void UpdateBoxingHitLayer()
+    {
+        if (!boxingHitPlaying) return;
+        if (!PreservesBoxingActionOnDamage || !thirdPersonAnimator.isInitialized)
+        {
+            ClearBoxingHitLayer();
+            return;
+        }
+        // Animator.Play is evaluated after Update. Empty may still be reported in the request frame.
+        if (Time.frameCount == boxingHitStartedFrame) return;
+        AnimatorStateInfo state = thirdPersonAnimator.GetCurrentAnimatorStateInfo(boxingHitLayer);
+        if (state.fullPathHash != BoxingHitState)
+        {
+            if (Time.unscaledTime - boxingHitStartedAt > .2f) ClearBoxingHitLayer();
+            return;
+        }
+        float progress = state.normalizedTime;
+        if (progress >= 1f)
+        {
+            ClearBoxingHitLayer();
+            return;
+        }
+        float weight = Mathf.Min(Mathf.Clamp01(progress / 0.15f), Mathf.Clamp01((1f - progress) / 0.35f));
+        thirdPersonAnimator.SetLayerWeight(boxingHitLayer, weight);
+    }
+
+    private void ClearBoxingHitLayer()
+    {
+        if (!boxingHitPlaying) return;
+        boxingHitPlaying = false;
+        if (thirdPersonAnimator == null || !thirdPersonAnimator.isInitialized) return;
+        thirdPersonAnimator.SetLayerWeight(boxingHitLayer, 0f);
+        thirdPersonAnimator.Play(BoxingHitEmpty, boxingHitLayer, 0f);
+    }
+
     private float currentSpeed;
     private float moveHorizontal;
     private float moveVertical;
@@ -573,6 +636,8 @@ public class PlayerAnimatorController : MonoBehaviour
         equipment = GetComponent<PlayerEquipment>();
         if (firstPersonAnimator != null) firstPersonAnimator.enabled = false;
         PrepareAnimator(thirdPersonAnimator);
+        if (useBoxingHitLayer && thirdPersonAnimator != null)
+            boxingHitLayer = thirdPersonAnimator.GetLayerIndex(BoxingHitLayer);
     }
 
     /// <summary>
@@ -694,6 +759,7 @@ public class PlayerAnimatorController : MonoBehaviour
     {
         if (status != null) { status.Damaged += OnHit; status.Died += OnDeath; }
         if (movement != null) movement.Succeeded += MovementSucceeded;
+        if (scriptedVictimCombat != null) scriptedVictimCombat.AttackReceived += OnBoxingAttackReceived;
         upperResetPending = true;
     }
     /// <summary>
@@ -706,6 +772,8 @@ public class PlayerAnimatorController : MonoBehaviour
         if (storyAnimationOwner != null) EndStoryFirstPerson(storyAnimationOwner, storyRequestId);
         if (status != null) { status.Damaged -= OnHit; status.Died -= OnDeath; }
         if (movement != null) movement.Succeeded -= MovementSucceeded;
+        if (scriptedVictimCombat != null) scriptedVictimCombat.AttackReceived -= OnBoxingAttackReceived;
+        ClearBoxingHitLayer();
         isReloading = false;
         isDefending = false;
         ResetUpperLayer();
@@ -715,6 +783,7 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        UpdateBoxingHitLayer();
         UpdateKnifeUpperLayer();
         if (scriptedDefeatGraph.IsValid())
         {

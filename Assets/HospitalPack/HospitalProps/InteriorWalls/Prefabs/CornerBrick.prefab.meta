@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c0662767c6a1ea442bc1d738384a293e
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/CornerBrick.prefab
+  uploadId: 822378

@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 8828beec482122d49a085169f4fd8af5
+labels:
+- House
+- Building
+- Residential
+- Suburb
+- Home
+timeCreated: 1450101309
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Buildings/House_A_3.prefab
+  uploadId: 762663

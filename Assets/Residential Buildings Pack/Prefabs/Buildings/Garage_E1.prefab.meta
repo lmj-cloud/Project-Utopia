@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: bd71dc673636aae44aa9746f0e571407
+labels:
+- Garage
+timeCreated: 1450101887
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Buildings/Garage_E1.prefab
+  uploadId: 762663

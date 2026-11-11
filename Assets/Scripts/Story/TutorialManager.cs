@@ -144,6 +144,12 @@ public class TutorialManager : MonoBehaviour
     /// </summary>
     public void BeginTutorial()
     {
+        BeginTutorialFromStep(1);
+    }
+
+    // Page 전용 연출로 대체된 안내를 표시하지 않고 기존 후속 단계부터 시작한다.
+    public void BeginTutorialFromStep(int firstStep)
+    {
         if (!isActiveAndEnabled || running || IsCompleted || (!standaloneTest && (flow == null || !flow.HasBegun))) return;
         if (steps == null || steps.Length == 0)
         {
@@ -151,8 +157,9 @@ public class TutorialManager : MonoBehaviour
             warnedMissingSteps = true;
             return;
         }
+        if (firstStep < 1 || firstStep > steps.Length) return;
         presentationRequest++;
-        currentStep = -1;
+        currentStep = firstStep - 2;
         revision = standaloneTest ? revision + 1 : flow.Revision;
         requestedStage = standaloneTest ? default : flow.CurrentStage;
         foundStep = false;
@@ -229,7 +236,8 @@ public class TutorialManager : MonoBehaviour
             Time.frameCount == lastCountedFrame || !IsCurrentFlow || currentStep < 0 || currentStep >= steps.Length ||
             gameplayUI == null || !gameplayUI.CanCountTutorial(this)) return;
         Step step = steps[currentStep];
-        if (step.keys == TutorialKeyLayout.WASD && movementKeyMask != 15) return;
+        // WASD 키를 모두 요구하는 것은 이동 입력 학습 단계뿐이다. 도착 단계는 실제 대상 도착으로 판단한다.
+        if (step.keys == TutorialKeyLayout.WASD && step.action == DemoAction.Move && movementKeyMask != 15) return;
         if ((!standaloneTest && step.stage != flow.CurrentStage) || step.action != action ||
             (step.requireTarget && step.target == null) || (step.target != null && step.target != target)) return;
         if (step.checkEquipmentKind && (equipment == null || equipment.CurrentKind != step.equipmentKind)) return;

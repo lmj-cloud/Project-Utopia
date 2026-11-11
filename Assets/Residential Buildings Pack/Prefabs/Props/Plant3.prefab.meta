@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e594c78fa1acc754ba0189f73887b1e1
+labels:
+- Foliage
+- Plant
+timeCreated: 1450186430
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Props/Plant3.prefab
+  uploadId: 762663

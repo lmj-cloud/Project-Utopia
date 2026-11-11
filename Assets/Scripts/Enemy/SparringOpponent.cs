@@ -29,6 +29,7 @@ public class SparringOpponent : MonoBehaviour
     [SerializeField, Min(0f)] private float recoveryDuration = 0.25f;
 
     [Header("방어 설정: 기본 수치는 임시 시험값")]
+    [SerializeField] private bool enableGuard = true;
     [SerializeField, Range(0f, 180f)] private float guardAngle = 120f;
     [SerializeField, Range(0f, 1f)] private float normalGuardChance = 0.25f;
     [SerializeField, Range(0f, 1f)] private float reactiveGuardChance = 0.4f;
@@ -214,7 +215,7 @@ public class SparringOpponent : MonoBehaviour
             return;
         }
         UpdateCombatFacing();
-        if (IsGuarding && Time.time >= guardEndTime) EndGuard();
+        if (IsGuarding && (!enableGuard || Time.time >= guardEndTime)) EndGuard();
         if (isAttacking || IsGuarding)
         {
             StopMoving();
@@ -389,7 +390,7 @@ public class SparringOpponent : MonoBehaviour
     /// <summary>수평 기준 전방 방어 각도를 실제 공격 발생 위치와 비교한다.</summary>
     public bool CanBlockAttack(Vector3 sourcePosition)
     {
-        return CanAct && IsGuarding && !isAttacking && Time.time < guardEndTime && IsSourceInFront(sourcePosition);
+        return enableGuard && CanAct && IsGuarding && !isAttacking && Time.time < guardEndTime && IsSourceInFront(sourcePosition);
     }
 
     /// <summary>공격 높이는 제외하고 적 정면을 기준으로 전체 방어 각도의 절반씩 비교한다.</summary>
@@ -405,7 +406,7 @@ public class SparringOpponent : MonoBehaviour
     /// <summary>공격 준비·타격·회복, 잡기·처형과 쿨다운 중의 방어 진입을 거부한다.</summary>
     private bool CanStartGuard()
     {
-        return CanAct && !isAttacking && attack == null && !IsGuarding && Time.time >= nextGuardTime && guardDuration > 0f;
+        return enableGuard && CanAct && !isAttacking && attack == null && !IsGuarding && Time.time >= nextGuardTime && guardDuration > 0f;
     }
 
     /// <summary>0과 1을 정확한 불가능·확정 값으로 처리하고 그 사이 값만 확률 추첨한다.</summary>

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 60cf84fa0f9d64e4983e29cb9ae3e2d2
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/MopBucket.prefab
+  uploadId: 822378

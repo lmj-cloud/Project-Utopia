@@ -1,0 +1,569 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Boxing_Hit_HeadTorso
+  m_Mask: 00000000010000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  m_Elements:
+  - m_Path: 'US-Soldier '
+    m_Weight: 0
+  - m_Path: US-Soldier /22
+    m_Weight: 0
+  - m_Path: US-Soldier /akum
+    m_Weight: 0
+  - m_Path: US-Soldier /antana
+    m_Weight: 0
+  - m_Path: US-Soldier /azov
+    m_Weight: 0
+  - m_Path: US-Soldier /Bag4.1
+    m_Weight: 0
+  - m_Path: US-Soldier /Bag4.002
+    m_Weight: 0
+  - m_Path: US-Soldier /batareyka
+    m_Weight: 0
+  - m_Path: US-Soldier /batareyka.001
+    m_Weight: 0
+  - m_Path: US-Soldier /batareyka.002
+    m_Weight: 0
+  - m_Path: US-Soldier /BodyArmor
+    m_Weight: 0
+  - m_Path: US-Soldier /boots
+    m_Weight: 0
+  - m_Path: US-Soldier /BSurfaceMesh
+    m_Weight: 0
+  - m_Path: US-Soldier /BSurfaceMesh.001
+    m_Weight: 0
+  - m_Path: US-Soldier /BSurfaceMesh.003
+    m_Weight: 0
+  - m_Path: US-Soldier /BSurfaceMesh.004
+    m_Weight: 0
+  - m_Path: US-Soldier /BSurfaceMesh.014
+    m_Weight: 0
+  - m_Path: US-Soldier /camera
+    m_Weight: 0
+  - m_Path: US-Soldier /Cap
+    m_Weight: 0
+  - m_Path: US-Soldier /Cap.001
+    m_Weight: 0
+  - m_Path: US-Soldier /carabine
+    m_Weight: 0
+  - m_Path: US-Soldier /carabine.002
+    m_Weight: 0
+  - m_Path: US-Soldier /carabine.003
+    m_Weight: 0
+  - m_Path: US-Soldier /carabine.004
+    m_Weight: 0
+  - m_Path: US-Soldier /Cylinder
+    m_Weight: 0
+  - m_Path: US-Soldier /eye_low.001
+    m_Weight: 0
+  - m_Path: US-Soldier /flag
+    m_Weight: 0
+  - m_Path: US-Soldier /flag.001
+    m_Weight: 0
+  - m_Path: US-Soldier /flag2
+    m_Weight: 0
+  - m_Path: US-Soldier /flag2.002
+    m_Weight: 0
+  - m_Path: US-Soldier /flag3
+    m_Weight: 0
+  - m_Path: US-Soldier /flag3.001
+    m_Weight: 0
+  - m_Path: US-Soldier /flag4
+    m_Weight: 0
+  - m_Path: US-Soldier /flag5
+    m_Weight: 0
+  - m_Path: US-Soldier /flag6
+    m_Weight: 0
+  - m_Path: US-Soldier /fonar
+    m_Weight: 0
+  - m_Path: US-Soldier /GlassesOkoLow
+    m_Weight: 0
+  - m_Path: US-Soldier /glasssesramLow
+    m_Weight: 0
+  - m_Path: US-Soldier /glove.001
+    m_Weight: 0
+  - m_Path: US-Soldier /Gun
+    m_Weight: 0
+  - m_Path: US-Soldier /Gun2
+    m_Weight: 0
+  - m_Path: US-Soldier /Headphone
+    m_Weight: 0
+  - m_Path: US-Soldier /Headphone.001
+    m_Weight: 0
+  - m_Path: US-Soldier /headphoneHelmet
+    m_Weight: 0
+  - m_Path: US-Soldier /headphoneHelmet.001
+    m_Weight: 0
+  - m_Path: US-Soldier /helmet
+    m_Weight: 0
+  - m_Path: US-Soldier /hhhead
+    m_Weight: 0
+  - m_Path: US-Soldier /Holster
+    m_Weight: 0
+  - m_Path: US-Soldier /Holster.001
+    m_Weight: 0
+  - m_Path: US-Soldier /koburkoleno.001
+    m_Weight: 0
+  - m_Path: US-Soldier /koburkoleno.002
+    m_Weight: 0
+  - m_Path: US-Soldier /logoarm
+    m_Weight: 0
+  - m_Path: US-Soldier /logoarm.001
+    m_Weight: 0
+  - m_Path: US-Soldier /logoarm2
+    m_Weight: 0
+  - m_Path: US-Soldier /logoarm2.001
+    m_Weight: 0
+  - m_Path: US-Soldier /logoarm2.002
+    m_Weight: 0
+  - m_Path: US-Soldier /logoarm2.003
+    m_Weight: 0
+  - m_Path: US-Soldier /logohelmet
+    m_Weight: 0
+  - m_Path: US-Soldier /logohelmet.001
+    m_Weight: 0
+  - m_Path: US-Soldier /logohelmet.002
+    m_Weight: 0
+  - m_Path: US-Soldier /m18
+    m_Weight: 0
+  - m_Path: US-Soldier /m18.001
+    m_Weight: 0
+  - m_Path: US-Soldier /m18.002
+    m_Weight: 0
+  - m_Path: US-Soldier /m18.003
+    m_Weight: 0
+  - m_Path: US-Soldier /magaz.001
+    m_Weight: 0
+  - m_Path: US-Soldier /magaz.002
+    m_Weight: 0
+  - m_Path: US-Soldier /magaz.004
+    m_Weight: 0
+  - m_Path: US-Soldier /Mask.001
+    m_Weight: 0
+  - m_Path: US-Soldier /meshok
+    m_Weight: 0
+  - m_Path: US-Soldier /mikrophone
+    m_Weight: 0
+  - m_Path: US-Soldier /nightvizione
+    m_Weight: 0
+  - m_Path: US-Soldier /nightvizione.001
+    m_Weight: 0
+  - m_Path: US-Soldier /p1
+    m_Weight: 0
+  - m_Path: US-Soldier /p2
+    m_Weight: 0
+  - m_Path: US-Soldier /p3
+    m_Weight: 0
+  - m_Path: US-Soldier /p4
+    m_Weight: 0
+  - m_Path: US-Soldier /p5
+    m_Weight: 0
+  - m_Path: US-Soldier /p6
+    m_Weight: 0
+  - m_Path: US-Soldier /p7
+    m_Weight: 0
+  - m_Path: US-Soldier /p8
+    m_Weight: 0
+  - m_Path: US-Soldier /p9
+    m_Weight: 0
+  - m_Path: US-Soldier /p10
+    m_Weight: 0
+  - m_Path: US-Soldier /pak1
+    m_Weight: 0
+  - m_Path: US-Soldier /pak1.001
+    m_Weight: 0
+  - m_Path: US-Soldier /portphel
+    m_Weight: 0
+  - m_Path: US-Soldier /Pounch1
+    m_Weight: 0
+  - m_Path: US-Soldier /Pounch1.001
+    m_Weight: 0
+  - m_Path: US-Soldier /Pounch1.002
+    m_Weight: 0
+  - m_Path: US-Soldier /Pounch1.003
+    m_Weight: 0
+  - m_Path: US-Soldier /Pounch1.004
+    m_Weight: 0
+  - m_Path: US-Soldier /Pounch1.005
+    m_Weight: 0
+  - m_Path: US-Soldier /Pounch1.006
+    m_Weight: 0
+  - m_Path: US-Soldier /PounchMag
+    m_Weight: 0
+  - m_Path: US-Soldier /PounchMag.001
+    m_Weight: 0
+  - m_Path: US-Soldier /PounchMag.002
+    m_Weight: 0
+  - m_Path: US-Soldier /racio
+    m_Weight: 0
+  - m_Path: US-Soldier /root
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_foot_root
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_foot_root/ik_foot_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_foot_root/ik_foot_l/ik_foot_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_foot_root/ik_foot_l/ik_foot_l_end/ik_foot_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_foot_root/ik_foot_l/ik_foot_l_end/ik_foot_l_end_end/ik_foot_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_foot_root/ik_foot_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_foot_root/ik_foot_r/ik_foot_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_foot_root/ik_foot_r/ik_foot_r_end/ik_foot_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_foot_root/ik_foot_r/ik_foot_r_end/ik_foot_r_end_end/ik_foot_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_hand_root
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_hand_root/ik_hand_gun
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_hand_root/ik_hand_gun/ik_hand_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_hand_root/ik_hand_gun/ik_hand_l/ik_hand_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_hand_root/ik_hand_gun/ik_hand_l/ik_hand_l_end/ik_hand_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_hand_root/ik_hand_gun/ik_hand_l/ik_hand_l_end/ik_hand_l_end_end/ik_hand_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_hand_root/ik_hand_gun/ik_hand_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_hand_root/ik_hand_gun/ik_hand_r/ik_hand_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_hand_root/ik_hand_gun/ik_hand_r/ik_hand_r_end/ik_hand_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/ik_hand_root/ik_hand_gun/ik_hand_r/ik_hand_r_end/ik_hand_r_end_end/ik_hand_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/index_01_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/index_01_l/index_02_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/index_01_l/index_02_l/index_03_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/index_01_l/index_02_l/index_03_l/index_03_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/index_01_l/index_02_l/index_03_l/index_03_l_end/index_03_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/index_01_l/index_02_l/index_03_l/index_03_l_end/index_03_l_end_end/index_03_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/middle_01_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/middle_01_l/middle_02_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/middle_01_l/middle_02_l/middle_03_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/middle_01_l/middle_02_l/middle_03_l/middle_03_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/middle_01_l/middle_02_l/middle_03_l/middle_03_l_end/middle_03_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/middle_01_l/middle_02_l/middle_03_l/middle_03_l_end/middle_03_l_end_end/middle_03_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/pinky_01_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/pinky_01_l/pinky_02_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/pinky_01_l/pinky_02_l/pinky_03_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/pinky_01_l/pinky_02_l/pinky_03_l/pinky_03_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/pinky_01_l/pinky_02_l/pinky_03_l/pinky_03_l_end/pinky_03_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/pinky_01_l/pinky_02_l/pinky_03_l/pinky_03_l_end/pinky_03_l_end_end/pinky_03_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/ring_01_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/ring_01_l/ring_02_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/ring_01_l/ring_02_l/ring_03_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/ring_01_l/ring_02_l/ring_03_l/ring_03_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/ring_01_l/ring_02_l/ring_03_l/ring_03_l_end/ring_03_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/ring_01_l/ring_02_l/ring_03_l/ring_03_l_end/ring_03_l_end_end/ring_03_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/thumb_01_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/thumb_01_l/thumb_02_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/thumb_01_l/thumb_02_l/thumb_03_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/thumb_01_l/thumb_02_l/thumb_03_l/thumb_03_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/thumb_01_l/thumb_02_l/thumb_03_l/thumb_03_l_end/thumb_03_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/hand_l/thumb_01_l/thumb_02_l/thumb_03_l/thumb_03_l_end/thumb_03_l_end_end/thumb_03_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/lowerarm_twist_01_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/lowerarm_twist_01_l/lowerarm_twist_01_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/lowerarm_twist_01_l/lowerarm_twist_01_l_end/lowerarm_twist_01_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/lowerarm_l/lowerarm_twist_01_l/lowerarm_twist_01_l_end/lowerarm_twist_01_l_end_end/lowerarm_twist_01_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/upperarm_twist_01_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/upperarm_twist_01_l/upperarm_twist_01_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/upperarm_twist_01_l/upperarm_twist_01_l_end/upperarm_twist_01_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_l/upperarm_l/upperarm_twist_01_l/upperarm_twist_01_l_end/upperarm_twist_01_l_end_end/upperarm_twist_01_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/index_01_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/index_01_r/index_02_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/index_01_r/index_02_r/index_03_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/index_01_r/index_02_r/index_03_r/index_03_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/index_01_r/index_02_r/index_03_r/index_03_r_end/index_03_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/index_01_r/index_02_r/index_03_r/index_03_r_end/index_03_r_end_end/index_03_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/middle_01_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/middle_01_r/middle_02_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/middle_01_r/middle_02_r/middle_03_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/middle_01_r/middle_02_r/middle_03_r/middle_03_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/middle_01_r/middle_02_r/middle_03_r/middle_03_r_end/middle_03_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/middle_01_r/middle_02_r/middle_03_r/middle_03_r_end/middle_03_r_end_end/middle_03_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/pinky_01_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/pinky_01_r/pinky_02_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/pinky_01_r/pinky_02_r/pinky_03_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/pinky_01_r/pinky_02_r/pinky_03_r/pinky_03_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/pinky_01_r/pinky_02_r/pinky_03_r/pinky_03_r_end/pinky_03_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/pinky_01_r/pinky_02_r/pinky_03_r/pinky_03_r_end/pinky_03_r_end_end/pinky_03_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/ring_01_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/ring_01_r/ring_02_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/ring_01_r/ring_02_r/ring_03_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/ring_01_r/ring_02_r/ring_03_r/ring_03_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/ring_01_r/ring_02_r/ring_03_r/ring_03_r_end/ring_03_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/ring_01_r/ring_02_r/ring_03_r/ring_03_r_end/ring_03_r_end_end/ring_03_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/thumb_01_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/thumb_01_r/thumb_02_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/thumb_01_r/thumb_02_r/thumb_03_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/thumb_01_r/thumb_02_r/thumb_03_r/thumb_03_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/thumb_01_r/thumb_02_r/thumb_03_r/thumb_03_r_end/thumb_03_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/thumb_01_r/thumb_02_r/thumb_03_r/thumb_03_r_end/thumb_03_r_end_end/thumb_03_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/Toon
+      Muzzleflash 1
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/Toon
+      Muzzleflash 1/Top
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/Toon
+      Muzzleflash 1/Side
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/Toon
+      Muzzleflash 1/Front
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/Toon
+      Muzzleflash 1/Point light
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/assault_rifle_01_iron_sights
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/assault_rifle_01_mag
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/assault_rifle_01_slider
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/SpawnPoints
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/SpawnPoints/CasingSpawnPoint
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/assault_rifle_01/SpawnPoints/BulletSpawnPoint
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/Weapon_Pistol
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/Weapon_Pistol/PistolModel
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/Weapon_Pistol/Muzzle
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/Weapon_Pistol/Muzzle/PistolMuzzleFlash
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/Weapon_Pistol/Muzzle/PistolMuzzleFlash/Top
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/Weapon_Pistol/Muzzle/PistolMuzzleFlash/Side
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/Weapon_Pistol/Muzzle/PistolMuzzleFlash/Front
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/Weapon_Pistol/Muzzle/PistolMuzzleFlash/Point
+      light
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/hand_r/Weapon_Pistol/CasingSpawnPoint
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/lowerarm_twist_01_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/lowerarm_twist_01_r/lowerarm_twist_01_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/lowerarm_twist_01_r/lowerarm_twist_01_r_end/lowerarm_twist_01_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/lowerarm_r/lowerarm_twist_01_r/lowerarm_twist_01_r_end/lowerarm_twist_01_r_end_end/lowerarm_twist_01_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/upperarm_twist_01_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/upperarm_twist_01_r/upperarm_twist_01_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/upperarm_twist_01_r/upperarm_twist_01_r_end/upperarm_twist_01_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/clavicle_r/upperarm_r/upperarm_twist_01_r/upperarm_twist_01_r_end/upperarm_twist_01_r_end_end/upperarm_twist_01_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/neck_01
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/neck_01/head
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/neck_01/head/head_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/neck_01/head/head_end/head_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/neck_01/head/head_end/head_end_end/head_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/spine_01/spine_02/spine_03/neck_01/ThirdPersonCameraTarget
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/calf_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/calf_l/calf_twist_01_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/calf_l/calf_twist_01_l/calf_twist_01_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/calf_l/calf_twist_01_l/calf_twist_01_l_end/calf_twist_01_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/calf_l/calf_twist_01_l/calf_twist_01_l_end/calf_twist_01_l_end_end/calf_twist_01_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/calf_l/foot_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/calf_l/foot_l/ball_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/calf_l/foot_l/ball_l/ball_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/calf_l/foot_l/ball_l/ball_l_end/ball_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/calf_l/foot_l/ball_l/ball_l_end/ball_l_end_end/ball_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/thigh_twist_01_l
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/thigh_twist_01_l/thigh_twist_01_l_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/thigh_twist_01_l/thigh_twist_01_l_end/thigh_twist_01_l_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_l/thigh_twist_01_l/thigh_twist_01_l_end/thigh_twist_01_l_end_end/thigh_twist_01_l_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/calf_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/calf_r/calf_twist_01_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/calf_r/calf_twist_01_r/calf_twist_01_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/calf_r/calf_twist_01_r/calf_twist_01_r_end/calf_twist_01_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/calf_r/calf_twist_01_r/calf_twist_01_r_end/calf_twist_01_r_end_end/calf_twist_01_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/calf_r/foot_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/calf_r/foot_r/ball_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/calf_r/foot_r/ball_r/ball_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/calf_r/foot_r/ball_r/ball_r_end/ball_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/calf_r/foot_r/ball_r/ball_r_end/ball_r_end_end/ball_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/thigh_twist_01_r
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/thigh_twist_01_r/thigh_twist_01_r_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/thigh_twist_01_r/thigh_twist_01_r_end/thigh_twist_01_r_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /root/pelvis/thigh_r/thigh_twist_01_r/thigh_twist_01_r_end/thigh_twist_01_r_end_end/thigh_twist_01_r_end_end_end
+    m_Weight: 0
+  - m_Path: US-Soldier /SCISSORS
+    m_Weight: 0
+  - m_Path: US-Soldier /shevrone
+    m_Weight: 0
+  - m_Path: US-Soldier /shnyr
+    m_Weight: 0
+  - m_Path: US-Soldier /ShoulderArmour
+    m_Weight: 0
+  - m_Path: US-Soldier /steklonight
+    m_Weight: 0
+  - m_Path: US-Soldier /steklonight.001
+    m_Weight: 0
+  - m_Path: US-Soldier /sumka2
+    m_Weight: 0
+  - m_Path: US-Soldier /sumka2.001
+    m_Weight: 0
+  - m_Path: US-Soldier /sumka3
+    m_Weight: 0
+  - m_Path: US-Soldier /sumka3.001
+    m_Weight: 0
+  - m_Path: US-Soldier /sumka3.002
+    m_Weight: 0
+  - m_Path: US-Soldier /sumka3.003
+    m_Weight: 0
+  - m_Path: US-Soldier /watch
+    m_Weight: 0
+  - m_Path: US-Soldier /xxx
+    m_Weight: 0
+  - m_Path: US-Soldier /ThirdPersonCameraTarget
+    m_Weight: 0

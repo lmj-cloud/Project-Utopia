@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: d435b20a56a9e954eb8437b8ca761f11
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/RecoveryRoom/DemoScene/RecoveryRoomNight/RecoveryRoomNight
+    Baking Set.asset
+  uploadId: 822378

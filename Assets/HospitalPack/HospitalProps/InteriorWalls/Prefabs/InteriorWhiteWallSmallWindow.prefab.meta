@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f8dc131d656078148aee902dee36aaaa
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/InteriorWhiteWallSmallWindow.prefab
+  uploadId: 822378

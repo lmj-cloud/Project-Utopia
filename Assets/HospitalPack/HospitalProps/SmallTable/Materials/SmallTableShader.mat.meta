@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ace6d90be7093e14599fa8524c04de5a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/SmallTable/Materials/SmallTableShader.mat
+  uploadId: 822378

@@ -1,11 +1,15 @@
 using System;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
  
 public class MaterialToHDRP : MonoBehaviour
 {
  
+    // 에디터 전용 머티리얼 변환 도구는 Player 빌드에서 제외한다.
+#if UNITY_EDITOR
     [MenuItem("Tools/Convert selected Materials to HDRP...", priority = 0)]
     private static void upgradeSelected()
     {
@@ -47,4 +51,5 @@ public class MaterialToHDRP : MonoBehaviour
         }
         return false;
     }
+#endif
 }

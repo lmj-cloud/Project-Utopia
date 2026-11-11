@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 350e7dc5eb6b34045ac1970c74a2afc2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Sky/Materials/cloudLayers_diff.mat
+  uploadId: 822378

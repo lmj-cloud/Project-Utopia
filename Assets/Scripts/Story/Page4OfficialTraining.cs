@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 /// <summary>기존 성공 이벤트와 실제 장비/조준 상태를 기존 TutorialManager에 연결한다.</summary>
@@ -23,7 +23,7 @@ public class Page4OfficialTraining : MonoBehaviour
         if (!tutorial.IsRunning || tutorial.CurrentStep == observed) return;
         observed = tutorial.CurrentStep;
         aimHeld = 0;
-        if (tutorial.StepNumber == 7 && !gunDialogueCompleted) StartCoroutine(ExplainKnife());
+        if (tutorial.CurrentStep.action == DemoAction.DaggerHit && !gunDialogueCompleted) StartCoroutine(ExplainKnife());
     }
     private IEnumerator ExplainKnife()
     {

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 08c1b96063693bf4dbf54f54266b97bb
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/OutsideTrim4M.prefab
+  uploadId: 822378

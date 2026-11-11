@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: f46c34f2a481a5a4e86147fc9c35bcd2
+labels:
+- Manholecover
+timeCreated: 1450186440
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 39272
+  packageName: Residential Buildings Pack
+  packageVersion: 2.8
+  assetPath: Assets/Residential Buildings Pack/Prefabs/Props/ManholeCover.prefab
+  uploadId: 762663

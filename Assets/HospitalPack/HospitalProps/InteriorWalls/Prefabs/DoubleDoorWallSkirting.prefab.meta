@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b342ad49611c2ef498261046e176aa27
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/DoubleDoorWallSkirting.prefab
+  uploadId: 822378

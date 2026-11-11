@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4fc7ba8014ae82b4294a166c3f545a0f
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/RecoveryRoom/Prefabs/RecoveryRoom.prefab
+  uploadId: 822378

@@ -19,6 +19,9 @@ namespace Capstone.Direction
         public Behaviour[] inputComponents = new Behaviour[0];
         public AudioClip transitionSound, crowdLoop;
         public UnityEvent onStarted=new UnityEvent(), onTransitionCovered=new UnityEvent(), onCompleted=new UnityEvent(), onCancelled=new UnityEvent();
+        [Tooltip("When enabled, existing Timeline tracks own the visible departure and white fade.")]
+        public bool timelineOwnsScreen;
+        private bool transitionCovered;
         public bool enableF8Test;
         [Min(0.1f)] public float timelineTimeout=30;
         public bool IsRunning {get;private set;}
@@ -37,7 +40,7 @@ namespace Capstone.Direction
         public void Play()
         {
             if(!isActiveAndEnabled || IsRunning || owner || (director && director.state==PlayState.Playing)) return;
-            owner=this; IsRunning=true;
+            owner=this; IsRunning=true; transitionCovered=false;
             enabledStates=new bool[inputComponents.Length];
             for(int i=0;i<inputComponents.Length;i++) if(inputComponents[i]){enabledStates[i]=inputComponents[i].enabled;inputComponents[i].enabled=false;}
             if(cinematicCamera){oldPriority=cinematicCamera.Priority;oldCameraEnabled=cinematicCamera.enabled;cinematicCamera.enabled=true;cinematicCamera.Priority=100;}
@@ -50,6 +53,11 @@ namespace Capstone.Direction
         {
             if(!InvokeSafely(onStarted)) yield break;
             if(!IsRunning) yield break;
+            if (timelineOwnsScreen)
+            {
+                yield return RunTimelinePresentation();
+                yield break;
+            }
             if(audioSystem) audioSystem.Play(transitionSound);
             if(screen) yield return screen.Fade(Color.white,1,0.5f);
             if(!InvokeSafely(onTransitionCovered)) yield break; // Teleport or scene handoff belongs to the main developer.
@@ -70,6 +78,41 @@ namespace Capstone.Direction
             else yield return new WaitForSecondsRealtime(0.5f);
             Restore(); Debug.Log("Direction sequence completed: "+name,this); onCompleted.Invoke();
         }
+        /// <summary>선택한 연출에서만 기존 Director를 먼저 재생한다. 다른 연출의 Fade 순서는 유지한다.</summary>
+        IEnumerator RunTimelinePresentation()
+        {
+            if (!director || !director.playableAsset) { Cancel(); yield break; }
+            finished = false;
+            ownsDirector = true;
+            director.stopped += Stopped;
+            director.time = 0;
+            director.Play();
+            float elapsed = 0f;
+            while (IsRunning && !finished && elapsed < timelineTimeout)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+            if (!IsRunning) yield break;
+            if (!finished) { Cancel(); yield break; }
+            Restore();
+            onCompleted.Invoke();
+        }
+
+        /// <summary>완전 백색 Signal에서 기존 인계 이벤트를 한 번만 호출한다.</summary>
+        public void TimelineTransitionCovered()
+        {
+            if (!timelineOwnsScreen || !IsRunning || transitionCovered) return;
+            if (!screen || !screen.overlay || screen.overlay.color.a < .999f)
+            {
+                Debug.LogError("Timeline transition requires full white coverage.", this);
+                Cancel();
+                return;
+            }
+            transitionCovered = true;
+            InvokeSafely(onTransitionCovered);
+        }
+
         /// <summary>
         /// 연결 이벤트의 예외를 기록하고 실패 시 연출 취소·복구를 요청한다.
         /// </summary>

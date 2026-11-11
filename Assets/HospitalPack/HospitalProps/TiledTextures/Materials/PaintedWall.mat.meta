@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fe757104f7cdc7d4989d25441cb99163
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/TiledTextures/Materials/PaintedWall.mat
+  uploadId: 822378

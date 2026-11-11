@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: AudienceWife
+  m_Controller: {fileID: 9100000, guid: 47807e644e0ae024dafe3e6dff008ac0, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: c1492df70e6547543bbabb893d72e854, type: 2}
+    m_OverrideClip: {fileID: 3094330708855449807, guid: 0553c8018e93de04c999a9201b1d8439, type: 3}
+  - m_OriginalClip: {fileID: 7400000, guid: 3e0ddd67dfa6b214fbf0b52431bd54d3, type: 2}
+    m_OverrideClip: {fileID: 0}

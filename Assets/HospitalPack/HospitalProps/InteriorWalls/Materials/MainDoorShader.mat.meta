@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6aedd588aaa940b468e9f97a6bc62b92
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Materials/MainDoorShader.mat
+  uploadId: 822378

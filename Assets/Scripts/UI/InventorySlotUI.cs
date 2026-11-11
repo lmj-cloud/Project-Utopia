@@ -20,6 +20,14 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IPointerDown
     [SerializeField, Min(0.01f)] private float hoverScale = 1.07f;
     [SerializeField, Min(0.01f)] private float pressedScale = 0.95f;
     [SerializeField, Min(0f)] private float transitionSpeed = 12f;
+    [Header("Slot Background Tint")]
+    [SerializeField] private Color normalColor = Color.white;
+    [SerializeField] private Color hoverColor = new Color(168f / 255f, 223f / 255f, 1f, 1f);
+    [SerializeField] private Color selectedColor = new Color(84f / 255f, 191f / 255f, 1f, 1f);
+    [SerializeField, Min(0f)] private float colorTransitionDuration = 0.12f;
+    private Color tintFromColor;
+    private Color tintTargetColor;
+    private float tintElapsed;
     private Vector3 originalVisualScale = Vector3.one;
     private bool hasCapturedVisualScale;
     private float currentScale = 1f;
@@ -61,14 +69,14 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IPointerDown
         }
     }
     /// <summary>
-    /// Hover와 실제 퀵슬롯 등록 상태를 서로 독립적으로 표시한다.
+    /// 기존 오버레이 표시를 해제한다. 상태 색상은 기존 Update에서 보간한다.
     /// </summary>
     public void RefreshHighlight()
     {
-        if (highlight != null) highlight.SetActive(item != null && hovered && !isDragging);
-        // Detail 선택과 별개로, 실제 퀵슬롯 등록 및 보유 수량만 읽는다.
-        if (selectedItem != null) selectedItem.SetActive(item != null && quantity > 0 &&
-            owner != null && owner.IsQuickSlotAssigned(item));
+        // 예전 오버레이 참조는 보존하지만, 렌더링은 배경 Image 하나로 통일한다.
+        // 클릭 선택과 퀵슬롯 등록 데이터는 기존 InventoryUI가 계속 관리한다.
+        if (highlight != null) highlight.SetActive(false);
+        if (selectedItem != null) selectedItem.SetActive(false);
     }
     private bool equipped;
     private int slotIndex = -1;
@@ -157,6 +165,43 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IPointerDown
         currentScale = Mathf.Lerp(currentScale, targetScale, blend);
         if (Mathf.Abs(currentScale - targetScale) < 0.0001f) currentScale = targetScale;
         if (visualRoot != null) visualRoot.localScale = originalVisualScale * currentScale;
+        UpdateBackgroundTint(false);
+    }
+
+    /// <summary>기존 클릭 선택 판정을 읽고 선택+Hover부터 우선 적용한다.</summary>
+    private Color GetStateColor()
+    {
+        bool hasItem = item != null && quantity > 0;
+        bool selected = hasItem && owner != null && owner.IsSelected(this);
+        bool pointerOver = hasItem && hovered && !isDragging && owner != null && owner.InteractionAllowed;
+        if (selected) return selectedColor;
+        if (pointerOver) return hoverColor;
+        return normalColor;
+    }
+
+    /// <summary>인벤토리가 시간을 멈춰도 배경 Tint만 지정 시간 동안 부드럽게 전환한다.</summary>
+    private void UpdateBackgroundTint(bool immediate)
+    {
+        if (pointerImage == null) pointerImage = GetComponent<Image>();
+        // 구형 슬롯에서 아이콘이 루트 Image를 공유하더라도 아이콘 색상은 변경하지 않는다.
+        if (pointerImage == null || pointerImage == iconImage) return;
+        Color target = GetStateColor();
+        if (immediate || colorTransitionDuration <= 0f)
+        {
+            pointerImage.color = target;
+            tintFromColor = target;
+            tintTargetColor = target;
+            tintElapsed = 0f;
+            return;
+        }
+        if (target != tintTargetColor)
+        {
+            tintFromColor = pointerImage.color;
+            tintTargetColor = target;
+            tintElapsed = 0f;
+        }
+        tintElapsed = Mathf.Min(colorTransitionDuration, tintElapsed + Time.unscaledDeltaTime);
+        pointerImage.color = Color.Lerp(tintFromColor, tintTargetColor, tintElapsed / colorTransitionDuration);
     }
 
     /// <summary>슬롯 재사용·비활성화 시 포인터 효과만 초기화하고 등록 정보는 변경하지 않는다.</summary>
@@ -174,6 +219,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IPointerDown
         currentScale = normalScale;
         if (visualRoot != null) visualRoot.localScale = originalVisualScale * normalScale;
         if (highlight != null) highlight.SetActive(false);
+        UpdateBackgroundTint(true);
     }
 
     /// <summary>
@@ -202,6 +248,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IPointerDown
             quantityText.raycastTarget = false;
         }
         RefreshHighlight();
+        UpdateBackgroundTint(true);
     }
 
     /// <summary>

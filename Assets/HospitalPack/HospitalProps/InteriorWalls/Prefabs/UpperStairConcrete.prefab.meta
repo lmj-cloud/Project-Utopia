@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: c4d0eed6802e0824eb94df0269184b18
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/UpperStairConcrete.prefab
+  uploadId: 822378

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 41299c5857d0a6047a1c2825097954d6
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/TVScreen.prefab
+  uploadId: 822378

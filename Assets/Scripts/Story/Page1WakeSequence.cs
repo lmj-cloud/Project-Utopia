@@ -20,6 +20,12 @@ public class Page1WakeSequence : MonoBehaviour
     [SerializeField] private UnityEvent onStandUpRequested = new UnityEvent();
     [SerializeField] private UnityEvent onWakeCompleted = new UnityEvent();
     [SerializeField] private UnityEvent onWakeCancelled = new UnityEvent();
+    [Header("실제 침대 기상 기준점")]
+    [SerializeField] private Transform wakeStartPoint;
+    [SerializeField] private UnityEngine.Timeline.AnimationTrack wakeMovementTrack;
+    private Vector3 previousTrackPosition;
+    private Vector3 previousTrackRotation;
+    private bool hasTrackSnapshot;
     private Coroutine presentation;
     private int requestId;
     private bool running;
@@ -54,6 +60,18 @@ public class Page1WakeSequence : MonoBehaviour
             !player.CanControlPlayer || playerCamera.HasTargetControl || !cutscene.CanPlay()) return;
         if (!screenEffects.TryAcquire(this)) return;
         ownsEffects = true;
+        Vector3 previousPosition = player.transform.position;
+        Quaternion previousRotation = player.transform.rotation;
+        if (wakeStartPoint != null && wakeMovementTrack != null)
+        {
+            // 위치 기준은 침대의 Inspector Marker, 실제 이동·발 높이 보정은 Timeline이 소유한다.
+            previousTrackPosition = wakeMovementTrack.position;
+            previousTrackRotation = wakeMovementTrack.eulerAngles;
+            hasTrackSnapshot = true;
+            wakeMovementTrack.position = wakeStartPoint.position;
+            wakeMovementTrack.eulerAngles = wakeStartPoint.eulerAngles;
+            player.GetComponent<PlayerMovement>().Teleport(wakeStartPoint.position, wakeStartPoint.rotation);
+        }
         Transform eye = playerCamera.FirstPersonTarget;
         eyeLocalPosition = eye.localPosition;
         eyeLocalRotation = eye.localRotation;
@@ -63,6 +81,7 @@ public class Page1WakeSequence : MonoBehaviour
         if (!cutscene.TryPlay(this, out requestId))
         {
             Cleanup();
+            player.GetComponent<PlayerMovement>().Teleport(previousPosition, previousRotation);
             running = false;
             Phase = "Failed";
             return;
@@ -151,6 +170,12 @@ public class Page1WakeSequence : MonoBehaviour
 
     private void Cleanup()
     {
+        if (hasTrackSnapshot && wakeMovementTrack != null)
+        {
+            wakeMovementTrack.position = previousTrackPosition;
+            wakeMovementTrack.eulerAngles = previousTrackRotation;
+            hasTrackSnapshot = false;
+        }
         if (presentation != null && officialDialogue != null) officialDialogue.CancelOwned(this);
         if (presentation != null) StopCoroutine(presentation);
         presentation = null;

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a616f495af926d74a9c6ff1c23b65435
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 112000000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalWard/DemoScene/HospitalWard/LightingData.asset
+  uploadId: 822378

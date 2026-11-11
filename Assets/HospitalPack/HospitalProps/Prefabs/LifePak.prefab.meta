@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6d68b10dce7b9e64587d81729103e65c
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/Prefabs/LifePak.prefab
+  uploadId: 822378

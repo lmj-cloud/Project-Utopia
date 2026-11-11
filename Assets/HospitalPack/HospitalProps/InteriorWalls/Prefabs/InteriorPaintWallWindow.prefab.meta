@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 53f24293d4f99544a83706746ce3cbb8
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 80735
+  packageName: Hospital Ward
+  packageVersion: 4.0
+  assetPath: Assets/HospitalPack/HospitalProps/InteriorWalls/Prefabs/InteriorPaintWallWindow.prefab
+  uploadId: 822378
