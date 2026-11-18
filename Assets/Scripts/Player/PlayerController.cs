@@ -177,8 +177,14 @@ public class PlayerController : MonoBehaviour
     private bool canMove = true;
     private bool isAiming;
     private Vector2 animationInput;
+    [SerializeField, Min(0f)] private float fireFacingHold = 0.3f;
+    [SerializeField, Min(1f)] private float firearmTurnSpeed = 540f;
     private float fireFacingUntil;
-    private int lastFiredFrame = -1;
+
+    // 우클릭 조준은 기존 입력 상태로 유지하고, 총기 자세만 좌클릭과 공유한다.
+    public bool CharacterAimActive => CanUseWeapons && weapon != null &&
+        (IsAiming || Time.time < fireFacingUntil ||
+         (Mouse.current != null && Mouse.current.leftButton.isPressed));
     // 입력을 잠근 소유자 집합. 자기 소유자만 제거해야 다른 컷신 잠금이 유지된다.
     private readonly HashSet<Object> controlLocks = new();
 
@@ -215,10 +221,8 @@ public class PlayerController : MonoBehaviour
     public bool CanApplyPistolAim => CanUseWeapons && equipment != null &&
         equipment.CurrentKind == PlayerEquipmentKind.Pistol && weapon != null &&
         equipment.CurrentWeapon == weapon && weapon.isActiveAndEnabled && !weapon.IsReloading;
-    public bool WantsPistolAimCorrection => CanApplyPistolAim && isAiming;
-    public bool PistolFiredThisFrame => CanApplyPistolAim && isAiming && lastFiredFrame == Time.frameCount;
-    public bool WantsRifleAimCorrection => CanApplyRifleAim && isAiming;
-    public bool RifleFiredThisFrame => CanApplyRifleAim && isAiming && lastFiredFrame == Time.frameCount;
+    public bool WantsPistolAimCorrection => CanApplyPistolAim && CharacterAimActive;
+    public bool WantsRifleAimCorrection => CanApplyRifleAim && CharacterAimActive;
     public bool CanControlPlayer => isActiveAndEnabled && canMove && controlLocks.Count == 0 &&
         playerStatus != null && !playerStatus.IsDead &&
         !(cameraController != null && cameraController.IsStoryFirstPerson) &&
@@ -256,15 +260,12 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 이전 무기의 발사 구독을 해제하고 새 무기의 구독과 Animator 상태를 연결한다.
+    /// 현재 무기를 바꾸고 이전 무기의 사격 추적 상태를 정리한다.
     /// </summary>
     private void SetCurrentWeapon(WeaponAssaultRifle next)
     {
-        if (weapon != null) weapon.OnFired -= OnWeaponFired;
         weapon = next;
-        if (weapon != null) weapon.OnFired += OnWeaponFired;
         fireFacingUntil = 0f;
-        lastFiredFrame = -1;
         if (playerAnimator != null && equipment != null) playerAnimator.OnEquipmentChanged(equipment.CurrentKind);
         else if (playerAnimator != null && weapon != null) playerAnimator.OnWeaponChanged(weapon.WeaponName);
     }
@@ -272,13 +273,10 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// 이번 발사에 맞추어 플레이어의 방향과 조준 보정 유지 시간을 갱신한다.
     /// </summary>
-    private void OnWeaponFired(Vector3 targetPoint)
+    internal void NotifyWeaponShot(WeaponAssaultRifle source)
     {
-        if (!CanControlPlayer) return;
-        fireFacingUntil = Time.time + Mathf.Max(0.25f, weapon.AttackInterval + 0.05f);
-        lastFiredFrame = Time.frameCount;
-        // 비조준 발사는 기존 이동 방향을 유지하고, 우클릭 조준 중에만 카메라를 향한다.
-        if (isAiming) playerMovement.FaceImmediately(cameraController.Forward);
+        if (source != weapon || !CanUseWeapons) return;
+        fireFacingUntil = Time.time + fireFacingHold;
     }
 
     /// <summary>
@@ -295,11 +293,6 @@ public class PlayerController : MonoBehaviour
         {
             BlockControl();
             return;
-        }
-        if (weapon != null && weapon.IsReloading)
-        {
-            fireFacingUntil = 0f;
-            lastFiredFrame = -1;
         }
         if (playerStatus == null || playerStatus.IsDead)
         {
@@ -373,8 +366,6 @@ public class PlayerController : MonoBehaviour
         UpdateCameraInput();
         Vector2 input = GetMoveInput();
         playerMovement.SetCrouching(keyboard != null && keyboard.leftCtrlKey.isPressed);
-        UpdateSpeed(input);
-        UpdateMove(input);
         UpdateJump();
         if (playerInventory != null && Mouse.current != null && (itemUse == null || !itemUse.IsUsing) &&
             (gameplayUI == null || !gameplayUI.IsDemoEndVisible))
@@ -385,7 +376,12 @@ public class PlayerController : MonoBehaviour
         if (Pressed(keyboard, itemUseKey) && itemUse != null && (gameplayUI == null || !gameplayUI.IsDemoEndVisible))
             itemUse.UseSelectedItem();
         if (!CanControlPlayer) { BlockControl(); return; }
-        if (equipment != null && equipment.IsMelee && melee != null && CanUseMelee)
+        bool useMelee = equipment != null && equipment.IsMelee && melee != null && CanUseMelee;
+        if (!useMelee) UpdateWeaponAction();
+        UpdateSpeed(input);
+        if (playerAnimator != null) playerAnimator.OnAiming(CharacterAimActive);
+        UpdateMove(input);
+        if (useMelee)
         {
             isAiming = false;
             bool mma = equipment.CurrentKind == PlayerEquipmentKind.Gloves;
@@ -425,7 +421,6 @@ public class PlayerController : MonoBehaviour
         else
         {
             if (melee != null) melee.SetBlocking(false);
-            UpdateWeaponAction();
         }
     }
 
@@ -499,7 +494,7 @@ public class PlayerController : MonoBehaviour
     private void UpdateSpeed(Vector2 input)
     {
         playerMovement.TargetSpeed = playerStatus.WalkSpeed;
-        if (isAiming || IsMmaCombatStance || IsKnifeCombatStance)
+        if (CharacterAimActive || IsMmaCombatStance || IsKnifeCombatStance)
         {
             // 조준은 기존 걷기 속도를 사용한다. Shift의 스태미나 검사도 실행하지 않는다.
             playerMovement.LimitHorizontalSpeed(playerStatus.WalkSpeed);
@@ -518,8 +513,6 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 moveDirection = cameraController.GetMoveDirection(input);
         playerMovement.MoveTo(moveDirection);
-        // 장비·재장전 여부와 무관하게 우클릭 조준 중일 때만 카메라 기준 방향을 사용한다.
-        // 비조준은 맨손과 같은 이동 방향 회전을 사용하며, 정지 중에는 현재 방향을 유지한다.
         if (combatActions != null && combatActions.HasMmaAttackFacing && CanUseMma)
         {
             // 한 공격의 정렬 방향은 모션이 끝날 때까지 유지한다. 카메라 자체는 계속 자유롭게 움직인다.
@@ -527,12 +520,14 @@ public class PlayerController : MonoBehaviour
         }
         else if (IsMmaCombatStance || IsKnifeCombatStance)
             playerMovement.SetCombatFacingDirection(MmaCameraForward, mmaFacingTurnSpeed);
+        else if (cameraController.IsThirdPerson && CharacterAimActive)
+            playerMovement.SetCombatFacingDirection(cameraController.Forward, firearmTurnSpeed);
         else if (cameraController.IsThirdPerson && !isAiming)
             playerMovement.SetFacingDirection(moveDirection, false);
         else
             playerMovement.SetFacingDirection(cameraController.Forward, true);
 
-        if (playerAnimator != null && (playerAnimator.UsesMmaCombatLocomotion || IsKnifeCombatStance))
+        if (playerAnimator != null && UsesLocalMovementAnimation())
         {
             // 요청 방향 대신 실제 수평 속도를 현재 몸의 로컬 축으로 변환한다.
             Vector3 localMove = Quaternion.Inverse(transform.rotation) * playerMovement.HorizontalVelocity;
@@ -576,8 +571,8 @@ public class PlayerController : MonoBehaviour
             if (keyboard.sKey.isPressed) vertical -= 1f;
             if (keyboard.wKey.isPressed) vertical += 1f;
         }
-        // 복싱 이동은 UpdateMove에서 몸의 기준 방향으로 변환한 뒤 한 번만 보간한다.
-        if (playerAnimator != null && (playerAnimator.UsesMmaCombatLocomotion || IsKnifeCombatStance))
+        // 방향 이동은 UpdateMove에서 몸의 기준 방향으로 변환한 뒤 한 번만 보간한다.
+        if (playerAnimator != null && UsesLocalMovementAnimation())
             return new Vector2(horizontal, vertical);
         float maxDelta = animationChangedSecond * Time.deltaTime;
         animationInput.x = Mathf.MoveTowards(animationInput.x, horizontal, maxDelta);
@@ -590,6 +585,12 @@ public class PlayerController : MonoBehaviour
         return new Vector2(horizontal, vertical);
     }
 
+    private bool UsesLocalMovementAnimation()
+    {
+        return playerAnimator.UsesMmaCombatLocomotion || IsKnifeCombatStance ||
+            (CharacterAimActive && equipment != null && equipment.CurrentKind == PlayerEquipmentKind.AssaultRifle);
+    }
+
     /// <summary>
     /// 마우스와 재장전 키 입력을 현재 총기의 발사·중단·재장전에 전달한다.
     /// </summary>
@@ -599,7 +600,12 @@ public class PlayerController : MonoBehaviour
         if (!CanUseWeapons) { weapon.CancelWeaponActions(); return; }
         if (Mouse.current != null)
         {
-            if (Mouse.current.leftButton.wasPressedThisFrame) weapon.StartWeaponAction();
+            if (Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                // 연타가 발사 간격에 걸려도 다음 유효 발사까지 몸 방향은 계속 추적한다.
+                fireFacingUntil = Time.time + fireFacingHold;
+                weapon.StartWeaponAction();
+            }
             else if (Mouse.current.leftButton.wasReleasedThisFrame) weapon.StopWeaponAction();
         }
         else weapon.StopWeaponAction();
@@ -627,7 +633,6 @@ public class PlayerController : MonoBehaviour
     {
         isAiming = false;
         fireFacingUntil = 0f;
-        lastFiredFrame = -1;
         animationInput = Vector2.zero;
         if (playerMovement != null) playerMovement.Stop();
         if (weapon != null) weapon.CancelWeaponActions();
@@ -659,7 +664,6 @@ public class PlayerController : MonoBehaviour
         if (playerAnimator != null && playerMovement != null && canMove && controlLocks.Count == 0)
         {
             playerAnimator.CurrentSpeed = CanControlPlayer ? playerMovement.HorizontalVelocity.magnitude : 0f;
-            playerAnimator.OnAiming(IsAiming);
         }
     }
 
@@ -729,7 +733,6 @@ public class PlayerController : MonoBehaviour
     {
         if (quickSlotWheel != null) quickSlotWheel.Cancel();
         if (equipment != null) equipment.OnWeaponChanged -= SetCurrentWeapon;
-        if (weapon != null) weapon.OnFired -= OnWeaponFired;
         BlockControl();
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;

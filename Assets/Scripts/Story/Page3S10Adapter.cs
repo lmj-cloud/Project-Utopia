@@ -3,6 +3,7 @@ using System.Collections;
 using Capstone.Direction.Workspace.S10;
 
 /// <summary>원본 S10의 Signal·트럭 연출을 보존하며 직접 운전 차량에서 연출 리그로 인계한다.</summary>
+[DefaultExecutionOrder(-50)]
 public class Page3S10Adapter : MonoBehaviour
 {
     [SerializeField] private Page3StoryController story;
@@ -18,6 +19,15 @@ public class Page3S10Adapter : MonoBehaviour
     [SerializeField] private Light homeSun;
     [SerializeField] private OfficialDialoguePlayer officialDialogue;
     [SerializeField] private PageTimelineSequence presentation;
+    [SerializeField] private Transform carHandoffOffset;
+    [SerializeField] private Transform carRouteStart;
+    [SerializeField] private Transform carContact;
+    [SerializeField] private Transform truckRouteStart;
+    [SerializeField] private Transform contactPoint;
+    [SerializeField, Min(0f)] private float authoredEntrySpeed = 15.5f;
+    private Vector3 entryOffset;
+    private Vector3 entryVelocityOffset;
+    private Quaternion entryRotation;
     private bool pending;
     public S10CrashSequence Sequence { get { return sequence; } }
     public int StartCount { get; private set; }
@@ -84,9 +94,22 @@ public class Page3S10Adapter : MonoBehaviour
             hidden[i] = renderers[i].forceRenderingOff;
             renderers[i].forceRenderingOff = true;
         }
-        // 실제 차량의 진입 방향을 원본 리그의 로컬 +Z와 맞춘다. 원본 트럭 궤적은 유지한다.
-        Vector3 forward = Vector3.ProjectOnPlane(vehicle.transform.forward, Vector3.up).normalized;
-        presentationRoot.transform.SetPositionAndRotation(vehicle.transform.position, Quaternion.LookRotation(forward));
+        if (carHandoffOffset != null && carRouteStart != null)
+        {
+            entryOffset = vehicle.transform.position - carRouteStart.position;
+            entryRotation = Quaternion.Inverse(carRouteStart.rotation) * vehicle.transform.rotation;
+            entryVelocityOffset = Vector3.ProjectOnPlane(velocity, Vector3.up) - carRouteStart.forward * authoredEntrySpeed;
+            carHandoffOffset.position = carHandoffOffset.parent.position + entryOffset;
+            sequence.car.localRotation = entryRotation;
+            sequence.driver.SetEntryCameraPose(new Pose(
+                vehicle.transform.InverseTransformPoint(vehicleCamera.transform.position),
+                Quaternion.Inverse(vehicle.transform.rotation) * vehicleCamera.transform.rotation));
+        }
+        else
+        {
+            Vector3 forward = Vector3.ProjectOnPlane(vehicle.transform.forward, Vector3.up).normalized;
+            presentationRoot.transform.SetPositionAndRotation(vehicle.transform.position, Quaternion.LookRotation(forward));
+        }
         vehicleCamera.enabled = false;
         if (vehicleListener != null) vehicleListener.enabled = false;
         sunEnabled = homeSun != null && homeSun.enabled;
@@ -110,6 +133,28 @@ public class Page3S10Adapter : MonoBehaviour
         StartCount++;
         if (presentation != null) presentation.Begin();
         return true;
+    }
+
+    private void LateUpdate()
+    {
+        if (!owned || carHandoffOffset == null || carRouteStart == null) return;
+        float time = (float)sequence.sequence.director.time;
+        float remaining = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(time / 1.4f));
+        float velocityBlend = 1f - Mathf.Clamp01(time / .32f);
+        Vector3 momentumOffset = entryVelocityOffset * (time * velocityBlend * velocityBlend);
+        carHandoffOffset.position = carHandoffOffset.parent.position + entryOffset * remaining + momentumOffset;
+        sequence.car.localRotation = Quaternion.Slerp(Quaternion.identity, entryRotation, remaining);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (carRouteStart == null || carContact == null || truckRouteStart == null || contactPoint == null) return;
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawLine(carRouteStart.position, carContact.position);
+        Gizmos.color = new Color(1f, .55f, .1f);
+        Gizmos.DrawLine(truckRouteStart.position, contactPoint.position);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(contactPoint.position, .35f);
     }
 
     private void Update()
@@ -140,6 +185,8 @@ public class Page3S10Adapter : MonoBehaviour
     {
         if (!owned) return;
         owned = false;
+        if (carHandoffOffset != null) carHandoffOffset.localPosition = Vector3.zero;
+        if (carHandoffOffset != null && sequence != null) sequence.car.localRotation = Quaternion.identity;
         if (presentationRoot != null) presentationRoot.SetActive(false);
         if (gameplayRoad != null) gameplayRoad.SetActive(roadWasActive);
         if (vehicleBody != null)

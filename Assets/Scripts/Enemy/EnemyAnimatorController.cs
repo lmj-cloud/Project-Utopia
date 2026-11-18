@@ -32,6 +32,19 @@ public class EnemyAnimatorController : MonoBehaviour
     private static readonly int Hit = Animator.StringToHash("Hit");
     private static readonly int IsAttacking = Animator.StringToHash("IsAttacking");
     private static readonly int IsTraining = Animator.StringToHash("IsTraining");
+    private BoxingOpponentLook boxingLook;
+
+    private void Awake()
+    {
+        boxingLook = GetComponentInParent<BoxingOpponentLook>();
+    }
+
+    private void OnAnimatorIK(int layerIndex)
+    {
+        if (layerIndex == 0 && boxingLook != null && animator != null)
+            boxingLook.ApplyAnimatorIK(animator);
+    }
+
     private bool hasWarned;
     private bool isAttacking;
     private SparringOpponent attackOwner;
@@ -156,6 +169,14 @@ public class EnemyAnimatorController : MonoBehaviour
         animator.ResetTrigger(PunchLeft);
         animator.ResetTrigger(PunchRight);
         animator.SetTrigger(PunchRight);
+    }
+
+    public void PlayFollowupPunch(bool right)
+    {
+        if (!CanAnimate()) return;
+        // The opposite-hand trigger has no transition out of a held punch state.
+        // Finish the blend before the incoming clip's ArmAttack at 0.033 seconds.
+        animator.CrossFadeInFixedTime(right ? "Base Layer.PunchRight" : "Base Layer.PunchLeft", .012f, 0, 0f);
     }
 
     /// <summary>공격 중 방어 금지를 표현하고 방어 상태를 전달한다. 판단 자체는 AI가 한다.</summary>

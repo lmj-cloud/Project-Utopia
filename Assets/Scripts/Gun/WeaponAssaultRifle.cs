@@ -16,6 +16,8 @@ public class ReserveAmmoEvent : UnityEngine.Events.UnityEvent<int> { }
 /// <summary>
 /// 소총과 권총의 발사, 조준 기준 Raycast 피해, 탄약, 재장전 및 발사 효과를 처리한다.
 /// </summary>
+// 화면과 상체 조준이 모두 평가된 뒤 같은 프레임에 총구 판정을 실행한다.
+[DefaultExecutionOrder(100)]
 public class WeaponAssaultRifle : MonoBehaviour
 {
     /// <summary>
@@ -76,6 +78,7 @@ public class WeaponAssaultRifle : MonoBehaviour
     public event System.Action<WeaponAssaultRifle> OnReloadCompleted;
     public float AttackInterval => weaponSetting.attackRate;
     public bool IsReloading => isReload;
+    internal bool IsAutomaticAttack => WeaponName != WeaponName.Pistol && weaponSetting.isAutomaticAttack;
 
     [HideInInspector]
     public AmmoEvent onAmmoEvent = new AmmoEvent();
@@ -147,7 +150,6 @@ public class WeaponAssaultRifle : MonoBehaviour
     private Coroutine reloadRoutine;
     private bool isEquipped = true;
     private bool hasPendingShot;
-    private Vector3 pendingShotTarget;
     private PlayerController playerController;
     private bool CanUse => isEquipped && isActiveAndEnabled &&
         (playerController == null || playerController.CanUseWeapons) && HasWeaponOwnership();
@@ -304,7 +306,7 @@ public class WeaponAssaultRifle : MonoBehaviour
         if (type != 0 || isReload || !CanUse)
             return;
 
-        if (weaponSetting.weaponName != WeaponName.Pistol && weaponSetting.isAutomaticAttack)
+        if (IsAutomaticAttack)
         {
             if (attackRoutine == null)
                 attackRoutine = StartCoroutine(OnAttackLoop());
@@ -364,10 +366,7 @@ public class WeaponAssaultRifle : MonoBehaviour
         weaponSetting.currentAmmo--;
         NotifyAmmoChanged();
 
-        Vector3 targetPoint = GetTargetPoint();
-        OnFired?.Invoke(targetPoint);
-        // 소총·권총 모두 최종 상체 IK 이후 같은 프레임에 한 번 판정한다.
-        pendingShotTarget = targetPoint;
+        playerController?.NotifyWeaponShot(this);
         hasPendingShot = true;
 
         if (animator != null)
@@ -386,8 +385,10 @@ public class WeaponAssaultRifle : MonoBehaviour
     {
         if (!hasPendingShot) return;
         hasPendingShot = false;
-        if (!CanUse) return;
-        TwoStepRaycast(pendingShotTarget);
+        if (!CanUse || mainCamera == null) return;
+        Vector3 targetPoint = GetTargetPoint();
+        OnFired?.Invoke(targetPoint);
+        TwoStepRaycast(targetPoint);
         SpawnCasing();
     }
 
@@ -489,12 +490,6 @@ public class WeaponAssaultRifle : MonoBehaviour
     {
         targetPoint = Vector3.zero;
         if (mainCamera == null) return false;
-        // 발사가 예약된 프레임에는 Update에서 확정한 목표를 그대로 사용한다.
-        if (hasPendingShot)
-        {
-            targetPoint = pendingShotTarget;
-            return true;
-        }
         targetPoint = GetCameraTargetPoint(mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f)));
         return true;
     }
@@ -512,7 +507,7 @@ public class WeaponAssaultRifle : MonoBehaviour
     /// </summary>
     private void TwoStepRaycast(Vector3 targetPoint)
     {
-        // OnFired에서 몸이 회전한 뒤 현재 시점의 총구 위치를 사용한다.
+        // 회전과 상체 IK가 끝난 현재 프레임의 총구 위치를 사용한다.
         Transform spawnPoint = ActiveBulletSpawnPoint;
         if (spawnPoint == null)
             return;
@@ -530,7 +525,8 @@ public class WeaponAssaultRifle : MonoBehaviour
         debugMuzzleDirection = attackDirection;
         debugImpactPoint = spawnPoint.position + attackDirection * weaponSetting.attackDistance;
 #endif
-        if (TryGetShotHit(spawnPoint.position, attackDirection, out RaycastHit hit))
+        if (TryGetMuzzleObstruction(spawnPoint.position, out RaycastHit hit) ||
+            TryGetShotHit(spawnPoint.position, attackDirection, out hit))
         {
 #if UNITY_EDITOR
             debugImpactPoint = hit.point;
@@ -556,6 +552,20 @@ public class WeaponAssaultRifle : MonoBehaviour
         }
 #endif
 
+    }
+
+    /// <summary>총구가 벽 안이나 건너편으로 들어간 경우 몸과 총구 사이의 표면에서 탄을 막는다.</summary>
+    private bool TryGetMuzzleObstruction(Vector3 muzzlePosition, out RaycastHit hit)
+    {
+        hit = default;
+        if (playerController == null) return false;
+
+        Vector3 origin = playerController.transform.position;
+        origin.y = muzzlePosition.y;
+        Vector3 offset = muzzlePosition - origin;
+        float distance = offset.magnitude;
+        if (distance < 0.01f) return false;
+        return TryGetShotHit(origin, offset / distance, out hit, distance);
     }
 
 #if UNITY_EDITOR
@@ -589,20 +599,21 @@ public class WeaponAssaultRifle : MonoBehaviour
     /// <summary>
     /// 발사 경로에서 제외 Collider를 걸러 가장 가까운 유효 충돌을 찾는다.
     /// </summary>
-    private bool TryGetShotHit(Vector3 origin, Vector3 direction, out RaycastHit hit)
+    private bool TryGetShotHit(Vector3 origin, Vector3 direction, out RaycastHit hit,
+        float maximumDistance = float.PositiveInfinity)
     {
-        if (ignoredShotColliders == null || ignoredShotColliders.Length == 0)
-            return Physics.Raycast(origin, direction, out hit, weaponSetting.attackDistance, shotLayers, shotTriggerInteraction);
+        float distance = Mathf.Min(maximumDistance, weaponSetting.attackDistance);
+        if (playerController == null && (ignoredShotColliders == null || ignoredShotColliders.Length == 0))
+            return Physics.Raycast(origin, direction, out hit, distance, shotLayers, shotTriggerInteraction);
 
         // RaycastAll is unordered: choose the nearest non-ignored hit, including walls.
         hit = default;
         float nearestDistance = float.PositiveInfinity;
         bool found = false;
-        foreach (RaycastHit candidate in Physics.RaycastAll(origin, direction, weaponSetting.attackDistance, shotLayers, shotTriggerInteraction))
+        foreach (RaycastHit candidate in Physics.RaycastAll(origin, direction, distance, shotLayers, shotTriggerInteraction))
         {
-            bool ignored = false;
-            foreach (Collider excluded in ignoredShotColliders)
-                if (excluded != null && excluded == candidate.collider) { ignored = true; break; }
+            if (playerController != null && candidate.collider.transform.IsChildOf(playerController.transform)) continue;
+            bool ignored = System.Array.IndexOf(ignoredShotColliders ?? System.Array.Empty<Collider>(), candidate.collider) >= 0;
             if (ignored || candidate.distance >= nearestDistance) continue;
             nearestDistance = candidate.distance;
             hit = candidate;

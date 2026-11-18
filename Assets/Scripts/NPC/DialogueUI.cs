@@ -44,8 +44,11 @@ public class DialogueUI : MonoBehaviour
     [Header("Per-dialogue Auto Reading")]
     [SerializeField, Min(0f)] private float autoReadBaseDelay = 1.5f;
     [SerializeField, Min(0f)] private float autoReadSecondsPerCharacter = .04f;
+    [SerializeField] private bool useLengthBasedReadingByDefault;
+    [SerializeField, Min(0f)] private float autoReadMaximumDelay;
     private bool currentAutoAdvance;
     private bool lengthBasedReading;
+    private float currentReadDelayMultiplier = 1f;
     private Func<int, IEnumerator> beforeNextLine;
     private Coroutine lineTransitionRoutine;
     private int dialogueRevision;
@@ -118,12 +121,12 @@ public class DialogueUI : MonoBehaviour
     /// <summary>
     /// 표시 참조와 대사·화자 정보를 확인하고 완료·취소 콜백을 가진 대화 시퀀스를 연다.
     /// </summary>
-    public bool TryOpenNamedSequence(string[] dialogueLines, string[] names, bool blockInput, Action onCompleted, Action onCancelled, DialogueSpeaker[] speakers = null, DialogueProgressMode? progressMode = null, Func<int, IEnumerator> lineTransition = null)
+    public bool TryOpenNamedSequence(string[] dialogueLines, string[] names, bool blockInput, Action onCompleted, Action onCancelled, DialogueSpeaker[] speakers = null, DialogueProgressMode? progressMode = null, Func<int, IEnumerator> lineTransition = null, float autoReadDelayMultiplier = 1f)
     {
-        return TryOpenSequence(dialogueLines, speakers, null, DialogueSpeaker.NPC, onCompleted, onCancelled, names, blockInput, progressMode, lineTransition);
+        return TryOpenSequence(dialogueLines, speakers, null, DialogueSpeaker.NPC, onCompleted, onCancelled, names, blockInput, progressMode, lineTransition, autoReadDelayMultiplier);
     }
     private bool TryOpenSequence(string[] dialogueLines, DialogueSpeaker[] speakers, string npcName,
-        DialogueSpeaker defaultSpeaker, Action onCompleted, Action onCancelled, string[] names = null, bool blockInput = true, DialogueProgressMode? progressMode = null, Func<int, IEnumerator> lineTransition = null)
+        DialogueSpeaker defaultSpeaker, Action onCompleted, Action onCancelled, string[] names = null, bool blockInput = true, DialogueProgressMode? progressMode = null, Func<int, IEnumerator> lineTransition = null, float autoReadDelayMultiplier = 1f)
     {
         if (!IsReady || IsOpen || dialogueLines == null) return false;
         List<string> validLines = new();
@@ -146,7 +149,8 @@ public class DialogueUI : MonoBehaviour
         ResetAdvanceState();
         dialogueRevision++;
         currentAutoAdvance = progressMode.HasValue ? progressMode.Value == DialogueProgressMode.Auto : allowAutoAdvance;
-        lengthBasedReading = progressMode.HasValue && progressMode.Value == DialogueProgressMode.Auto;
+        lengthBasedReading = progressMode.HasValue ? progressMode.Value == DialogueProgressMode.Auto : useLengthBasedReadingByDefault;
+        currentReadDelayMultiplier = Mathf.Max(0f, autoReadDelayMultiplier);
         beforeNextLine = lineTransition;
         lines = validLines.ToArray();
         speakerNames = validNames.ToArray();
@@ -277,8 +281,10 @@ public class DialogueUI : MonoBehaviour
 
     private float CurrentReadDelay()
     {
-        if (!lengthBasedReading) return Mathf.Max(0f, autoAdvanceDelay);
-        return autoReadBaseDelay + autoReadSecondsPerCharacter * dialogueText.textInfo.characterCount;
+        if (!lengthBasedReading) return Mathf.Max(0f, autoAdvanceDelay) * currentReadDelayMultiplier;
+        float delay = autoReadBaseDelay + autoReadSecondsPerCharacter * dialogueText.textInfo.characterCount;
+        if (autoReadMaximumDelay > 0f) delay = Mathf.Min(delay, autoReadMaximumDelay);
+        return delay * currentReadDelayMultiplier;
     }
     private IEnumerator AdvanceAfterTransition(int next, int revision)
     {

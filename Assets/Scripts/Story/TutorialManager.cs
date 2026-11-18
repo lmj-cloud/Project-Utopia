@@ -35,6 +35,8 @@ public class TutorialManager : MonoBehaviour
         public GameFlowStage stage;
         public DemoAction action;
         public UnityEngine.Object target;
+        public Transform shootingRangeTargets;
+        public Page4StoryController requireRangeArrival;
         public bool requireTarget;
         public bool checkEquipmentKind;
         public PlayerEquipmentKind equipmentKind;
@@ -198,7 +200,8 @@ public class TutorialManager : MonoBehaviour
     public void RequestShowCurrentTutorial()
     {
         if (!isActiveAndEnabled || !running || changingStep || !IsCurrentFlow ||
-            displayState != TutorialDisplayState.WaitingForShow) return;
+            displayState != TutorialDisplayState.WaitingForShow ||
+            (CurrentStep?.requireRangeArrival != null && !CurrentStep.requireRangeArrival.CanStartRangeAim)) return;
         if (gameplayUI == null)
         {
             if (!warnedMissingUI) Debug.LogWarning("TutorialManager: GameplayUI를 연결하세요.", this);
@@ -239,7 +242,7 @@ public class TutorialManager : MonoBehaviour
         // WASD 키를 모두 요구하는 것은 이동 입력 학습 단계뿐이다. 도착 단계는 실제 대상 도착으로 판단한다.
         if (step.keys == TutorialKeyLayout.WASD && step.action == DemoAction.Move && movementKeyMask != 15) return;
         if ((!standaloneTest && step.stage != flow.CurrentStage) || step.action != action ||
-            (step.requireTarget && step.target == null) || (step.target != null && step.target != target)) return;
+            !MatchesTarget(step, target)) return;
         if (step.checkEquipmentKind && (equipment == null || equipment.CurrentKind != step.equipmentKind)) return;
         currentCount++;
         lastCountedFrame = Time.frameCount;
@@ -279,6 +282,17 @@ public class TutorialManager : MonoBehaviour
     /// <summary>
     /// 지정 조사 대상의 상호작용 성공을 튜토리얼에 보고한다.
     /// </summary>
+    private static bool MatchesTarget(Step step, UnityEngine.Object target)
+    {
+        if (step.shootingRangeTargets != null)
+        {
+            if (!(target is Component component)) return false;
+            ShootingRangeTarget practiceTarget = component.GetComponentInParent<ShootingRangeTarget>();
+            return practiceTarget != null && practiceTarget.transform.IsChildOf(step.shootingRangeTargets);
+        }
+        return (step.target != null || !step.requireTarget) && (step.target == null || step.target == target);
+    }
+
     public void OnInspected(UnityEngine.Object target) => Report(DemoAction.Inspect, target);
     /// <summary>Bridge가 실제 이동을 확인한 키만 기록한다. 같은 키와 UI/컷씬 중 입력은 성공시키지 않는다.</summary>
     public void RecordMovementKey(int index)

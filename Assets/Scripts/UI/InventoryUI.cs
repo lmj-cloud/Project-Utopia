@@ -994,24 +994,9 @@ public class InventoryUI : MonoBehaviour
     {
         RefreshWeaponIcon(primaryWeaponIcon, PlayerEquipmentKind.AssaultRifle);
         RefreshWeaponIcon(secondaryWeaponIcon, PlayerEquipmentKind.Pistol);
-        WeaponText(primaryWeaponText, PlayerEquipmentKind.AssaultRifle, "주무기");
-        WeaponText(pistolWeaponText, PlayerEquipmentKind.Pistol, "권총");
-        WeaponText(meleeWeaponText, PlayerEquipmentKind.Dagger, "근접 무기");
-    }
-    /// <summary>
-    /// 현재 장비 종류를 표시용 무기 이름으로 변환한다.
-    /// </summary>
-    private void WeaponText(TMP_Text text, PlayerEquipmentKind kind, string label)
-    {
-        if (text == null) return;
-        if (kind == PlayerEquipmentKind.AssaultRifle || kind == PlayerEquipmentKind.Pistol)
-        {
-            ItemData item = equipment != null ? equipment.GetRequiredItem(kind) : null;
-            bool hasWeapon = equipment != null && equipment.HasOwnership(kind);
-            text.text = hasWeapon ? item.ItemName + (equipment.CurrentKind == kind ? " · 장착됨" : " · 보유") : label + " · 미보유";
-            return;
-        }
-        text.text = label + (equipment == null || !equipment.IsAssigned(kind) ? " · 준비되지 않음" : equipment.CurrentKind == kind ? " · 장착됨" : " · 배정됨");
+        if (primaryWeaponText != null) primaryWeaponText.text = "주무기";
+        if (pistolWeaponText != null) pistolWeaponText.text = "보조무기";
+        if (meleeWeaponText != null) meleeWeaponText.text = "근접무기";
     }
     /// <summary>
     /// 소유 중인 총기의 아이콘을 기존 장비 슬롯에 표시한다.

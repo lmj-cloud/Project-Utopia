@@ -25,6 +25,7 @@ public class PageTimelineSequence : MonoBehaviour
     [SerializeField] private PlayableDirector director;
     [SerializeField] private OfficialDialoguePlayer dialogue;
     [SerializeField] private DialogueCue[] dialogueCues = new DialogueCue[0];
+    [SerializeField, Min(.1f)] private float autoReadDelayMultiplier = 1f;
     [SerializeField] private CanvasGroup[] retainAlphas = new CanvasGroup[0];
     [SerializeField] private Transform[] retainTransforms = new Transform[0];
     [SerializeField] private Transform origin;
@@ -37,6 +38,7 @@ public class PageTimelineSequence : MonoBehaviour
     [SerializeField] private CinemachineTrack dialogueCameraTrack;
     [SerializeField] private SignalAsset[] dialogueCameraSignals = new SignalAsset[0];
     [SerializeField, Min(0f)] private float dialogueCameraBlendDuration = .4f;
+    [SerializeField] private bool timelineOwnsDialogueCamera;
     private int dialogueCameraOverride = -1;
     private ICinemachineCamera currentDialogueCamera;
     private bool dialoguePresentationBusy;
@@ -102,9 +104,13 @@ public class PageTimelineSequence : MonoBehaviour
         return active;
     }
 
-    public IEnumerator Play()
+    public IEnumerator Play() => PlaySequence(false);
+
+    public IEnumerator WaitForCompletion() => PlaySequence(true);
+
+    private IEnumerator PlaySequence(bool alreadyStarted)
     {
-        if (!Begin()) yield break;
+        if (alreadyStarted ? !active : !Begin()) yield break;
         while (active && (director.time < director.duration || waiting || dialoguePresentationBusy)) yield return null;
         if (!active) yield break;
         Completed = true;
@@ -173,7 +179,7 @@ public class PageTimelineSequence : MonoBehaviour
         if (cue.overrideProgressMode) mode = cue.progressMode;
         if (!cue.synchronizeCamera || dialogueCameraTrack == null)
         {
-            yield return dialogue.Play(cue.section, cue.blocksGameplay, cue.first, cue.count, this, mode);
+            yield return dialogue.Play(cue.section, cue.blocksGameplay, cue.first, cue.count, this, mode, autoReadDelayMultiplier: autoReadDelayMultiplier);
             yield break;
         }
         dialoguePresentationBusy = true;
@@ -183,7 +189,7 @@ public class PageTimelineSequence : MonoBehaviour
             // 기존 Timeline Shot/Signal을 읽고 같은 Brain의 소유 Override만 사용한다.
             yield return BlendDialogueCamera(CameraForLine(cue.first));
             yield return dialogue.Play(cue.section, cue.blocksGameplay, cue.first, cue.count, this, mode,
-                next => BlendDialogueCamera(CameraForLine(cue.first + next)));
+                next => BlendDialogueCamera(CameraForLine(cue.first + next)), autoReadDelayMultiplier);
             if (dialogue.LastCompleted) yield return BlendDialogueCamera(CameraAtTime(director.time));
         }
         finally
@@ -232,14 +238,17 @@ public class PageTimelineSequence : MonoBehaviour
         {
             elapsed += Time.unscaledDeltaTime;
             float weight = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
-            dialogueCameraOverride = brain.SetCameraOverride(dialogueCameraOverride, dialogueCameraTrack.TrackPriority + 1,
-                currentDialogueCamera, target, weight, Time.unscaledDeltaTime);
+            if (!timelineOwnsDialogueCamera)
+                dialogueCameraOverride = brain.SetCameraOverride(dialogueCameraOverride, dialogueCameraTrack.TrackPriority + 1,
+                    currentDialogueCamera, target, weight, Time.unscaledDeltaTime);
             yield return null;
         }
         if (!active) yield break;
-        dialogueCameraOverride = brain.SetCameraOverride(dialogueCameraOverride, dialogueCameraTrack.TrackPriority + 1,
-            target, target, 1f, Time.unscaledDeltaTime);
+        if (!timelineOwnsDialogueCamera)
+            dialogueCameraOverride = brain.SetCameraOverride(dialogueCameraOverride, dialogueCameraTrack.TrackPriority + 1,
+                target, target, 1f, Time.unscaledDeltaTime);
         currentDialogueCamera = target;
+        // Timeline 카메라를 사용하는 경우에도 기존 문장 전환 대기 시간은 유지한다.
         // Brain LateUpdate에서 최종 Camera가 반영된 다음 문장을 표시한다.
         yield return null;
     }

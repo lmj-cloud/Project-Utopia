@@ -14,6 +14,8 @@ public class PlayerCombatActions : MonoBehaviour
     [SerializeField] private PlayerEquipment equipment;
     [SerializeField] private PlayerAnimatorController animator;
     [SerializeField] private ActionAnimationEventRelay relay;
+    [SerializeField] private TrailRenderer knifeSwingTrail;
+    private int trailStrike;
     // 암살·마무리의 거리와 장애물 검사를 시작하는 기준점.
     [SerializeField] private Transform executionOrigin;
     [SerializeField, Min(0.1f)] private float executionRange = 1.2f;
@@ -235,12 +237,31 @@ public class PlayerCombatActions : MonoBehaviour
         if (!TryGetMmaProgress(out progress)) return;
         CombatAnimationProfile.Binding binding = profile.GetBinding(action);
         if (binding == null || binding.normalizedHitTimes == null || binding.normalizedHitTimes.Length == 0) return;
+        UpdateKnifeTrail(progress, binding.normalizedHitTimes);
         for (int i = 0; i < binding.normalizedHitTimes.Length; i++)
         {
             if (progress >= binding.normalizedHitTimes[i]) ConsumeKnifeHit(requestId, i + 1);
         }
         int allHits = (1 << binding.normalizedHitTimes.Length) - 1;
         if (progress >= 1f && comboStrikeMask == allHits) ConsumeComplete(requestId);
+    }
+
+    private void UpdateKnifeTrail(float progress, float[] hitTimes)
+    {
+        if (knifeSwingTrail == null) return;
+        int strike = 0;
+        for (int i = 0; i < hitTimes.Length; i++)
+        {
+            if (progress >= hitTimes[i] - .10f && progress <= hitTimes[i] + .07f)
+            {
+                strike = i + 1;
+                break;
+            }
+        }
+        if (strike == trailStrike) return;
+        trailStrike = strike;
+        if (strike != 0) knifeSwingTrail.Clear();
+        knifeSwingTrail.emitting = strike != 0;
     }
 
     public bool ConsumeKnifeHit(int id, int strikeIndex)
@@ -536,6 +557,8 @@ public class PlayerCombatActions : MonoBehaviour
     private void EndAction(bool restoreAnimation = true, bool chainMma = false, bool completedMma = false, float recoveryOverride = -1f)
     {
         isRunning = false;
+        trailStrike = 0;
+        if (knifeSwingTrail != null) knifeSwingTrail.emitting = false;
         if (relay != null) relay.EndCombatRequest(this, requestId);
         if (target != null) target.Release(this, requestId);
         target = null;

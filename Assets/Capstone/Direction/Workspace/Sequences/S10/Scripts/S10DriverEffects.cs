@@ -20,6 +20,14 @@ namespace Capstone.Direction.Workspace.S10
         ICinemachineCamera previousSolo;
         bool previousCracks,acquired;
         Color previousRed;
+        Pose? entryCameraPose;
+
+        public void SetEntryCameraPose(Pose carLocalPose) => entryCameraPose = carLocalPose;
+
+        private Pose WorldEntryPose(Pose localPose)
+        {
+            return new Pose(owner.car.TransformPoint(localPose.position), owner.car.rotation * localPose.rotation);
+        }
         void Awake()
         {
             // The FBX contains an authoring camera aimed at its grille. It must never
@@ -37,15 +45,21 @@ namespace Capstone.Direction.Workspace.S10
             previousUpdate=brain.UpdateMethod;previousIgnoreTimeScale=brain.IgnoreTimeScale;
             previousSolo=CinemachineCore.SoloCamera;CinemachineCore.SoloCamera=null;
             brain.UpdateMethod=CinemachineBrain.UpdateMethods.ManualUpdate;brain.IgnoreTimeScale=true;
-            owner.cinematicPose.SetPositionAndRotation(seatEye.position,seatEye.rotation);owner.outputCamera.transform.SetPositionAndRotation(seatEye.position,seatEye.rotation);
+            Pose pose = entryCameraPose is Pose entry
+                ? WorldEntryPose(entry)
+                : new Pose(seatEye.position, seatEye.rotation);
+            owner.cinematicPose.SetPositionAndRotation(pose.position, pose.rotation);
+            owner.outputCamera.transform.SetPositionAndRotation(pose.position, pose.rotation);
         }
         void LateUpdate()
         {
             // Procedural pose is written in Update. Resolve the output camera afterwards,
             // including when SmartUpdate would otherwise classify a stationary seat rig.
-            if(acquired&&owner&&owner.Active&&brain&&brain.isActiveAndEnabled)brain.ManualUpdate();
+            if (!acquired || !owner || !owner.Active || !brain || !brain.isActiveAndEnabled) return;
+            if (owner.TimelineOwnsVehicleMotion) ApplyCamera((float)owner.sequence.director.time);
+            brain.ManualUpdate();
         }
-        public void Apply(float t)
+        void ApplyCamera(float t)
         {
             var s=owner.timing;
             float hit=t>=s.ImpactAt?Mathf.Exp(-(t-s.ImpactAt)*10):0;
@@ -53,8 +67,28 @@ namespace Capstone.Direction.Workspace.S10
             float glance=t<s.ApproachAt?Mathf.Sin(Mathf.Clamp01(t/Mathf.Max(.1f,s.ApproachAt))*Mathf.PI)*38:0;
             float sway=t<s.ImpactAt?.003f:.012f*disorient;
             Vector3 offset=new Vector3(Mathf.Sin(t*19)*sway,Mathf.Sin(t*23)*sway,-hit*.02f+hit*.20f);
-            owner.cinematicPose.SetPositionAndRotation(seatEye.position+seatEye.TransformVector(offset),seatEye.rotation*Quaternion.Euler(hit*2.3f+disorient*.6f,glance,hit*Mathf.Sin(t*37)*.7f));
+            Vector3 position = seatEye.position;
+            Quaternion rotation = seatEye.rotation;
+            // Page3 authors the look and recoil on DriverSeatEye. The standalone S10 retains its procedural pose.
+            if (!owner.TimelineOwnsVehicleMotion)
+            {
+                position += seatEye.TransformVector(offset);
+                rotation *= Quaternion.Euler(hit * 2.3f + disorient * .6f, glance, hit * Mathf.Sin(t * 37) * .7f);
+            }
+            if (entryCameraPose is Pose entry)
+            {
+                float blend = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / .65f));
+                Pose entryWorld = WorldEntryPose(entry);
+                position = Vector3.Lerp(entryWorld.position, position, blend);
+                rotation = Quaternion.Slerp(entryWorld.rotation, rotation, blend);
+            }
+            owner.cinematicPose.SetPositionAndRotation(position, rotation);
             var lens=owner.sequence.cinematicCamera.Lens;lens.FieldOfView=Mathf.Lerp(72,68,Mathf.SmoothStep(0,1,Mathf.InverseLerp(s.DangerAt,s.ImpactAt,t)));lens.NearClipPlane=.025f;owner.sequence.cinematicCamera.Lens=lens;
+        }
+        public void Apply(float t)
+        {
+            if (!owner.TimelineOwnsVehicleMotion) ApplyCamera(t);
+            var s = owner.timing;
             float progression=Mathf.Clamp01(Mathf.InverseLerp(s.ImpactAt,s.CoveredAt,t));
             RedStrength=t<s.ImpactAt?0:Mathf.Lerp(.05f,.18f,Mathf.SmoothStep(0,1,progression));
             subjectiveRed.color=new Color(.58f,.015f,.01f,RedStrength);
@@ -77,6 +111,7 @@ namespace Capstone.Direction.Workspace.S10
             if(owner&&owner.outputCamera)owner.outputCamera.GetComponent<CinemachineBrain>().DefaultBlend=previousBlend;
             if(brain){brain.UpdateMethod=previousUpdate;brain.IgnoreTimeScale=previousIgnoreTimeScale;}
             CinemachineCore.SoloCamera=previousSolo;previousSolo=null;
+            entryCameraPose = null;
             RedStrength=0;EyeCycle=0;
         }
     }

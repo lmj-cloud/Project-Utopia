@@ -14,6 +14,11 @@ public class InteractionPrompt : MonoBehaviour
     [SerializeField] private Animator panelAnimator;
     [SerializeField] private CanvasGroup canvasGroup;
     [SerializeField] private TMP_Text keyText;
+    [Header("Optional Pickup Anchor")]
+    [SerializeField] private Transform pickupUIAnchor;
+    [SerializeField] private Renderer pickupRenderer;
+    [SerializeField, Min(0f)] private float pickupLabelClearance = .32f;
+
     private bool isVisible;
     private Key displayedKey = Key.None;
 
@@ -31,7 +36,7 @@ public class InteractionPrompt : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (viewCamera != null) transform.rotation = viewCamera.transform.rotation;
+        UpdatePromptPose();
         UpdateKeyText();
         bool canShow = playerController != null && playerController.CanControlPlayer &&
             playerInteraction != null && interactionTarget != null &&
@@ -58,6 +63,23 @@ public class InteractionPrompt : MonoBehaviour
     /// <summary>
     /// 대상이 비활성화되면 표시 상태를 초기화하여 재활성화 때 등장 동작을 다시 시작한다.
     /// </summary>
+    private void UpdatePromptPose()
+    {
+        if (pickupUIAnchor != null && pickupRenderer != null)
+        {
+            Bounds bounds = pickupRenderer.bounds;
+            Vector3 anchorPosition = new Vector3(bounds.center.x, bounds.max.y + pickupLabelClearance, bounds.center.z);
+            Vector3 forward = viewCamera != null ? viewCamera.transform.forward : Vector3.forward;
+            forward = Vector3.ProjectOnPlane(forward, Vector3.up);
+            Quaternion rotation = forward.sqrMagnitude > .0001f ? Quaternion.LookRotation(forward) : Quaternion.identity;
+            pickupUIAnchor.SetPositionAndRotation(anchorPosition, rotation);
+        }
+        else if (viewCamera != null)
+        {
+            transform.rotation = viewCamera.transform.rotation;
+        }
+    }
+
     private void OnDisable()
     {
         isVisible = false;

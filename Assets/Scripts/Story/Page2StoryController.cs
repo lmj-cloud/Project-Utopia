@@ -31,9 +31,38 @@ public class Page2StoryController : MonoBehaviour
     [SerializeField] private TMPro.TMP_Text healthText;
     [SerializeField] private UnityEngine.UI.Image playerHealthFill;
     [SerializeField] private UnityEngine.UI.Image kevinHealthFill;
+    [SerializeField] private RectTransform kevinHealthBar;
+    [SerializeField] private Transform kevinHealthAnchor;
+    [SerializeField] private Camera healthCamera;
     [Header("기존 쓰러짐 모션 / 내일 교체 가능")]
     [SerializeField] private AnimationClip defeatClip;
     [SerializeField, Min(.01f)] private float defeatPlaybackSpeed = 1f;
+    [SerializeField, Range(.08f, .15f)] private float defeatPoseBlendSeconds = .12f;
+    private DefeatPoseBone[] defeatPose;
+    private float defeatPoseElapsed;
+    private double previousDefeatTime;
+
+    private readonly struct DefeatPoseBone
+    {
+        private readonly Transform bone;
+        private readonly Vector3 position;
+        private readonly Quaternion rotation;
+
+        public DefeatPoseBone(Transform bone)
+        {
+            this.bone = bone;
+            position = bone.localPosition;
+            rotation = bone.localRotation;
+        }
+
+        public void BlendToTimeline(float weight)
+        {
+            if (bone == null) return;
+            bone.SetLocalPositionAndRotation(
+                Vector3.Lerp(position, bone.localPosition, weight),
+                Quaternion.Slerp(rotation, bone.localRotation, weight));
+        }
+    }
     [SerializeField, Min(1f)] private float readinessTimeout = 10f;
     [SerializeField] private UnityEvent onPage2DefeatStarted = new UnityEvent();
     [SerializeField] private UnityEvent onDefeatAnimationRequested = new UnityEvent();
@@ -53,6 +82,8 @@ public class Page2StoryController : MonoBehaviour
     public int DefeatStartedFrame { get; private set; } = -1;
     public int FadeStartedFrame { get; private set; } = -1;
     public bool DefeatAnimationStarted { get; private set; }
+    public int DefeatAnimationStartedFrame { get; private set; } = -1;
+    public int DefeatAnimationCompletedFrame { get; private set; } = -1;
     public float BlackAlpha { get { return blackOverlay != null ? blackOverlay.alpha : 0; } }
     private const int TraumaPauseRequest = 1;
     private bool ownsEffects;
@@ -210,30 +241,121 @@ public class Page2StoryController : MonoBehaviour
     private void PlayerDied()
     {
         if (status == null || !status.IsDead || status.CurrentHealth > 0 || stage >= Page2Stage.PlayerDefeated) return;
-        BlockGameplay();
-        if (!melee.OwnsScriptedMmaVictim(this)) melee.TryBeginScriptedMmaVictim(this);
         SetStage(Page2Stage.PlayerDefeated);
         DefeatCount++;
+        DefeatStartedFrame = Time.frameCount;
+        CaptureDefeatPose();
+        BlockGameplay();
+        if (!melee.OwnsScriptedMmaVictim(this)) melee.TryBeginScriptedMmaVictim(this);
         opponent.PauseForExecution(this, TraumaPauseRequest + 1);
         opponent.EndTraining();
         glitchTimeline.StopVisuals();
         if (glitch != null) glitch.SetGlitch(false);
-        DefeatStartedFrame = Time.frameCount;
-        // 요청 이벤트와 검은 Fade는 같은 프레임에 시작한다. 완료 뒤에는 그래프의 마지막 자세를 유지한다.
+        var motion = GetDefeatMotion();
+        if (motion == null || !screenEffects.TryAcquire(this))
+        {
+            Fail("패배 애니메이션 또는 화면 효과를 준비하지 못했습니다.");
+            return;
+        }
+
+        ownsEffects = true;
+        // Died 이벤트 안에서 0초의 전신 클립을 시작한다. Fade는 같은 Timeline의 후반 키가 담당한다.
+        if (!defeatTimeline.Begin())
+        {
+            screenEffects.Release(this);
+            ownsEffects = false;
+            Fail("패배 Timeline 재생을 시작하지 못했습니다.");
+            return;
+        }
+
+        DefeatAnimationStarted = true;
+        DefeatAnimationStartedFrame = Time.frameCount;
         onPage2DefeatStarted.Invoke();
-        DefeatAnimationStarted = defeatTimeline != null && defeatClip != null && defeatPlaybackSpeed > 0;
         onDefeatAnimationRequested.Invoke();
-        if (!DefeatAnimationStarted) Debug.LogWarning("Page2: 호환되는 뒤로 쓰러짐 클립을 재생하지 못했습니다. 연결 이벤트와 Fade는 유지합니다.", this);
-        defeatRoutine = StartCoroutine(FinishDefeat());
+        defeatRoutine = StartCoroutine(FinishDefeat(motion.end));
     }
 
-    private IEnumerator FinishDefeat()
+    private UnityEngine.Timeline.TimelineClip GetDefeatMotion()
     {
-        if (!screenEffects.TryAcquire(this)) { Fail("패배 Fade 소유권을 얻지 못했습니다."); yield break; }
-        ownsEffects = true;
-        SetStage(Page2Stage.FadeToBlack);
-        FadeStartedFrame = Time.frameCount;
-        yield return defeatTimeline.Play();
+        if (defeatTimeline == null || defeatTimeline.Director == null || defeatClip == null ||
+            !defeatClip.humanMotion || playerAnimator == null || playerAnimator.CombatAnimator == null ||
+            !playerAnimator.CombatAnimator.isActiveAndEnabled ||
+            !(defeatTimeline.Director.playableAsset is UnityEngine.Timeline.TimelineAsset timeline)) return null;
+
+        foreach (var track in timeline.GetOutputTracks())
+        {
+            if (!(track is UnityEngine.Timeline.AnimationTrack animation) || animation.muted ||
+                defeatTimeline.Director.GetGenericBinding(track) != playerAnimator.CombatAnimator) continue;
+            foreach (var clip in track.GetClips())
+                if (clip.animationClip == defeatClip && clip.start == 0d && clip.clipIn < defeatClip.length &&
+                    clip.clipIn + clip.duration * clip.timeScale + .001d >= defeatClip.length) return clip;
+        }
+        return null;
+    }
+
+    private void CaptureDefeatPose()
+    {
+        Animator animator = playerAnimator != null ? playerAnimator.CombatAnimator : null;
+        if (animator == null || !animator.isHuman) return;
+
+        var bones = new System.Collections.Generic.List<DefeatPoseBone> { new DefeatPoseBone(animator.transform) };
+        for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+        {
+            Transform bone = animator.GetBoneTransform((HumanBodyBones)i);
+            if (bone != null) bones.Add(new DefeatPoseBone(bone));
+        }
+        defeatPose = bones.ToArray();
+        defeatPoseElapsed = 0f;
+        previousDefeatTime = 0d;
+    }
+
+    private void BlendDefeatPose()
+    {
+        if (defeatPose == null) return;
+        if (!DefeatAnimationStarted || !defeatTimeline.IsRunning)
+        {
+            defeatPose = null;
+            return;
+        }
+
+        // Timeline has already evaluated the incoming fall pose for this frame.
+        double time = defeatTimeline.Director.time;
+        float step = Mathf.Max(0f, (float)(time - previousDefeatTime));
+        previousDefeatTime = time;
+        // A slow frame must not consume the whole blend before any intermediate pose is rendered.
+        defeatPoseElapsed += Mathf.Min(step, defeatPoseBlendSeconds * .25f);
+        if (defeatPoseElapsed >= defeatPoseBlendSeconds)
+        {
+            defeatPose = null;
+            return;
+        }
+
+        float weight = Mathf.SmoothStep(0f, 1f, defeatPoseElapsed / defeatPoseBlendSeconds);
+        foreach (var bone in defeatPose) bone.BlendToTimeline(weight);
+    }
+
+    private IEnumerator FinishDefeat(double motionEnd)
+    {
+        var playback = defeatTimeline.WaitForCompletion();
+        while (playback.MoveNext())
+        {
+            double time = defeatTimeline.Director.time;
+            if (DefeatAnimationCompletedFrame < 0 && time >= motionEnd)
+                DefeatAnimationCompletedFrame = Time.frameCount;
+            if (FadeStartedFrame < 0 && BlackAlpha > .001f)
+            {
+                if (DefeatAnimationCompletedFrame < 0)
+                {
+                    defeatTimeline.Cancel();
+                    Fail("쓰러짐 완료 전에 패배 Fade가 시작됐습니다.");
+                    yield break;
+                }
+                SetStage(Page2Stage.FadeToBlack);
+                FadeStartedFrame = Time.frameCount;
+            }
+            yield return playback.Current;
+        }
+        if (FadeStartedFrame < 0) { Fail("패배 Fade 시작을 확인하지 못했습니다."); yield break; }
         if (!defeatTimeline.Completed) { Fail("패배 Timeline 취소"); yield break; }
         if (BlackAlpha < .999f) { Fail("패배 화면이 완전히 검어지지 않았습니다."); yield break; }
         onPage2FadeCompleted.Invoke();
@@ -285,14 +407,28 @@ public class Page2StoryController : MonoBehaviour
     private void Update()
     {
         if (status == null || opponentHealth == null) return;
-        if (healthText != null) healthText.text = "PLAYER " + Mathf.CeilToInt(status.CurrentHealth) + " / " + Mathf.CeilToInt(status.MaxHealth) +
-            "     KEVIN " + Mathf.CeilToInt(opponentHealth.CurrentHealth) + " / " + Mathf.CeilToInt(opponentHealth.MaxHealth);
         if (playerHealthFill != null) playerHealthFill.fillAmount = status.HealthNormalized;
         if (kevinHealthFill != null) kevinHealthFill.fillAmount = opponentHealth.CurrentHealth / opponentHealth.MaxHealth;
     }
 
+    private void LateUpdate()
+    {
+        BlendDefeatPose();
+        if (kevinHealthBar == null || kevinHealthAnchor == null || healthCamera == null) return;
+        Vector3 viewport = healthCamera.WorldToViewportPoint(kevinHealthAnchor.position);
+        bool visible = healthCamera.isActiveAndEnabled && kevinHealthAnchor.gameObject.activeInHierarchy &&
+            viewport.z > 0f && viewport.x > 0f && viewport.x < 1f && viewport.y > 0f && viewport.y < 1f;
+        if (visible && RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            (RectTransform)kevinHealthBar.parent, healthCamera.ViewportToScreenPoint(viewport), null, out Vector2 local))
+        {
+            kevinHealthBar.localPosition = new Vector3(local.x, local.y, 0f);
+        }
+        if (kevinHealthBar.gameObject.activeSelf != visible) kevinHealthBar.gameObject.SetActive(visible);
+    }
+
     private void OnDisable()
     {
+        defeatPose = null;
         if (status != null) status.Died -= PlayerDied;
         if (opponentHealth != null) opponentHealth.Damaged -= KevinThresholdReached;
         if (intro != null) { intro.Completed -= IntroCompleted; intro.Cancelled -= IntroCancelled; }

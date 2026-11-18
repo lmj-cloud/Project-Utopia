@@ -563,6 +563,8 @@ public class PlayerAnimatorController : MonoBehaviour
     private static readonly int BoxingHitState = Animator.StringToHash(BoxingHitLayer + ".Hit");
     private static readonly int BoxingHitEmpty = Animator.StringToHash(BoxingHitLayer + ".Empty");
     private int boxingHitLayer = -1;
+    public float BoxingHitWeight => boxingHitPlaying && thirdPersonAnimator.isInitialized
+        ? thirdPersonAnimator.GetLayerWeight(boxingHitLayer) : 0f;
     private bool boxingHitPlaying;
     private int boxingHitStartedFrame;
     private float boxingHitStartedAt;
@@ -717,7 +719,18 @@ public class PlayerAnimatorController : MonoBehaviour
     /// </summary>
     public void OnFire()
     {
-        if (!AnimationPoseLocked && !IsDead) StartUpperLayer(Names.thirdPersonFire);
+        if (AnimationPoseLocked || IsDead) return;
+
+        string fireState = Names.thirdPersonFire;
+        if (equipment != null && equipment.CurrentKind == PlayerEquipmentKind.AssaultRifle &&
+            activeUpperState == fireState && thirdPersonAnimator != null)
+        {
+            // 연사 간격이 반동 클립보다 짧으면 진행 중인 반동을 끝까지 재생한다.
+            AnimatorStateInfo recoil = thirdPersonAnimator.GetCurrentAnimatorStateInfo(thirdPersonWeaponLayer);
+            if (Time.frameCount == upperStartedFrame ||
+                (recoil.IsName("UpperLayer.RifleFire") && recoil.normalizedTime < 1f)) return;
+        }
+        StartUpperLayer(fireState);
     }
 
     /// <summary>
@@ -869,7 +882,7 @@ public class PlayerAnimatorController : MonoBehaviour
         if (upperResetPending) ResetUpperLayer();
         // 권총 조준 이동은 기존 하체 이동 위에 실제 조준 Idle의 상체만 겹친다.
         bool usePistolAim = equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Pistol &&
-            playerController != null && playerController.IsAiming;
+            playerController != null && playerController.CharacterAimActive;
         if (activeUpperState == pistolAimState && !usePistolAim) ResetUpperLayer();
         if (activeUpperState == null && usePistolAim) StartUpperLayer(pistolAimState);
         if (isDefending && equipment != null && equipment.CurrentKind == PlayerEquipmentKind.Gloves &&
@@ -880,7 +893,11 @@ public class PlayerAnimatorController : MonoBehaviour
         bool reload = activeUpperState == rifleAnimations.thirdPersonReloadState || activeUpperState == pistolAnimations.thirdPersonReloadState;
         bool guard = activeUpperState == guardState;
         bool aimPose = activeUpperState == pistolAimState;
-        if (upper.IsName(upperNeutralState) || (!reload && !guard && !aimPose && upper.normalizedTime >= 1f)) ResetUpperLayer();
+        if (upper.IsName(upperNeutralState) || (!reload && !guard && !aimPose && upper.normalizedTime >= 1f))
+        {
+            if (usePistolAim) StartUpperLayer(pistolAimState);
+            else ResetUpperLayer();
+        }
         else if ((reload && !isReloading) || (guard && !isDefending)) ResetUpperLayer();
     }
     /// <summary>
@@ -892,7 +909,7 @@ public class PlayerAnimatorController : MonoBehaviour
         string group = kind == PlayerEquipmentKind.AssaultRifle ? "Rifle" : kind == PlayerEquipmentKind.Pistol ? "Pistol" :
             kind == PlayerEquipmentKind.Dagger ? "Knife" : kind == PlayerEquipmentKind.Gloves ? "MMA" : "Default";
         bool crouch = movement != null && movement.IsCrouching;
-        bool aim = playerController != null && playerController.IsAiming && (kind == PlayerEquipmentKind.AssaultRifle || kind == PlayerEquipmentKind.Pistol);
+        bool aim = playerController != null && playerController.CharacterAimActive && (kind == PlayerEquipmentKind.AssaultRifle || kind == PlayerEquipmentKind.Pistol);
         string path = "Base Layer." + group + "." + (crouch ? (aim ? "CrouchAimLocomotion" : "CrouchLocomotion") : aim ? "AimLocomotion" : "Locomotion");
         if (!HasThirdPersonMotion(path)) path = kind == PlayerEquipmentKind.AssaultRifle && aim ? "Base Layer.Rifle.AimLocomotion" :
             kind == PlayerEquipmentKind.AssaultRifle ? "Base Layer.Rifle.Locomotion" : "Base Layer.Default.Locomotion";

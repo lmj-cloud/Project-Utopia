@@ -29,6 +29,8 @@ namespace Capstone.Direction.Workspace.S10
         public S10Timing timing;
         public S10DriverEffects driver;
         public bool integrationMode;
+        [SerializeField] private bool timelineOwnsVehicleMotion;
+        public bool TimelineOwnsVehicleMotion => timelineOwnsVehicleMotion;
         public float handoffTimeout=30;
         public bool HandoffPending {get;private set;}
         public bool IsBlackHeld {get;private set;}
@@ -115,11 +117,15 @@ namespace Capstone.Direction.Workspace.S10
             float t=Playhead;var s=timing;
             float approach=Ease(s.ApproachAt,s.DangerAt,t),danger=Ease(s.DangerAt,s.ImpactAt,t);
             float z=t<s.ApproachAt?48:t<s.DangerAt?Mathf.Lerp(48,15,approach):Mathf.Lerp(15,6,danger);
-            truck.localPosition=new Vector3(0,0,z);
+            if (!timelineOwnsVehicleMotion) truck.localPosition=new Vector3(0,0,z);
             float drive=1-Ease(s.ImpactAt,s.ConfusionAt+.6f,t);roadMotion.localPosition=roadP+Vector3.back*(t*9%12)*drive;
             float hit=t>=s.ImpactAt?Mathf.Exp(-(t-s.ImpactAt)*11):0;
             float after=t>=s.ConfusionAt?Mathf.Exp(-(t-s.ConfusionAt)*.9f):0;
-            car.localPosition=carP+new Vector3(.06f*hit,0,-.22f*hit);car.localRotation=carR*Quaternion.Euler(0,0,.8f*hit);
+            if (!timelineOwnsVehicleMotion)
+            {
+                car.localPosition=carP+new Vector3(.06f*hit,0,-.22f*hit);
+                car.localRotation=carR*Quaternion.Euler(0,0,.8f*hit);
+            }
             impactLight.intensity=savedFlash+7*hit;
             keyLight.intensity=Mathf.Lerp(savedKey,savedKey*.65f,Ease(s.ImpactAt,s.ConfusionAt+.5f,t));
             confusionVolume.weight=Mathf.Clamp01(after*.8f+hit*.6f);

@@ -46,7 +46,7 @@ public class Page4OfficialTraining : MonoBehaviour
             if (step.action == DemoAction.Inspect && equipment.CurrentWeapon == null)
                 objective.text = "무기고에서 소총 또는 권총을 획득한 뒤 조준하세요.";
             else if (step.action == DemoAction.DaggerHit && !equipment.HasOwnership(PlayerEquipmentKind.Dagger))
-                objective.text = "무기고에서 단검을 획득한 뒤 지정 표적을 공격하세요.";
+                objective.text = "무기고에서 단검을 획득한 뒤 훈련 표적을 공격하세요.";
             else objective.text = step.instruction;
         }
         // UI Show/Hide 중 이미 성공한 획득·장착은 실제 현재 상태로 확인한다. 아이템을 생성하지 않는다.
@@ -64,9 +64,10 @@ public class Page4OfficialTraining : MonoBehaviour
         if (step.action == DemoAction.Inspect && story.RangeTrainingEnabled)
         {
             WeaponAssaultRifle weapon = equipment.CurrentWeapon;
-            bool aiming = weapon != null && !weapon.IsReloading && (player.WantsRifleAimCorrection || player.WantsPistolAimCorrection);
+            bool aiming = player.IsAiming && weapon != null && !weapon.IsReloading &&
+                (player.WantsRifleAimCorrection || player.WantsPistolAimCorrection);
             aimHeld = aiming ? aimHeld + Time.deltaTime : 0;
-            if (aimHeld >= aimHoldSeconds) tutorial.Report(DemoAction.Inspect, weapon);
+            if (aimHeld >= aimHoldSeconds) tutorial.Report(DemoAction.Inspect, equipment);
 
         }
         // ShotHit/Reload/DaggerHit는 TutorialManager의 기존 무기·근접 성공 이벤트만 사용한다.

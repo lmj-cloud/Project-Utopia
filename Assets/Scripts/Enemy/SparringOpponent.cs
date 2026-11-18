@@ -28,6 +28,13 @@ public class SparringOpponent : MonoBehaviour
     [SerializeField, Range(0f, 180f)] private float attackAngle = 120f;
     [SerializeField, Min(0f)] private float recoveryDuration = 0.25f;
 
+    [Header("Page2 boxing combinations")]
+    [SerializeField] private bool useBoxingCombinations;
+    [SerializeField, Min(0f)] private float jabWeight = 45f;
+    [SerializeField, Min(0f)] private float jabCrossWeight = 35f;
+    [SerializeField, Min(0f)] private float threePunchWeight = 20f;
+    [SerializeField, Min(0f)] private float comboGap = .08f;
+
     [Header("방어 설정: 기본 수치는 임시 시험값")]
     [SerializeField] private bool enableGuard = true;
     [SerializeField, Range(0f, 180f)] private float guardAngle = 120f;
@@ -264,7 +271,9 @@ public class SparringOpponent : MonoBehaviour
     {
         if (!CanAct || isAttacking || attack != null || IsGuarding || attackOrigin == null || Time.time < nextAttack ||
             Vector3.Distance(transform.position, player.transform.position) > attackDistance) return false;
-        bool right = Random.value >= 0.5f;
+        bool combo = useBoxingCombinations && attackTiming == ActionTimingMode.AnimationEvent;
+        int punches = combo ? ChoosePunchCount() : 1;
+        bool right = !combo && Random.value >= 0.5f;
         if (attackTiming == ActionTimingMode.AnimationEvent &&
             (enemyAnimator == null || !enemyAnimator.CanPlayPunch(right))) return false;
         attackRequestId++;
@@ -286,12 +295,20 @@ public class SparringOpponent : MonoBehaviour
                 else enemyAnimator.PlayPunchLeft();
             }
         }
-        attack = StartCoroutine(Attack(id, right));
+        attack = StartCoroutine(Attack(id, right, punches));
         return true;
     }
 
     /// <summary>개발용 Timer 판정과 실제 Animation Event 대기를 서로 배타적으로 실행한다.</summary>
-    private IEnumerator Attack(int id, bool right)
+    private int ChoosePunchCount()
+    {
+        float total = jabWeight + jabCrossWeight + threePunchWeight;
+        if (total <= 0f) return 1;
+        float roll = Random.value * total;
+        return roll < jabWeight ? 1 : roll < jabWeight + jabCrossWeight ? 2 : 3;
+    }
+
+    private IEnumerator Attack(int id, bool right, int punches)
     {
         yield return null;
         if (!OwnsAttack(id, right)) yield break;
@@ -306,20 +323,39 @@ public class SparringOpponent : MonoBehaviour
             // 이벤트 판정도 기존 예고 시간을 지킨 뒤 실제 펀치를 시작한다.
             yield return new WaitForSeconds(telegraphDuration);
             if (!OwnsAttack(id, right)) yield break;
-            if (enemyAnimator == null || !enemyAnimator.CanPlayPunch(right))
+            for (int punch = 0; punch < punches; punch++)
             {
-                CancelAttack();
-                yield break;
+                if (enemyAnimator == null || !enemyAnimator.CanPlayPunch(right))
+                {
+                    CancelAttack();
+                    yield break;
+                }
+
+                enemyAnimator.BindAttackRequest(this, id, right);
+                if (punch > 0) enemyAnimator.PlayFollowupPunch(right);
+                else if (right) enemyAnimator.PlayPunchRight();
+                else enemyAnimator.PlayPunchLeft();
+                player.PlayMmaSwing(right, mmaAudioSource);
+
+                float deadline = Time.unscaledTime + Mathf.Max(0.1f, animationEventTimeout);
+                while (OwnsAttack(id, right) && !hasFinishedAnimation && Time.unscaledTime < deadline) yield return null;
+                if (!OwnsAttack(id, right)) yield break;
+                if (!hasFinishedAnimation) { CancelAttack(); yield break; }
+                if (punch + 1 == punches) break;
+
+                yield return new WaitForSeconds(comboGap);
+                if (!OwnsAttack(id, right)) yield break;
+                if (Vector3.Distance(transform.position, player.transform.position) > attackDistance) break;
+
+                enemyAnimator.ClearAttackRequest(id);
+                id = ++attackRequestId;
+                right = !right;
+                isRightPunch = right;
+                hasConsumedHit = false;
+                hasFinishedAnimation = false;
             }
-            enemyAnimator.BindAttackRequest(this, id, right);
-            if (right) enemyAnimator.PlayPunchRight();
-            else enemyAnimator.PlayPunchLeft();
-            if (player != null) player.PlayMmaSwing(right, mmaAudioSource);
-            float deadline = Time.unscaledTime + Mathf.Max(0.1f, animationEventTimeout);
-            while (OwnsAttack(id, right) && !hasFinishedAnimation && Time.unscaledTime < deadline) yield return null;
-            if (!OwnsAttack(id, right)) yield break;
-            if (!hasFinishedAnimation) { CancelAttack(); yield break; }
         }
+        if (punches > 1) nextAttack = Mathf.Max(nextAttack, Time.time + recoveryDuration);
         // 회복 구간이 끝날 때까지 isAttacking을 유지하여 중간 방어 진입을 막는다.
         yield return new WaitForSeconds(recoveryDuration);
         if (!OwnsAttack(id, right)) yield break;

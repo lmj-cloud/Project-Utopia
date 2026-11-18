@@ -74,6 +74,7 @@ public class Page4StoryController : MonoBehaviour
     [SerializeField] private UnityEvent onRehabilitationTimePassed = new UnityEvent();
     public int NurseDialogueCount { get; private set; }
     public bool RangeTrainingEnabled { get; private set; }
+    public bool CanStartRangeAim => gunRangeEntered && RangeTrainingEnabled;
     public Page4Stage Stage { get { return stage; } }
     public bool IntroStarted { get; private set; }
     public int HospitalCompletionCount { get; private set; }
@@ -101,6 +102,8 @@ public class Page4StoryController : MonoBehaviour
     [SerializeField] private Transform officerCutsceneFinish;
     [SerializeField] private InteractableObject pistolPickup;
     private bool corridorEntered;
+    private bool gunRangeEntered;
+    private bool gunRangeEscortCompleted;
     private bool officerSignalCompleted;
     private bool officerSceneOwnsRestore;
     private Vector3 officerStartPosition;
@@ -351,11 +354,14 @@ public class Page4StoryController : MonoBehaviour
                 rifleTutorial.RequestShowCurrentTutorial();
             yield return null;
         }
+        RangeTrainingEnabled = false;
         stage = Page4Stage.OfficerWalkingToRange;
         objective.text = "더 안쪽 사격장으로 이동하세요.";
         if (gunRangeWalkTimeline == null) { Fail("사격장 동행 Timeline 연결 누락"); yield break; }
         yield return gunRangeWalkTimeline.Play();
         if (!gunRangeWalkTimeline.Completed) { Fail("사격장 동행 Timeline 취소"); yield break; }
+        gunRangeEscortCompleted = true;
+        while (!gunRangeEntered) yield return null;
         RangeArrivalCount++;
         stage = Page4Stage.RangeBriefing;
         yield return rangeDialogueTimeline.Play();
@@ -371,6 +377,12 @@ public class Page4StoryController : MonoBehaviour
         stage = Page4Stage.FreePractice;
         objective.text = "벙커 출입문으로 이동하세요.";
     }
+    public void GunRangeArrived()
+    {
+        if (stage == Page4Stage.OfficerWalkingToRange && gunRangeEscortCompleted)
+            gunRangeEntered = true;
+    }
+
     public void CorridorArrived()
     {
         if (corridorEntered || stage != Page4Stage.CorridorWaiting ||

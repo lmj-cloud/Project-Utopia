@@ -60,6 +60,8 @@ public class Page1WakeSequence : MonoBehaviour
             !player.CanControlPlayer || playerCamera.HasTargetControl || !cutscene.CanPlay()) return;
         if (!screenEffects.TryAcquire(this)) return;
         ownsEffects = true;
+        // 시작 위치로 옮기기 전에 게임플레이 Blend Tree를 정지 상태로 둔다.
+        ResetLocomotionParameters();
         Vector3 previousPosition = player.transform.position;
         Quaternion previousRotation = player.transform.rotation;
         if (wakeStartPoint != null && wakeMovementTrack != null)
@@ -143,11 +145,22 @@ public class Page1WakeSequence : MonoBehaviour
     {
         if (!running || source != cutscene || id != requestId) return;
         Cleanup();
+        // Timeline이 포즈를 반환한 뒤 정지 상태에서 일반 이동을 시작한다.
+        ResetLocomotionParameters();
         running = false;
         HasCompleted = true;
         CompletionCount++;
         Phase = "Completed";
         onWakeCompleted.Invoke();
+    }
+
+    private void ResetLocomotionParameters()
+    {
+        var playerAnimator = player.GetComponent<PlayerAnimatorController>();
+        if (playerAnimator == null) return;
+        playerAnimator.MoveHorizontal = 0f;
+        playerAnimator.MoveVertical = 0f;
+        playerAnimator.CurrentSpeed = 0f;
     }
     private void Cancelled(CutsceneController source, int id)
     {

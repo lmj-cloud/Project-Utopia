@@ -3,8 +3,8 @@
 /// <summary>
 /// 유효한 Humanoid에서 소총·권총 조준을 상체에 보정하고 이전 프레임의 보정을 복원한다.
 /// </summary>
-// 최종 상체 보정을 소총의 기본 순서 LateUpdate 사격 판정보다 먼저 끝낸다.
-[DefaultExecutionOrder(-10)]
+// Cinemachine 갱신 뒤, 총기의 LateUpdate 판정 전에 상체를 정렬한다.
+[DefaultExecutionOrder(50)]
 public class ThirdPersonAimController : MonoBehaviour
 {
     [Header("Player References")]
@@ -43,6 +43,8 @@ public class ThirdPersonAimController : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float mmaLookClampWeight = 0.5f;
     [SerializeField, Min(1f)] private float mmaLookDistance = 10f;
     [SerializeField, Min(1f)] private float mmaLookTurnSpeed = 180f;
+
+    [SerializeField] private bool trackMmaFootwork;
 
     [Header("MMA Punch Look At")]
     [SerializeField] private bool enableMmaAttackLookAt = true;
@@ -163,19 +165,10 @@ public class ThirdPersonAimController : MonoBehaviour
         bool isReloading = CanApplyReloadFacing;
         // 재장전 클립이 총을 들어 올리는 자연스러운 동작은 보존한다.
         float targetPitch = isReloading ? 0f : Mathf.Clamp(cameraController.Pitch, -maxUpAngle, maxDownAngle);
-        if (playerController.RifleFiredThisFrame || playerController.PistolFiredThisFrame)
-        {
-            // 발사 확정 프레임은 블렌드 지연 없이, 이 프레임의 최종 IK Pass에 반영한다.
-            aimWeight = 1f;
-            currentPitch = targetPitch;
-        }
-        else
-        {
-            bool requested = isReloading || playerController.WantsRifleAimCorrection || playerController.WantsPistolAimCorrection;
-            aimWeight = Mathf.MoveTowards(aimWeight, requested ? 1f : 0f, aimBlendSpeed * Time.deltaTime);
-            if (requested) currentPitch = Mathf.MoveTowards(currentPitch, targetPitch, pitchSpeed * Time.deltaTime);
-            else if (aimWeight <= 0f) currentPitch = 0f;
-        }
+        bool requested = isReloading || playerController.WantsRifleAimCorrection || playerController.WantsPistolAimCorrection;
+        aimWeight = Mathf.MoveTowards(aimWeight, requested ? 1f : 0f, aimBlendSpeed * Time.deltaTime);
+        if (requested) currentPitch = Mathf.MoveTowards(currentPitch, targetPitch, pitchSpeed * Time.deltaTime);
+        else if (aimWeight <= 0f) currentPitch = 0f;
 
         if (aimWeight <= 0f)
             return;
@@ -189,7 +182,7 @@ public class ThirdPersonAimController : MonoBehaviour
 
         // UpperChest가 없는 모델도 남은 뼈가 조준 각도를 나누어 담당한다.
         float pitchToApply = isReloading ? 0f : currentPitch * aimWeight;
-        if (!isReloading && playerController.CanApplyPistolAim && playerController.IsAiming && pistolDirection != null)
+        if (!isReloading && playerController.CanApplyPistolAim && playerController.CharacterAimActive && pistolDirection != null)
         {
             // 권총 준비 자세에 포함된 총열의 상하 각도까지 반영한다. 공유 Pitch 상태를 바꾸지 않아 소총 전환에 영향을 주지 않는다.
             float barrelElevation = Mathf.Asin(Mathf.Clamp(pistolDirection.forward.y, -1f, 1f)) * Mathf.Rad2Deg;
@@ -238,7 +231,7 @@ public class ThirdPersonAimController : MonoBehaviour
         punch = punch || IsMmaPunchPose(state) ||
             (animator.IsInTransition(0) && IsMmaPunchPose(animator.GetNextAnimatorStateInfo(0)));
         bool idle = state.IsName("Base Layer.MMA.Locomotion") && !animator.IsInTransition(0) &&
-            playerMovement.IsGrounded && !playerMovement.IsCrouching && playerMovement.HorizontalVelocity.sqrMagnitude < 0.0025f;
+            playerMovement.IsGrounded && !playerMovement.IsCrouching && (trackMmaFootwork || playerMovement.HorizontalVelocity.sqrMagnitude < 0.0025f);
         bool requested = enableMmaIdleLookAt && ((idle && playerAnimator.UsesMmaCombatLocomotion) || (punch && enableMmaAttackLookAt));
         float blendSeconds = Mathf.Max(0.01f, punch ? mmaAttackBlendSeconds : mmaLookBlendSeconds);
         float headWeight = punch ? mmaAttackHeadWeight : mmaLookHeadWeight;
@@ -247,6 +240,12 @@ public class ThirdPersonAimController : MonoBehaviour
         {
             mmaLookHeadBlend = headWeight;
             mmaLookBodyBlend = bodyWeight;
+        }
+        if (trackMmaFootwork)
+        {
+            float recoil = playerAnimator.BoxingHitWeight;
+            headWeight *= 1f - .8f * recoil;
+            bodyWeight *= 1f - recoil;
         }
         float blend = 1f - Mathf.Exp(-3f * Time.deltaTime / blendSeconds);
         mmaLookHeadBlend = Mathf.Lerp(mmaLookHeadBlend, headWeight, blend);
@@ -297,7 +296,7 @@ public class ThirdPersonAimController : MonoBehaviour
     /// </summary>
     private void LateUpdate()
     {
-        if (!CanApplyPitch || !playerController.IsAiming || CanApplyReloadFacing ||
+        if (!CanApplyPitch || CanApplyReloadFacing ||
             aimWeight <= 0f || appliedFrame != Time.frameCount) return;
 
         WeaponAssaultRifle currentWeapon = playerController.CurrentWeapon;
@@ -315,7 +314,7 @@ public class ThirdPersonAimController : MonoBehaviour
         // 카메라와 몸 사이의 자기 Collider 등 뒤쪽 목표로 상체를 뒤집지 않는다.
         if (Vector3.Dot(targetPoint - playerController.transform.position, playerController.transform.forward) <= 0f)
         {
-            ApplyPistolCameraAim();
+            if (playerController.CharacterAimActive) ApplyPistolCameraAim();
             return;
         }
 
@@ -325,7 +324,7 @@ public class ThirdPersonAimController : MonoBehaviour
         // 발밑처럼 기존 조준 범위를 넘는 목표는 원래 IK 자세를 유지한다. 정렬을 위해 허리를 과하게 꺾지 않는다.
         if (requiredPitch < -maxUpAngle || requiredPitch > maxDownAngle)
         {
-            ApplyPistolCameraAim();
+            if (playerController.CharacterAimActive) ApplyPistolCameraAim();
             return;
         }
         // 제한 각도의 마지막 10도에서는 잔여 보정을 서서히 줄여 경계에서 자세가 튀지 않게 한다.

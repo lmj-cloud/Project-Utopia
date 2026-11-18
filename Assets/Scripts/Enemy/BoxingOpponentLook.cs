@@ -1,14 +1,14 @@
 using UnityEngine;
 
-/// <summary>Applies a bounded gaze offset after Kevin's boxing pose has been evaluated.</summary>
-[DefaultExecutionOrder(100)]
+/// <summary>Kevin's Humanoid LookAt target and weights, evaluated by his Animator's IK pass.</summary>
 public sealed class BoxingOpponentLook : MonoBehaviour
 {
     [SerializeField] private SparringOpponent opponent;
     [SerializeField] private Animator boxer;
     [SerializeField] private Animator player;
-    [SerializeField, Range(0f, 80f)] private float maxYaw = 38f;
+    [SerializeField, Range(0f, 80f)] private float maxYaw = 45f;
     [SerializeField, Range(0f, 45f)] private float maxPitch = 20f;
+    [SerializeField, Range(0f, 25f)] private float maxBodyYaw = 12f;
     [SerializeField, Min(0.1f)] private float response = 10f;
     [SerializeField, Range(0f, 1f)] private float spineWeight = .03f;
     [SerializeField, Range(0f, 1f)] private float chestWeight = .05f;
@@ -17,84 +17,58 @@ public sealed class BoxingOpponentLook : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float headWeight = .69f;
     [SerializeField, Range(0f, 1f)] private float attackBodyWeight = .25f;
 
-    private Transform[] bones;
+    private Transform head;
     private Transform target;
     private PlayerController playerController;
-    private readonly Quaternion[] pose = new Quaternion[5];
-    private readonly Quaternion[] applied = new Quaternion[5];
     private Vector2 angles;
-    private bool hasOffset;
+    private float weight;
+    private float bodyBlend = 1f;
 
     private void Awake()
     {
         if (boxer == null || !boxer.isHuman || player == null || !player.isHuman) return;
-        bones = new[] {
-            boxer.GetBoneTransform(HumanBodyBones.Spine),
-            boxer.GetBoneTransform(HumanBodyBones.Chest),
-            boxer.GetBoneTransform(HumanBodyBones.UpperChest),
-            boxer.GetBoneTransform(HumanBodyBones.Neck),
-            boxer.GetBoneTransform(HumanBodyBones.Head)
-        };
+        head = boxer.GetBoneTransform(HumanBodyBones.Head);
         target = player.GetBoneTransform(HumanBodyBones.Head);
         playerController = player.GetComponentInParent<PlayerController>();
     }
 
-    private void Update() => RemoveOffset();
     private void OnDisable()
     {
-        RemoveOffset();
         angles = Vector2.zero;
+        weight = 0f;
+        bodyBlend = 1f;
     }
 
-    private void RemoveOffset()
+    internal void ApplyAnimatorIK(Animator source)
     {
-        if (!hasOffset) return;
-        for (int i = 0; i < bones.Length; i++)
-        {
-            Transform bone = bones[i];
-            if (bone != null && Quaternion.Angle(bone.localRotation, applied[i]) < .01f)
-                bone.localRotation = pose[i];
-        }
-        hasOffset = false;
-    }
+        if (!isActiveAndEnabled || source != boxer || head == null || target == null || opponent == null) return;
 
-    private void LateUpdate()
-    {
-        if (opponent == null || bones == null || bones[4] == null || target == null || !boxer.isActiveAndEnabled)
-            return;
-
-        Vector2 desired = Vector2.zero;
-        if (opponent.IsTraining && playerController != null && !playerController.HasAnimationControlLock)
+        Vector2 desired = angles;
+        float targetWeight = 0f;
+        if (opponent.IsTraining && playerController != null && playerController.IsAlive &&
+            !playerController.HasAnimationControlLock)
         {
-            Vector3 direction = transform.InverseTransformDirection(target.position - bones[4].position);
+            Vector3 direction = transform.InverseTransformDirection(target.position - head.position);
             if (direction.sqrMagnitude > .001f)
             {
                 float yaw = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
                 float pitch = Mathf.Atan2(-direction.y, new Vector2(direction.x, direction.z).magnitude) * Mathf.Rad2Deg;
-                // Ease out when the target crosses behind the boxer, where yaw changes sign.
-                float frontWeight = Mathf.InverseLerp(150f, 75f, Mathf.Abs(yaw));
-                desired = new Vector2(Mathf.Clamp(pitch, -maxPitch, maxPitch), Mathf.Clamp(yaw, -maxYaw, maxYaw)) * frontWeight;
+                desired = new Vector2(Mathf.Clamp(pitch, -maxPitch, maxPitch), Mathf.Clamp(yaw, -maxYaw, maxYaw));
+                // Keep the target on the front hemisphere and release the gaze behind the boxer.
+                targetWeight = Mathf.InverseLerp(150f, 75f, Mathf.Abs(yaw));
             }
         }
-        angles = Vector2.Lerp(angles, desired, 1f - Mathf.Exp(-response * Time.deltaTime));
-        if (angles.sqrMagnitude < .0001f) return;
 
-        float bodyWeight = opponent.IsAttacking ? attackBodyWeight : 1f;
-        Apply(0, spineWeight * bodyWeight);
-        Apply(1, chestWeight * bodyWeight);
-        Apply(2, upperChestWeight * bodyWeight);
-        Apply(3, neckWeight);
-        Apply(4, headWeight);
-        hasOffset = true;
-    }
+        float blend = 1f - Mathf.Exp(-response * Time.deltaTime);
+        angles = Vector2.Lerp(angles, desired, blend);
+        weight = Mathf.Lerp(weight, targetWeight, blend);
+        bodyBlend = Mathf.Lerp(bodyBlend, opponent.IsAttacking ? attackBodyWeight : 1f, blend);
 
-    private void Apply(int index, float weight)
-    {
-        Transform bone = bones[index];
-        if (bone == null) return;
-        pose[index] = bone.localRotation;
-        Quaternion offset = Quaternion.Euler(angles.x * weight, angles.y * weight, 0f);
-        bone.rotation = transform.rotation * offset * Quaternion.Inverse(transform.rotation) * bone.rotation;
-        applied[index] = bone.localRotation;
+        // The Humanoid solver distributes body and head weights through the spine and neck.
+        float bodyWeight = Mathf.Clamp01(spineWeight + chestWeight + upperChestWeight);
+        bodyWeight = Mathf.Min(bodyWeight, maxBodyYaw / Mathf.Max(1f, maxYaw));
+        Vector3 gaze = transform.rotation * Quaternion.Euler(angles.x, angles.y, 0f) * Vector3.forward;
+        source.SetLookAtPosition(head.position + gaze * 10f);
+        source.SetLookAtWeight(weight, bodyWeight * bodyBlend, Mathf.Clamp01(headWeight + neckWeight), 0f, .3f);
     }
 }
